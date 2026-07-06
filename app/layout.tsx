@@ -5,11 +5,11 @@ import BottomNav from "@/components/BottomNav";
 import LanguageSelector from "@/components/LanguageSelector";
 
 export const metadata: Metadata = {
-  title: "Rate My Stock — Learn Stocks Like a Game",
-  description: "5 min/day, quiz & AI matching to learn stock investing basics. Free, fun, easy.",
+  title: "(app title placeholder)",
+  description: "(app description placeholder)",
   openGraph: {
-    title: "Rate My Stock 📈",
-    description: "Learn stocks like Duolingo — fun, free, daily.",
+    title: "(app title placeholder)",
+    description: "(app description placeholder)",
     type: "website",
   },
 };

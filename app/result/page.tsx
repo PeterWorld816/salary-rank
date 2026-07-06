@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getResultById } from "@/data/results";
 import ResultClient from "./ResultClient";
 
 type RawSP = Record<string, string | string[] | undefined>;
@@ -13,18 +14,14 @@ export async function generateMetadata({
 }: {
   searchParams: RawSP;
 }): Promise<Metadata> {
-  const t = str(searchParams.t, "STOCK");
-  const n = str(searchParams.n);
-  const s = str(searchParams.s, "0");
-  const r = str(searchParams.r, "MID");
-  const e = str(searchParams.e, "📈");
-  const m = str(searchParams.m);
+  const id = str(searchParams.id);
+  const result = getResultById(id);
 
-  const title = `${e} $${t} 타입 · Rate My Stock`;
-  const desc  = `AI가 분석한 나의 주식 타입은 $${t}!${n ? ` (${n})` : ""} 점수 ${s}/100 · Rate My Stock에서 당신의 주식 타입을 찾아보세요.`;
+  const title = result ? `${result.emoji} ${result.title}` : "(app title placeholder)";
+  const desc  = result ? result.description : "(app description placeholder)";
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://ratemystock.app";
-  const ogUrl   = `${baseUrl}/api/og?${new URLSearchParams({ t, n, s, r, e, m }).toString()}`;
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const ogUrl   = `${baseUrl}/api/og?${new URLSearchParams({ id }).toString()}`;
 
   return {
     title,
@@ -33,7 +30,7 @@ export async function generateMetadata({
       title,
       description: desc,
       type: "website",
-      images: [{ url: ogUrl, width: 1200, height: 630, alt: `${t} 주식 타입 결과` }],
+      images: [{ url: ogUrl, width: 1200, height: 630, alt: title }],
     },
     twitter: {
       card: "summary_large_image",

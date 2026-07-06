@@ -6,14 +6,6 @@ import { useLanguage, LANGUAGES, type LangCode } from "@/lib/i18n";
 const FLAGS: Record<LangCode, string> = {
   ko: "🇰🇷",
   en: "🇺🇸",
-  zh: "🇨🇳",
-  ja: "🇯🇵",
-  es: "🇪🇸",
-  fr: "🇫🇷",
-  de: "🇩🇪",
-  pt: "🇧🇷",
-  hi: "🇮🇳",
-  ar: "🇸🇦",
 };
 
 export default function LanguageSelector() {
@@ -82,7 +74,7 @@ export default function LanguageSelector() {
           `}</style>
 
           <ul className="py-1.5">
-            {LANGUAGES.filter((l) => l.code === "ko" || l.code === "en").map((l) => {
+            {LANGUAGES.map((l) => {
               const active = lang === l.code;
               return (
                 <li key={l.code}>

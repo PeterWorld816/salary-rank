@@ -8,11 +8,8 @@ export default function BottomNav() {
   const { t } = useLanguage();
 
   const tabs = [
-    { href: "/",          icon: "🏠", label: t.home },
-    { href: "/today",     icon: "📈", label: t.navToday },
-    { href: "/quiz",      icon: "🎮", label: t.navQuiz },
-    { href: "/simulator", icon: "💸", label: t.navSim },
-    { href: "/match",     icon: "🔮", label: t.navMatch },
+    { href: "/",     icon: "🏠", label: t.home },
+    { href: "/quiz", icon: "🎯", label: t.start },
   ];
 
   return (
