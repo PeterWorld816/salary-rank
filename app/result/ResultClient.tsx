@@ -3,8 +3,8 @@ import { useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useLanguage } from "@/lib/i18n";
-import { getResultById } from "@/data/results";
-import ResultCard from "@/components/ResultCard";
+import { decodeBreakdown } from "@/data/results";
+import ResultCard, { CARD_WIDTH, BREAKDOWN_CARD_HEIGHT } from "@/components/ResultCard";
 import ShareButtons from "@/components/ShareButtons";
 
 function ResultContent() {
@@ -12,10 +12,11 @@ function ResultContent() {
   const { t } = useLanguage();
   const cardRef = useRef<HTMLDivElement>(null);
 
-  const id = sp.get("id") ?? "";
-  const result = getResultById(id);
+  const d = sp.get("d") ?? "";
+  const breakdown = decodeBreakdown(d);
+  const top = breakdown[0];
 
-  if (!result) {
+  if (!top) {
     return (
       <main className="min-h-screen bg-[#F5F5F0] font-sans flex items-center justify-center px-4">
         <div className="text-center">
@@ -41,16 +42,18 @@ function ResultContent() {
 
         <div className="flex justify-center mb-5">
           <div className="shadow-[0_12px_48px_rgba(0,0,0,0.35)] rounded-3xl overflow-hidden">
-            <ResultCard result={result} cardRef={cardRef} />
+            <ResultCard breakdown={breakdown} cardRef={cardRef} />
           </div>
         </div>
 
         <div className="mb-5">
           <ShareButtons
             cardRef={cardRef}
-            shareTitle={`${result.emoji} ${result.title}`}
-            shareText={`${result.title} — ${result.description}`}
-            downloadName={`result-${result.id}.png`}
+            width={CARD_WIDTH}
+            height={BREAKDOWN_CARD_HEIGHT}
+            shareTitle={`${top.result.emoji} 내 뇌의 ${top.percent}%는 '${top.result.title}'`}
+            shareText={breakdown.map((b) => `${b.result.title} ${b.percent}%`).join(" · ")}
+            downloadName={`brain-result-${top.result.id}.png`}
           />
         </div>
 

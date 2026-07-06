@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useLanguage } from "@/lib/i18n";
 import { questions, type QuestionOption } from "@/data/questions";
-import { matchResult } from "@/data/results";
+import { computeBreakdown, encodeBreakdown } from "@/data/results";
 import QuestionCard from "@/components/QuestionCard";
 
 export default function QuizPage() {
@@ -22,8 +22,8 @@ export default function QuizPage() {
       return;
     }
 
-    const result = matchResult(next);
-    router.push(`/result?id=${result.id}`);
+    const breakdown = computeBreakdown(next);
+    router.push(`/result?d=${encodeURIComponent(encodeBreakdown(breakdown))}`);
   };
 
   return (

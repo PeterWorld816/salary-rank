@@ -3,14 +3,17 @@ import { useState } from "react";
 import { toPng } from "html-to-image";
 import type { RefObject } from "react";
 import { useLanguage } from "@/lib/i18n";
+import { CARD_WIDTH, CARD_HEIGHT } from "@/components/ResultCard";
 
 export default function ShareButtons({
-  cardRef, shareTitle, shareText, downloadName,
+  cardRef, shareTitle, shareText, downloadName, width = CARD_WIDTH, height = CARD_HEIGHT,
 }: {
   cardRef: RefObject<HTMLDivElement>;
   shareTitle: string;
   shareText: string;
   downloadName: string;
+  width?: number;
+  height?: number;
 }) {
   const { t } = useLanguage();
   const [saving, setSaving] = useState(false);
@@ -43,8 +46,8 @@ export default function ShareButtons({
     try {
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 3,
-        width: 360,
-        height: 450,
+        width,
+        height,
         style: { borderRadius: "0px" },
         backgroundColor: "#0D0D0D",
       });

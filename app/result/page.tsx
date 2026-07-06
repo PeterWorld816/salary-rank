@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getResultById } from "@/data/results";
+import { decodeBreakdown } from "@/data/results";
 import ResultClient from "./ResultClient";
 
 type RawSP = Record<string, string | string[] | undefined>;
@@ -14,14 +14,19 @@ export async function generateMetadata({
 }: {
   searchParams: RawSP;
 }): Promise<Metadata> {
-  const id = str(searchParams.id);
-  const result = getResultById(id);
+  const d = str(searchParams.d);
+  const breakdown = decodeBreakdown(d);
+  const top = breakdown[0];
 
-  const title = result ? `${result.emoji} ${result.title}` : "(app title placeholder)";
-  const desc  = result ? result.description : "(app description placeholder)";
+  const title = top
+    ? `${top.result.emoji} 내 뇌의 ${top.percent}%는 '${top.result.title}'`
+    : "🧠 뇌 구조 테스트";
+  const desc = top
+    ? `${breakdown.slice(0, 3).map((b) => `${b.result.title} ${b.percent}%`).join(" · ")} — 뇌 구조 테스트 결과`
+    : "질문 8개로 알아보는 내 뇌 속 비율";
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const ogUrl   = `${baseUrl}/api/og?${new URLSearchParams({ id }).toString()}`;
+  const ogUrl   = `${baseUrl}/api/og?${new URLSearchParams({ d }).toString()}`;
 
   return {
     title,

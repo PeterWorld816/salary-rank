@@ -5,11 +5,11 @@ import BottomNav from "@/components/BottomNav";
 import LanguageSelector from "@/components/LanguageSelector";
 
 export const metadata: Metadata = {
-  title: "(app title placeholder)",
-  description: "(app description placeholder)",
+  title: "🧠 뇌 구조 테스트",
+  description: "질문 8개로 알아보는 내 뇌 속 비율",
   openGraph: {
-    title: "(app title placeholder)",
-    description: "(app description placeholder)",
+    title: "🧠 뇌 구조 테스트",
+    description: "질문 8개로 알아보는 내 뇌 속 비율",
     type: "website",
   },
 };

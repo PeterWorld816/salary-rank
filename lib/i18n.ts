@@ -28,9 +28,9 @@ export interface Translations {
 
 export const translations: Record<LangCode, Translations> = {
   ko: {
-    appTitle: "(앱 이름 placeholder)",
-    tagline: "(한 줄 소개 placeholder)",
-    disclaimer: "(안내 문구 placeholder)",
+    appTitle: "🧠 뇌 구조 테스트",
+    tagline: "질문 8개로 알아보는 내 뇌 속 비율",
+    disclaimer: "이 테스트는 재미로만 봐주세요. 과학적 근거는 1도 없습니다 😅",
     home: "홈",
     start: "시작하기",
     back: "뒤로",
@@ -45,9 +45,9 @@ export const translations: Record<LangCode, Translations> = {
     resultNotFoundDesc: "다시 시작해서 결과를 확인해보세요.",
   },
   en: {
-    appTitle: "(app title placeholder)",
-    tagline: "(tagline placeholder)",
-    disclaimer: "(disclaimer placeholder)",
+    appTitle: "🧠 Brain Map Test",
+    tagline: "8 questions to map what's filling your brain right now",
+    disclaimer: "For fun only — zero scientific basis 😅",
     home: "Home",
     start: "Start",
     back: "Back",
