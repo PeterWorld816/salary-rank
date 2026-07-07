@@ -2,14 +2,17 @@
 import { useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useLanguage } from "@/lib/i18n";
+import { ChevronLeft, RotateCcw, Home } from "lucide-react";
+import { useLanguage } from "@/lib/LanguageProvider";
 import { decodeBreakdown } from "@/data/results";
+import { buildResultShareText } from "@/lib/shareText";
 import ResultCard, { CARD_WIDTH, BREAKDOWN_CARD_HEIGHT } from "@/components/ResultCard";
 import ShareButtons from "@/components/ShareButtons";
+import PageLoading from "@/components/PageLoading";
 
 function ResultContent() {
   const sp = useSearchParams();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const cardRef = useRef<HTMLDivElement>(null);
 
   const d = sp.get("d") ?? "";
@@ -18,14 +21,11 @@ function ResultContent() {
 
   if (!top) {
     return (
-      <main className="min-h-screen bg-[#F5F5F0] font-sans flex items-center justify-center px-4">
-        <div className="text-center">
-          <h1 className="font-display font-bold text-xl mb-2 text-[#0D0D0D]">{t.resultNotFound}</h1>
-          <p className="text-sm text-[#6B7280] mb-6">{t.resultNotFoundDesc}</p>
-          <Link
-            href="/quiz"
-            className="inline-block rounded-xl px-5 py-3 text-sm font-semibold bg-[#0D0D0D] text-white"
-          >
+      <main className="min-h-screen bg-bg font-sans flex items-center justify-center px-6">
+        <div className="text-center fade-up">
+          <h1 className="text-title text-text mb-2">{t.resultNotFound}</h1>
+          <p className="text-body text-text-secondary mb-8">{t.resultNotFoundDesc}</p>
+          <Link href="/quiz" className="btn btn-primary">
             {t.retry}
           </Link>
         </div>
@@ -33,44 +33,43 @@ function ResultContent() {
     );
   }
 
+  const { title: shareTitle, description: shareText } = buildResultShareText(lang, breakdown);
+
   return (
-    <main className="min-h-screen bg-[#F5F5F0] font-sans">
-      <div className="max-w-sm mx-auto px-4 pt-8 pb-safe">
-        <Link href="/quiz" className="inline-flex items-center gap-2 text-sm text-[#6B7280] mb-6 touch-target">
-          ← {t.retry}
+    <main className="min-h-screen bg-bg font-sans">
+      <div className="max-w-sm mx-auto px-6 pt-10 pb-safe fade-up">
+        <Link href="/quiz" className="inline-flex items-center gap-1 text-caption text-text-secondary mb-8 touch-target">
+          <ChevronLeft className="w-4 h-4" />
+          {t.retry}
         </Link>
 
-        <div className="flex justify-center mb-5">
+        <div className="flex justify-center mb-8">
           <div className="shadow-[0_12px_48px_rgba(0,0,0,0.35)] rounded-3xl overflow-hidden">
-            <ResultCard breakdown={breakdown} cardRef={cardRef} />
+            <ResultCard breakdown={breakdown} cardRef={cardRef} lang={lang} />
           </div>
         </div>
 
-        <div className="mb-5">
+        <div className="mb-6">
           <ShareButtons
             cardRef={cardRef}
             width={CARD_WIDTH}
             height={BREAKDOWN_CARD_HEIGHT}
-            shareTitle={`${top.result.emoji} 내 뇌의 ${top.percent}%는 '${top.result.title}'`}
-            shareText={breakdown.map((b) => `${b.result.title} ${b.percent}%`).join(" · ")}
+            shareTitle={shareTitle}
+            shareText={shareText}
             downloadName={`brain-result-${top.result.id}.png`}
           />
         </div>
 
-        <p className="text-[10px] text-[#9CA3AF] text-center mb-5">{t.disclaimer}</p>
+        <p className="text-caption text-text-tertiary text-center mb-6">{t.disclaimer}</p>
 
-        <div className="grid grid-cols-2 gap-3 pb-4">
-          <Link
-            href="/quiz"
-            className="card-hover rounded-xl py-3.5 text-center text-xs font-semibold bg-white shadow-sm border border-[#E5E5E0] text-[#0D0D0D]"
-          >
-            ↩ {t.retry}
+        <div className="grid grid-cols-2 gap-4 pb-4">
+          <Link href="/quiz" className="btn btn-secondary">
+            <RotateCcw className="w-4 h-4" />
+            {t.retry}
           </Link>
-          <Link
-            href="/"
-            className="card-hover rounded-xl py-3.5 text-center text-xs font-semibold bg-white shadow-sm border border-[#E5E5E0] text-[#0D0D0D]"
-          >
-            🏠 {t.home}
+          <Link href="/" className="btn btn-secondary">
+            <Home className="w-4 h-4" />
+            {t.home}
           </Link>
         </div>
       </div>
@@ -80,7 +79,7 @@ function ResultContent() {
 
 export default function ResultClient() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#F5F5F0]" />}>
+    <Suspense fallback={<PageLoading />}>
       <ResultContent />
     </Suspense>
   );

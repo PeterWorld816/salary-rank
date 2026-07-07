@@ -2,8 +2,10 @@
 import { useState } from "react";
 import { toPng } from "html-to-image";
 import type { RefObject } from "react";
-import { useLanguage } from "@/lib/i18n";
+import { Share2, Download } from "lucide-react";
+import { useLanguage } from "@/lib/LanguageProvider";
 import { CARD_WIDTH, CARD_HEIGHT } from "@/components/ResultCard";
+import Spinner from "@/components/Spinner";
 
 export default function ShareButtons({
   cardRef, shareTitle, shareText, downloadName, width = CARD_WIDTH, height = CARD_HEIGHT,
@@ -66,32 +68,24 @@ export default function ShareButtons({
     <div className="relative">
       {toast && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 fade-up">
-          <div className="rounded-2xl px-5 py-3 text-sm font-semibold text-white shadow-xl whitespace-nowrap bg-[#0D0D0D]">
+          <div className="rounded-md px-5 py-3 text-body font-semibold text-white shadow-lg whitespace-nowrap bg-text">
             {toast}
           </div>
         </div>
       )}
 
       <div className="grid grid-cols-2 gap-3">
-        <button
-          onClick={handleShare}
-          className="card-hover rounded-xl py-4 flex flex-col items-center justify-center gap-1 bg-[#0D0D0D] text-white"
-        >
-          <span className="text-xl">↗</span>
-          <span className="text-xs font-semibold">{t.share}</span>
+        <button onClick={handleShare} className="btn btn-primary flex-col gap-1 h-[72px]">
+          <Share2 className="w-5 h-5" />
+          <span className="text-caption font-semibold">{t.share}</span>
         </button>
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="card-hover rounded-xl py-4 flex flex-col items-center justify-center gap-1 text-white disabled:opacity-60"
-          style={{ background: "#00C805" }}
-        >
+        <button onClick={handleSave} disabled={saving} className="btn btn-secondary flex-col gap-1 h-[72px]">
           {saving ? (
-            <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+            <Spinner />
           ) : (
             <>
-              <span className="text-xl">↓</span>
-              <span className="text-xs font-semibold">{t.save}</span>
+              <Download className="w-5 h-5" />
+              <span className="text-caption font-semibold">{t.save}</span>
             </>
           )}
         </button>

@@ -1,30 +1,26 @@
 "use client";
 import Link from "next/link";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage } from "@/lib/LanguageProvider";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   const { t } = useLanguage();
 
   return (
-    <main className="min-h-screen bg-[#F5F5F0] font-sans">
-      <section className="px-5 pt-20 pb-8 text-center max-w-xl mx-auto">
-        <h1
-          className="font-display leading-tight mb-3"
-          style={{ fontWeight: 800, fontSize: "clamp(28px, 8vw, 48px)" }}
-        >
-          {t.appTitle}
-        </h1>
+    <main className="min-h-screen bg-bg font-sans flex flex-col">
+      <section className="flex-1 flex items-center justify-center px-6 fade-up">
+        <div className="w-full max-w-md text-center">
+          <h1 className="text-display text-text mb-4 text-balance">{t.appTitle}</h1>
 
-        <p className="text-sm md:text-base text-[#6B7280] mb-10">{t.tagline}</p>
+          <p className="text-body text-text-secondary mb-12">{t.tagline}</p>
 
-        <Link
-          href="/quiz"
-          className="inline-block rounded-xl px-8 py-4 text-sm font-semibold text-white card-hover"
-          style={{ background: "#0D0D0D" }}
-        >
-          {t.start}
-        </Link>
+          <Link href="/quiz" className="btn btn-primary px-10">
+            {t.start}
+          </Link>
+        </div>
       </section>
+
+      <Footer />
     </main>
   );
 }

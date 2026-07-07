@@ -2,13 +2,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useLanguage } from "@/lib/i18n";
+import { ChevronLeft } from "lucide-react";
+import { useLanguage } from "@/lib/LanguageProvider";
 import { questions, type QuestionOption } from "@/data/questions";
 import { computeBreakdown, encodeBreakdown } from "@/data/results";
 import QuestionCard from "@/components/QuestionCard";
 
 export default function QuizPage() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<QuestionOption[]>([]);
@@ -23,17 +24,20 @@ export default function QuizPage() {
     }
 
     const breakdown = computeBreakdown(next);
-    router.push(`/result?d=${encodeURIComponent(encodeBreakdown(breakdown))}`);
+    const params = new URLSearchParams({ d: encodeBreakdown(breakdown), lang });
+    router.push(`/result?${params.toString()}`);
   };
 
   return (
-    <main className="min-h-screen bg-[#F5F5F0] font-sans">
-      <section className="px-4 sm:px-6 pt-12 pb-safe max-w-xl mx-auto fade-up">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm text-[#6B7280] mb-6 touch-target">
-          ← {t.home}
+    <main className="min-h-screen bg-bg font-sans">
+      <section className="px-6 sm:px-8 pt-12 pb-safe max-w-xl mx-auto fade-up">
+        <Link href="/" className="inline-flex items-center gap-1 text-caption text-text-secondary mb-8 touch-target">
+          <ChevronLeft className="w-4 h-4" />
+          {t.home}
         </Link>
 
         <QuestionCard
+          key={questions[step].id}
           question={questions[step]}
           step={step}
           total={questions.length}

@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from "@/lib/LanguageProvider";
 import type { Question, QuestionOption } from "@/data/questions";
 
 const OPTION_LETTERS = ["A", "B", "C", "D", "E", "F"];
@@ -11,41 +12,33 @@ export default function QuestionCard({
   total: number;
   onSelect: (option: QuestionOption) => void;
 }) {
+  const { tr } = useLanguage();
   const progress = (step / total) * 100;
 
   return (
-    <div className="rounded-3xl bg-white p-5 shadow-md">
+    <div className="card p-6 fade-up">
       <div className="flex items-center justify-between mb-4">
-        <span className="text-xs font-bold tabular-nums" style={{ color: "#00C805" }}>
+        <span className="text-caption font-bold tabular-nums text-accent">
           {step + 1} / {total}
         </span>
       </div>
 
-      <div className="h-1.5 rounded-full bg-[#F3F4F6] mb-6 overflow-hidden">
+      <div className="h-1.5 rounded-full bg-bg-subtle mb-6 overflow-hidden">
         <div
-          className="h-full rounded-full transition-all duration-500"
-          style={{ width: `${progress}%`, background: "#00C805" }}
+          className="h-full rounded-full bg-accent transition-all duration-500"
+          style={{ width: `${progress}%` }}
         />
       </div>
 
-      <h2 className="font-display font-bold text-xl mb-6 leading-snug text-[#0D0D0D]">
-        {question.prompt}
-      </h2>
+      <h2 className="text-title text-text mb-6">{tr(question.prompt)}</h2>
 
       <div className="space-y-3">
         {question.options.map((opt, i) => (
-          <button
-            key={opt.id}
-            onClick={() => onSelect(opt)}
-            className="w-full text-left rounded-2xl border border-[#E5E5E0] bg-[#F5F5F0] px-4 touch-target text-sm font-medium text-[#374151] hover:border-[#00C805] hover:bg-[#F0FDF4] transition-all card-hover flex items-center gap-3"
-          >
-            <span
-              className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-              style={{ background: "#00C80518", color: "#00C805" }}
-            >
+          <button key={opt.id} onClick={() => onSelect(opt)} className="option-row text-body text-text">
+            <span className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-caption font-bold bg-accent-tint text-accent">
               {OPTION_LETTERS[i] ?? i + 1}
             </span>
-            <span>{opt.label}</span>
+            <span>{tr(opt.label)}</span>
           </button>
         ))}
       </div>

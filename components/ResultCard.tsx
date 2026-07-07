@@ -1,5 +1,6 @@
 import type { RefObject } from "react";
 import type { ResultDef, BreakdownItem } from "@/data/results";
+import { pick, translations, type LangCode } from "@/lib/i18n";
 import BrainChart from "@/components/BrainChart";
 
 export const CARD_WIDTH = 360;
@@ -8,13 +9,13 @@ export const BREAKDOWN_CARD_HEIGHT = 680;
 
 const FALLBACK_COLOR = "#00C805";
 
-function BreakdownCard({ breakdown }: { breakdown: BreakdownItem[] }) {
+function BreakdownCard({ breakdown, lang }: { breakdown: BreakdownItem[]; lang: LangCode }) {
   const top = breakdown[0];
 
   return (
     <>
       <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "12px", marginBottom: "6px" }}>
-        내 뇌 구조는?
+        {translations[lang].resultCardLabel}
       </div>
 
       <div style={{
@@ -22,18 +23,18 @@ function BreakdownCard({ breakdown }: { breakdown: BreakdownItem[] }) {
         letterSpacing: "-0.02em", lineHeight: 1.2, marginBottom: "8px",
         textAlign: "center", padding: "0 28px",
       }}>
-        {top.result.emoji} {top.result.title} {top.percent}%
+        {top.result.emoji} {pick(top.result.title, lang)} {top.percent}%
       </div>
 
       <div style={{
         color: "rgba(255,255,255,0.5)", fontSize: "12px",
         textAlign: "center", lineHeight: 1.5, padding: "0 34px", marginBottom: "18px",
       }}>
-        {top.result.description}
+        {pick(top.result.description, lang)}
       </div>
 
       <div style={{ marginBottom: "18px" }}>
-        <BrainChart breakdown={breakdown} width={220} />
+        <BrainChart breakdown={breakdown} width={220} lang={lang} />
       </div>
 
       {/* 범례 */}
@@ -45,7 +46,7 @@ function BreakdownCard({ breakdown }: { breakdown: BreakdownItem[] }) {
               background: b.result.color ?? FALLBACK_COLOR,
             }} />
             <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", flex: 1 }}>
-              {b.result.emoji} {b.result.title}
+              {b.result.emoji} {pick(b.result.title, lang)}
             </span>
             <span style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.8)" }}>
               {b.percent}%
@@ -57,7 +58,7 @@ function BreakdownCard({ breakdown }: { breakdown: BreakdownItem[] }) {
   );
 }
 
-function SingleResultCard({ result }: { result: ResultDef }) {
+function SingleResultCard({ result, lang }: { result: ResultDef; lang: LangCode }) {
   return (
     <>
       <div style={{ fontSize: "64px", lineHeight: 1, marginBottom: "18px" }}>{result.emoji}</div>
@@ -67,25 +68,26 @@ function SingleResultCard({ result }: { result: ResultDef }) {
         letterSpacing: "-0.02em", lineHeight: 1.2, marginBottom: "14px",
         textAlign: "center", padding: "0 28px",
       }}>
-        {result.title}
+        {pick(result.title, lang)}
       </div>
 
       <div style={{
         color: "rgba(255,255,255,0.5)", fontSize: "14px",
         textAlign: "center", lineHeight: 1.55, padding: "0 32px",
       }}>
-        {result.description}
+        {pick(result.description, lang)}
       </div>
     </>
   );
 }
 
 export default function ResultCard({
-  result, breakdown, cardRef,
+  result, breakdown, cardRef, lang = "ko",
 }: {
   result?: ResultDef;
   breakdown?: BreakdownItem[];
   cardRef?: RefObject<HTMLDivElement>;
+  lang?: LangCode;
 }) {
   const height = breakdown ? BREAKDOWN_CARD_HEIGHT : CARD_HEIGHT;
 
@@ -110,9 +112,9 @@ export default function ResultCard({
       }} />
 
       {breakdown && breakdown.length > 0
-        ? <BreakdownCard breakdown={breakdown} />
+        ? <BreakdownCard breakdown={breakdown} lang={lang} />
         : result
-          ? <SingleResultCard result={result} />
+          ? <SingleResultCard result={result} lang={lang} />
           : null}
 
       <div style={{
@@ -124,7 +126,7 @@ export default function ResultCard({
           color: "rgba(255,255,255,0.18)", fontSize: "11px",
           fontWeight: 600, letterSpacing: "0.1em",
         }}>
-          🧠 뇌 구조 테스트
+          {translations[lang].appTitle}
         </span>
       </div>
     </div>

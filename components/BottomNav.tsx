@@ -1,51 +1,41 @@
-﻿"use client";
+"use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useLanguage } from "@/lib/i18n";
+import { Home, Target } from "lucide-react";
+import { useLanguage } from "@/lib/LanguageProvider";
 
 export default function BottomNav() {
   const pathname = usePathname();
   const { t } = useLanguage();
 
   const tabs = [
-    { href: "/",     icon: "🏠", label: t.home },
-    { href: "/quiz", icon: "🎯", label: t.start },
+    { href: "/", Icon: Home, label: t.home },
+    { href: "/quiz", Icon: Target, label: t.start },
   ];
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#E5E5E0]"
-      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+      className="fixed bottom-0 left-0 right-0 z-50 bg-white"
+      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)", borderTop: "1px solid var(--color-border)" }}
     >
       <div className="flex h-16 max-w-[600px] mx-auto">
-        {tabs.map((tab) => {
-          const isActive =
-            tab.href === "/"
-              ? pathname === "/"
-              : pathname.startsWith(tab.href);
+        {tabs.map(({ href, Icon, label }) => {
+          const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
             <Link
-              key={tab.href}
-              href={tab.href}
-              className="flex-1 flex flex-col items-center justify-center gap-0.5 relative"
+              key={href}
+              href={href}
+              className={`flex-1 flex flex-col items-center justify-center gap-1 relative ${
+                isActive ? "text-accent" : "text-text-tertiary"
+              }`}
             >
               {isActive && (
                 <div className="absolute top-0 inset-x-0 flex justify-center">
-                  <div className="w-8 h-0.5 rounded-b-full" style={{ background: "#00C805" }} />
+                  <div className="w-8 h-0.5 rounded-b-full bg-accent" />
                 </div>
               )}
-              <span
-                className="text-xl transition-transform duration-200"
-                style={{ transform: isActive ? "scale(1.15)" : "scale(1)" }}
-              >
-                {tab.icon}
-              </span>
-              <span
-                className="text-[10px] font-semibold transition-colors"
-                style={{ color: isActive ? "#00C805" : "#9CA3AF" }}
-              >
-                {tab.label}
-              </span>
+              <Icon className="w-5 h-5" strokeWidth={isActive ? 2.25 : 2} />
+              <span className="text-caption font-semibold">{label}</span>
             </Link>
           );
         })}

@@ -3,6 +3,7 @@
 // 않지만 절대 위치 div/span은 지원하기 때문. 이 구조 덕분에 브라우저(공유 카드)와
 // edge 런타임(OG 이미지) 양쪽에서 동일한 컴포넌트를 그대로 재사용할 수 있다.
 import type { BreakdownItem } from "@/data/results";
+import { pick, type LangCode } from "@/lib/i18n";
 import { BRAIN_PATH, BRAIN_VIEWBOX_W, BRAIN_VIEWBOX_H, BRAIN_TOP_Y, BRAIN_BOTTOM_Y, BRAIN_CENTER_X } from "@/lib/brainPath";
 
 const FALLBACK_COLOR = "#00C805";
@@ -18,10 +19,11 @@ function textColorFor(hex: string): string {
 }
 
 export default function BrainChart({
-  breakdown, width = 240,
+  breakdown, width = 240, lang = "ko",
 }: {
   breakdown: BreakdownItem[];
   width?: number;
+  lang?: LangCode;
 }) {
   const scale = width / BRAIN_VIEWBOX_W;
   const height = BRAIN_VIEWBOX_H * scale;
@@ -86,7 +88,7 @@ export default function BrainChart({
             }}
           >
             <span style={{ display: "flex", fontSize: `${fontSize}px`, fontWeight: 700, color: fill }}>
-              {band.item.result.emoji} {band.item.result.title} {band.item.percent}%
+              {band.item.result.emoji} {pick(band.item.result.title, lang)} {band.item.percent}%
             </span>
           </div>
         );

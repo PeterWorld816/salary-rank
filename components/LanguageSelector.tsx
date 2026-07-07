@@ -1,12 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useLanguage, LANGUAGES, type LangCode } from "@/lib/i18n";
-
-const FLAGS: Record<LangCode, string> = {
-  ko: "🇰🇷",
-  en: "🇺🇸",
-};
+import { Globe, ChevronDown, Check } from "lucide-react";
+import { LANGUAGES, type LangCode } from "@/lib/i18n";
+import { useLanguage } from "@/lib/LanguageProvider";
 
 export default function LanguageSelector() {
   const { lang, setLang } = useLanguage();
@@ -38,8 +35,6 @@ export default function LanguageSelector() {
     setOpen(false);
   }
 
-  const currentMeta = LANGUAGES.find((l) => l.code === lang);
-
   return (
     <div ref={ref} className="relative z-50">
       {/* Trigger button */}
@@ -47,24 +42,20 @@ export default function LanguageSelector() {
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="flex items-center gap-1.5 rounded-full border border-[#E5E5E0] bg-white px-3 py-1.5 text-sm font-medium text-[#374151] shadow-sm transition-all active:scale-95 hover:border-[#D1D5DB]"
+        className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-caption font-medium text-text shadow-sm transition-all active:scale-[0.98]"
+        style={{ border: "1px solid var(--color-border)" }}
       >
-        <span className="text-base leading-none">{FLAGS[lang]}</span>
-        <span className="hidden sm:inline text-[13px]">{currentMeta?.label}</span>
-        <svg
-          className={`h-3 w-3 text-[#9CA3AF] transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-          viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-        >
-          <path d="M2 4l4 4 4-4" />
-        </svg>
+        <Globe className="w-3.5 h-3.5 text-text-tertiary" />
+        <span className="uppercase">{lang}</span>
+        <ChevronDown className={`w-3 h-3 text-text-tertiary transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
 
       {/* Dropdown */}
       {open && (
         <div
           role="listbox"
-          className="absolute right-0 top-full mt-2 w-44 overflow-hidden rounded-2xl border border-[#E5E5E0] bg-white shadow-xl"
-          style={{ animation: "langDrop 0.15s ease both" }}
+          className="absolute right-0 top-full mt-2 w-44 overflow-hidden rounded-lg bg-white shadow-lg"
+          style={{ border: "1px solid var(--color-border)", animation: "langDrop 0.15s ease both" }}
         >
           <style>{`
             @keyframes langDrop {
@@ -82,20 +73,12 @@ export default function LanguageSelector() {
                     role="option"
                     aria-selected={active}
                     onClick={() => select(l.code)}
-                    className="flex w-full items-center gap-2.5 px-3.5 py-2 text-sm transition-colors"
-                    style={{
-                      background: active ? "#F0FDF4" : "transparent",
-                      color:      active ? "#059669" : "#374151",
-                      fontWeight: active ? 600 : 400,
-                    }}
+                    className={`flex w-full items-center gap-2.5 px-3.5 py-2 text-caption transition-colors ${
+                      active ? "bg-accent-tint text-accent font-semibold" : "text-text"
+                    }`}
                   >
-                    <span className="text-base leading-none">{FLAGS[l.code]}</span>
                     <span className="flex-1 text-left">{l.label}</span>
-                    {active && (
-                      <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 14 14" fill="none" stroke="#059669" strokeWidth="2.2" strokeLinecap="round">
-                        <path d="M2 7l3.5 3.5L12 3" />
-                      </svg>
-                    )}
+                    {active && <Check className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} />}
                   </button>
                 </li>
               );

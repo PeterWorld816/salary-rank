@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { decodeBreakdown } from "@/data/results";
+import { isLangCode, DEFAULT_LANG } from "@/lib/i18n";
+import { buildResultShareText } from "@/lib/shareText";
 import ResultClient from "./ResultClient";
 
 type RawSP = Record<string, string | string[] | undefined>;
@@ -15,18 +17,14 @@ export async function generateMetadata({
   searchParams: RawSP;
 }): Promise<Metadata> {
   const d = str(searchParams.d);
+  const langParam = str(searchParams.lang);
+  const lang = isLangCode(langParam) ? langParam : DEFAULT_LANG;
   const breakdown = decodeBreakdown(d);
-  const top = breakdown[0];
 
-  const title = top
-    ? `${top.result.emoji} 내 뇌의 ${top.percent}%는 '${top.result.title}'`
-    : "🧠 뇌 구조 테스트";
-  const desc = top
-    ? `${breakdown.slice(0, 3).map((b) => `${b.result.title} ${b.percent}%`).join(" · ")} — 뇌 구조 테스트 결과`
-    : "질문 8개로 알아보는 내 뇌 속 비율";
+  const { title, description: desc } = buildResultShareText(lang, breakdown);
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const ogUrl   = `${baseUrl}/api/og?${new URLSearchParams({ d }).toString()}`;
+  const ogUrl   = `${baseUrl}/api/og?${new URLSearchParams({ d, lang }).toString()}`;
 
   return {
     title,

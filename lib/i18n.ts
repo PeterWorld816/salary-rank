@@ -1,16 +1,28 @@
-"use client";
+// Pure i18n data/logic — no React, no "use client". Safe to import from
+// client components, server components, and edge routes (e.g. app/api/og)
+// alike. The React-facing context/hook lives in lib/LanguageProvider.tsx.
+//
+// This is the single place UI chrome copy (buttons, nav, disclaimers) lives.
+// Content data (quiz questions, result copy) lives in data/*.ts using the
+// same `Localized` shape — see pick() below to resolve either one.
 
-import { useState, useEffect, createContext, useContext, createElement } from "react";
-import type { ReactNode } from "react";
-
-// ── Types ──────────────────────────────────────────────────────────────────────
 export type LangCode = "ko" | "en";
+
+// Any piece of content that varies by language — used across data/*.ts too.
+export type Localized = Record<LangCode, string>;
+
+export function pick(text: Localized, lang: LangCode): string {
+  return text[lang] ?? text.ko;
+}
 
 export interface Translations {
   // ── Content placeholders (fill in when building a real app on this skeleton)
   appTitle: string;
   tagline: string;
   disclaimer: string;
+  // ── Result screen copy
+  resultCardLabel: string;
+  shareTitle: string; // template: {emoji} {percent} {title}
   // ── Nav / actions (structural chrome, real copy)
   home: string;
   start: string;
@@ -31,6 +43,8 @@ export const translations: Record<LangCode, Translations> = {
     appTitle: "🧠 뇌 구조 테스트",
     tagline: "질문 8개로 알아보는 내 뇌 속 비율",
     disclaimer: "이 테스트는 재미로만 봐주세요. 과학적 근거는 1도 없습니다 😅",
+    resultCardLabel: "내 뇌 구조는?",
+    shareTitle: "{emoji} 내 뇌의 {percent}%는 '{title}'",
     home: "홈",
     start: "시작하기",
     back: "뒤로",
@@ -48,6 +62,8 @@ export const translations: Record<LangCode, Translations> = {
     appTitle: "🧠 Brain Map Test",
     tagline: "8 questions to map what's filling your brain right now",
     disclaimer: "For fun only — zero scientific basis 😅",
+    resultCardLabel: "What fills my brain?",
+    shareTitle: "{emoji} {percent}% of my brain is '{title}'",
     home: "Home",
     start: "Start",
     back: "Back",
@@ -75,46 +91,13 @@ export const LANGUAGES: LangMeta[] = [
   { code: "en", label: "English", dir: "ltr" },
 ];
 
-// ── Context ────────────────────────────────────────────────────────────────────
-const LS_KEY = "app_lang";
+export const DEFAULT_LANG: LangCode = "ko";
 
-function detectBrowserLang(): LangCode {
-  if (typeof navigator === "undefined") return "ko";
+export function detectBrowserLang(): LangCode {
+  if (typeof navigator === "undefined") return DEFAULT_LANG;
   return navigator.language.slice(0, 2).toLowerCase() === "ko" ? "ko" : "en";
 }
 
-interface LangCtx {
-  lang: LangCode;
-  setLang: (code: LangCode) => void;
-  t: Translations;
-  dir: "ltr" | "rtl";
-  languages: LangMeta[];
-}
-
-const LanguageContext = createContext<LangCtx | null>(null);
-
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<LangCode>("ko");
-
-  useEffect(() => {
-    const saved = localStorage.getItem(LS_KEY) as LangCode | null;
-    setLangState(saved ?? detectBrowserLang());
-  }, []);
-
-  function setLang(code: LangCode) {
-    localStorage.setItem(LS_KEY, code);
-    setLangState(code);
-  }
-
-  const meta = LANGUAGES.find((l) => l.code === lang)!;
-  const t    = translations[lang];
-
-  return createElement(LanguageContext.Provider, { value: { lang, setLang, t, dir: meta.dir, languages: LANGUAGES } }, children);
-}
-
-// ── Hook ───────────────────────────────────────────────────────────────────────
-export function useLanguage(): LangCtx {
-  const ctx = useContext(LanguageContext);
-  if (!ctx) throw new Error("useLanguage must be used inside <LanguageProvider>");
-  return ctx;
+export function isLangCode(value: unknown): value is LangCode {
+  return value === "ko" || value === "en";
 }
