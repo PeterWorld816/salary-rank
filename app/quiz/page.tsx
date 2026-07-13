@@ -31,10 +31,12 @@ export default function QuizPage() {
   return (
     <main className="min-h-screen bg-bg font-sans">
       <section className="px-6 sm:px-8 pt-12 pb-safe max-w-xl mx-auto fade-up">
-        <Link href="/" className="inline-flex items-center gap-1 text-caption text-text-secondary mb-8 touch-target">
+        <Link href="/" className="inline-flex items-center gap-1 text-caption text-text-secondary mb-4 touch-target">
           <ChevronLeft className="w-4 h-4" />
           {t.home}
         </Link>
+
+        <p className="text-caption text-text-tertiary mb-8">🔒 {t.privacyNotice}</p>
 
         <QuestionCard
           key={questions[step].id}

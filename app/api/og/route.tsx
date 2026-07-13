@@ -1,12 +1,12 @@
 import { ImageResponse } from "next/og";
 import { NextRequest } from "next/server";
-import { decodeBreakdown } from "@/data/results";
-import { translations, pick, isLangCode, DEFAULT_LANG } from "@/lib/i18n";
-import BrainChart from "@/components/BrainChart";
+import { decodeSalaryInput, computeSalaryRank, getAgeGroup, getIndustry, getRegion } from "@/lib/salaryCalc";
+import { translations, pick, formatTemplate, formatCurrency, isLangCode, DEFAULT_LANG } from "@/lib/i18n";
+import DistributionChart from "@/components/DistributionChart";
 
 export const runtime = "edge";
 
-const FALLBACK_COLOR = "#00C805";
+const ACCENT = "#34D399";
 
 export async function GET(req: NextRequest) {
   const params = new URL(req.url).searchParams;
@@ -14,8 +14,7 @@ export async function GET(req: NextRequest) {
   const langParam = params.get("lang");
   const lang = isLangCode(langParam) ? langParam : DEFAULT_LANG;
   const t = translations[lang];
-  const breakdown = decodeBreakdown(d);
-  const top = breakdown[0];
+  const input = decodeSalaryInput(d);
 
   return new ImageResponse(
     (
@@ -31,14 +30,14 @@ export async function GET(req: NextRequest) {
         <div style={{
           position: "absolute", width: "600px", height: "600px",
           top: "15px", left: "300px",
-          background: "radial-gradient(circle, rgba(0,200,5,0.08) 0%, transparent 65%)",
+          background: "radial-gradient(circle, rgba(52,211,153,0.08) 0%, transparent 65%)",
           borderRadius: "50%", display: "flex",
         }} />
 
-        {!top ? (
+        {!input ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <div style={{
-              color: "#00C805", fontSize: 56, fontWeight: 900,
+              color: ACCENT, fontSize: 56, fontWeight: 900,
               letterSpacing: "-0.02em", lineHeight: 1.2, marginBottom: 20,
               display: "flex", textAlign: "center", maxWidth: 900, justifyContent: "center",
             }}>
@@ -52,37 +51,55 @@ export async function GET(req: NextRequest) {
             </div>
           </div>
         ) : (
-          <>
-            <div style={{ display: "flex", marginRight: 70 }}>
-              <BrainChart breakdown={breakdown} width={340} lang={lang} />
-            </div>
+          (() => {
+            const rankResult = computeSalaryRank(input);
+            const rows = [
+              { label: t.comparisonAge, sub: pick(getAgeGroup(input.ageGroup).label, lang), percent: rankResult.groupComparisons.ageGroup },
+              { label: t.comparisonIndustry, sub: pick(getIndustry(input.industry).label, lang), percent: rankResult.groupComparisons.industry },
+              { label: t.comparisonRegion, sub: pick(getRegion(input.region).label, lang), percent: rankResult.groupComparisons.region },
+            ];
 
-            <div style={{ display: "flex", flexDirection: "column", maxWidth: 560 }}>
-              <div style={{ display: "flex", color: "rgba(255,255,255,0.4)", fontSize: 22, marginBottom: 10 }}>
-                {t.resultCardLabel}
-              </div>
-              <div style={{
-                display: "flex", color: top.result.color ?? FALLBACK_COLOR, fontSize: 48, fontWeight: 900,
-                letterSpacing: "-0.02em", lineHeight: 1.2, marginBottom: 24,
-              }}>
-                {top.result.emoji} {pick(top.result.title, lang)} {top.percent}%
-              </div>
+            return (
+              <>
+                <div style={{ display: "flex", marginRight: 70 }}>
+                  <DistributionChart monthlySalary={rankResult.monthly.estimate} width={420} lang={lang} dark />
+                </div>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {breakdown.map((b) => (
-                  <div key={b.result.id} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{
-                      width: 16, height: 16, borderRadius: 999, display: "flex",
-                      background: b.result.color ?? FALLBACK_COLOR,
-                    }} />
-                    <span style={{ display: "flex", fontSize: 22, color: "rgba(255,255,255,0.7)" }}>
-                      {b.result.emoji} {pick(b.result.title, lang)} {b.percent}%
-                    </span>
+                <div style={{ display: "flex", flexDirection: "column", maxWidth: 560 }}>
+                  <div style={{ display: "flex", color: "rgba(255,255,255,0.4)", fontSize: 20, marginBottom: 6 }}>
+                    {t.resultCardLabel}
                   </div>
-                ))}
-              </div>
-            </div>
-          </>
+                  <div style={{ display: "flex", color: "rgba(255,255,255,0.6)", fontSize: 20, marginBottom: 4 }}>
+                    {t.percentileHeroLabel}
+                  </div>
+                  <div style={{
+                    display: "flex", color: ACCENT, fontSize: 72, fontWeight: 900,
+                    letterSpacing: "-0.02em", lineHeight: 1.1, marginBottom: 14,
+                  }}>
+                    {rankResult.percentileRounded}%
+                  </div>
+                  <div style={{ display: "flex", color: "rgba(255,255,255,0.7)", fontSize: 22, marginBottom: 26 }}>
+                    {formatTemplate(t.annualEstimateTemplate, { value: formatCurrency(rankResult.annual.estimate, lang) })}
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 22 }}>
+                    {rows.map((row) => (
+                      <div key={row.label} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <div style={{ width: 12, height: 12, borderRadius: 999, display: "flex", background: ACCENT }} />
+                        <span style={{ display: "flex", fontSize: 20, color: "rgba(255,255,255,0.7)" }}>
+                          {row.label}({row.sub}) {formatTemplate(t.topPercentTemplate, { percent: row.percent })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ display: "flex", color: "rgba(255,255,255,0.3)", fontSize: 15 }}>
+                    {t.sourceLabel}: {t.sourceText}
+                  </div>
+                </div>
+              </>
+            );
+          })()
         )}
       </div>
     ),

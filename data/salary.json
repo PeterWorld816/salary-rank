@@ -1,0 +1,54 @@
+{
+  "meta": {
+    "source": "통계청 2023년 임금근로일자리 소득(보수) 결과 기준 추정치 — 재미용 앱으로 일부 구간은 근사 보정값",
+    "unit": "만원/월",
+    "year": 2023
+  },
+  "overall": { "average": 363, "median": 278 },
+  "ageGroups": [
+    { "id": "20s", "label": { "ko": "20대 이하", "en": "20s & under" }, "average": 258 },
+    { "id": "30s", "label": { "ko": "30대", "en": "30s" }, "average": 386 },
+    { "id": "40s", "label": { "ko": "40대", "en": "40s" }, "average": 451 },
+    { "id": "50s", "label": { "ko": "50대", "en": "50s" }, "average": 429 },
+    { "id": "60s", "label": { "ko": "60대 이상", "en": "60s & over" }, "average": 297 }
+  ],
+  "genders": [
+    { "id": "male", "label": { "ko": "남성", "en": "Male" }, "average": 426 },
+    { "id": "female", "label": { "ko": "여성", "en": "Female" }, "average": 279 }
+  ],
+  "companySizes": [
+    { "id": "large", "label": { "ko": "대기업", "en": "Large corporation" }, "average": 593 },
+    { "id": "sme", "label": { "ko": "중소기업", "en": "SME" }, "average": 298 },
+    { "id": "nonprofit", "label": { "ko": "비영리단체", "en": "Non-profit" }, "average": 349 }
+  ],
+  "industries": [
+    { "id": "finance", "label": { "ko": "금융·보험업", "en": "Finance & insurance" }, "average": 753 },
+    { "id": "utilities", "label": { "ko": "전기·가스·증기·공기조절 공급업", "en": "Utilities" }, "average": 556 },
+    { "id": "ict", "label": { "ko": "정보통신업", "en": "Information & communication" }, "average": 521 },
+    { "id": "professional", "label": { "ko": "전문·과학·기술서비스업", "en": "Professional & scientific services" }, "average": 437 },
+    { "id": "manufacturing", "label": { "ko": "제조업", "en": "Manufacturing" }, "average": 386 },
+    { "id": "construction", "label": { "ko": "건설업", "en": "Construction" }, "average": 344 },
+    { "id": "transport", "label": { "ko": "운수·창고업", "en": "Transportation & warehousing" }, "average": 331 },
+    { "id": "realestate", "label": { "ko": "부동산업", "en": "Real estate" }, "average": 305 },
+    { "id": "wholesale", "label": { "ko": "도매·소매업", "en": "Wholesale & retail" }, "average": 291 },
+    { "id": "education", "label": { "ko": "교육서비스업", "en": "Education services" }, "average": 279 },
+    { "id": "health", "label": { "ko": "보건업·사회복지서비스업", "en": "Health & social welfare" }, "average": 266 },
+    { "id": "arts", "label": { "ko": "예술·스포츠·여가서비스업", "en": "Arts, sports & leisure" }, "average": 246 },
+    { "id": "business_support", "label": { "ko": "사업시설관리·사업지원서비스업", "en": "Facilities & business support" }, "average": 219 },
+    { "id": "accommodation", "label": { "ko": "숙박·음식점업", "en": "Accommodation & food service" }, "average": 181 }
+  ],
+  "regions": [
+    { "id": "seoul", "label": { "ko": "서울", "en": "Seoul" }, "average": 401 },
+    { "id": "gyeonggi_incheon", "label": { "ko": "경기·인천", "en": "Gyeonggi & Incheon" }, "average": 368 },
+    { "id": "metro", "label": { "ko": "광역시 (부산·대구·광주·대전·울산)", "en": "Metropolitan cities" }, "average": 344 },
+    { "id": "other", "label": { "ko": "그 외 지방", "en": "Other regions" }, "average": 333 }
+  ],
+  "percentiles": [
+    { "topPercent": 1, "minSalary": 1500 },
+    { "topPercent": 5, "minSalary": 800 },
+    { "topPercent": 10, "minSalary": 600 },
+    { "topPercent": 25, "minSalary": 420 },
+    { "topPercent": 50, "minSalary": 278 },
+    { "topPercent": 100, "minSalary": 201 }
+  ]
+}

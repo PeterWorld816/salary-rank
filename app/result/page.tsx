@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { decodeBreakdown } from "@/data/results";
-import { isLangCode, DEFAULT_LANG } from "@/lib/i18n";
+import { decodeSalaryInput, computeSalaryRank } from "@/lib/salaryCalc";
+import { translations, isLangCode, DEFAULT_LANG } from "@/lib/i18n";
 import { buildResultShareText } from "@/lib/shareText";
 import ResultClient from "./ResultClient";
 
@@ -19,12 +19,15 @@ export async function generateMetadata({
   const d = str(searchParams.d);
   const langParam = str(searchParams.lang);
   const lang = isLangCode(langParam) ? langParam : DEFAULT_LANG;
-  const breakdown = decodeBreakdown(d);
-
-  const { title, description: desc } = buildResultShareText(lang, breakdown);
+  const input = decodeSalaryInput(d);
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const ogUrl   = `${baseUrl}/api/og?${new URLSearchParams({ d, lang }).toString()}`;
+  const ogUrl = `${baseUrl}/api/og?${new URLSearchParams({ d, lang }).toString()}`;
+
+  const t = translations[lang];
+  const { title, description: desc } = input
+    ? buildResultShareText(lang, input, computeSalaryRank(input))
+    : { title: t.appTitle, description: t.tagline };
 
   return {
     title,

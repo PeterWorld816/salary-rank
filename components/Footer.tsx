@@ -10,6 +10,7 @@ export default function Footer() {
         {t.appTitle} — {t.tagline}
       </p>
       <p className="text-caption text-text-tertiary mt-1">{t.disclaimer}</p>
+      <p className="text-caption text-text-tertiary mt-1">{t.privacyNotice}</p>
     </footer>
   );
 }

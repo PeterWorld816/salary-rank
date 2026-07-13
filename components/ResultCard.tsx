@@ -1,101 +1,46 @@
 import type { RefObject } from "react";
-import type { ResultDef, BreakdownItem } from "@/data/results";
-import { pick, translations, type LangCode } from "@/lib/i18n";
-import BrainChart from "@/components/BrainChart";
+import type { SalaryInput, SalaryRankResult } from "@/lib/salaryCalc";
+import { getAgeGroup, getIndustry, getRegion } from "@/lib/salaryCalc";
+import { pick, translations, formatTemplate, formatCurrency, type LangCode, type Translations } from "@/lib/i18n";
+import DistributionChart from "@/components/DistributionChart";
 
 export const CARD_WIDTH = 360;
-export const CARD_HEIGHT = 450;
-export const BREAKDOWN_CARD_HEIGHT = 680;
+export const CARD_HEIGHT = 740;
 
-const FALLBACK_COLOR = "#00C805";
+const ACCENT = "#34D399";
 
-function BreakdownCard({ breakdown, lang }: { breakdown: BreakdownItem[]; lang: LangCode }) {
-  const top = breakdown[0];
-
+function ComparisonRow({ label, sub, percent, t }: { label: string; sub: string; percent: number; t: Translations }) {
   return (
-    <>
-      <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "12px", marginBottom: "6px" }}>
-        {translations[lang].resultCardLabel}
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <span style={{ display: "flex", fontSize: "12px", color: "rgba(255,255,255,0.75)", fontWeight: 600 }}>{label}</span>
+        <span style={{ display: "flex", fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>{sub}</span>
       </div>
-
-      <div style={{
-        color: top.result.color ?? FALLBACK_COLOR, fontSize: "26px", fontWeight: 900,
-        letterSpacing: "-0.02em", lineHeight: 1.2, marginBottom: "8px",
-        textAlign: "center", padding: "0 28px",
-      }}>
-        {top.result.emoji} {pick(top.result.title, lang)} {top.percent}%
-      </div>
-
-      <div style={{
-        color: "rgba(255,255,255,0.5)", fontSize: "12px",
-        textAlign: "center", lineHeight: 1.5, padding: "0 34px", marginBottom: "18px",
-      }}>
-        {pick(top.result.description, lang)}
-      </div>
-
-      <div style={{ marginBottom: "18px" }}>
-        <BrainChart breakdown={breakdown} width={220} lang={lang} />
-      </div>
-
-      {/* 범례 */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "6px", width: "260px" }}>
-        {breakdown.map((b) => (
-          <div key={b.result.id} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{
-              width: "8px", height: "8px", borderRadius: "50%", flexShrink: 0,
-              background: b.result.color ?? FALLBACK_COLOR,
-            }} />
-            <span style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)", flex: 1 }}>
-              {b.result.emoji} {pick(b.result.title, lang)}
-            </span>
-            <span style={{ fontSize: "12px", fontWeight: 700, color: "rgba(255,255,255,0.8)" }}>
-              {b.percent}%
-            </span>
-          </div>
-        ))}
-      </div>
-    </>
-  );
-}
-
-function SingleResultCard({ result, lang }: { result: ResultDef; lang: LangCode }) {
-  return (
-    <>
-      <div style={{ fontSize: "64px", lineHeight: 1, marginBottom: "18px" }}>{result.emoji}</div>
-
-      <div style={{
-        color: result.color ?? FALLBACK_COLOR, fontSize: "32px", fontWeight: 900,
-        letterSpacing: "-0.02em", lineHeight: 1.2, marginBottom: "14px",
-        textAlign: "center", padding: "0 28px",
-      }}>
-        {pick(result.title, lang)}
-      </div>
-
-      <div style={{
-        color: "rgba(255,255,255,0.5)", fontSize: "14px",
-        textAlign: "center", lineHeight: 1.55, padding: "0 32px",
-      }}>
-        {pick(result.description, lang)}
-      </div>
-    </>
+      <span style={{ display: "flex", fontSize: "14px", fontWeight: 800, color: ACCENT }}>
+        {formatTemplate(t.topPercentTemplate, { percent })}
+      </span>
+    </div>
   );
 }
 
 export default function ResultCard({
-  result, breakdown, cardRef, lang = "ko",
+  input, rankResult, cardRef, lang = "ko",
 }: {
-  result?: ResultDef;
-  breakdown?: BreakdownItem[];
+  input: SalaryInput;
+  rankResult: SalaryRankResult;
   cardRef?: RefObject<HTMLDivElement>;
   lang?: LangCode;
 }) {
-  const height = breakdown ? BREAKDOWN_CARD_HEIGHT : CARD_HEIGHT;
+  const t = translations[lang];
+  const ageLabel = pick(getAgeGroup(input.ageGroup).label, lang);
+  const industryLabel = pick(getIndustry(input.industry).label, lang);
+  const regionLabel = pick(getRegion(input.region).label, lang);
 
   return (
     <div
       ref={cardRef}
       style={{
-        width: `${CARD_WIDTH}px`, height: `${height}px`,
+        width: `${CARD_WIDTH}px`, height: `${CARD_HEIGHT}px`,
         background: "linear-gradient(160deg, #0D0D0D 0%, #131313 100%)",
         display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
@@ -106,27 +51,49 @@ export default function ResultCard({
     >
       <div style={{
         position: "absolute", width: "300px", height: "300px",
-        top: "90px", left: "30px",
-        background: "radial-gradient(circle, rgba(0,200,5,0.1) 0%, transparent 70%)",
+        top: "40px", left: "30px",
+        background: "radial-gradient(circle, rgba(52,211,153,0.12) 0%, transparent 70%)",
         borderRadius: "50%", pointerEvents: "none",
       }} />
 
-      {breakdown && breakdown.length > 0
-        ? <BreakdownCard breakdown={breakdown} lang={lang} />
-        : result
-          ? <SingleResultCard result={result} lang={lang} />
-          : null}
+      <div style={{ display: "flex", color: "rgba(255,255,255,0.4)", fontSize: "12px", marginBottom: "8px" }}>
+        {t.resultCardLabel}
+      </div>
+
+      <div style={{ display: "flex", color: "rgba(255,255,255,0.6)", fontSize: "14px", marginBottom: "2px" }}>
+        {t.percentileHeroLabel}
+      </div>
+      <div style={{
+        display: "flex", color: ACCENT, fontSize: "58px", fontWeight: 900,
+        letterSpacing: "-0.02em", lineHeight: 1, marginBottom: "12px",
+      }}>
+        {rankResult.percentileRounded}%
+      </div>
+
+      <div style={{ display: "flex", color: "rgba(255,255,255,0.75)", fontSize: "14px", marginBottom: "22px", textAlign: "center" }}>
+        {formatTemplate(t.annualEstimateTemplate, { value: formatCurrency(rankResult.annual.estimate, lang) })}
+      </div>
+
+      <div style={{ display: "flex", marginBottom: "20px" }}>
+        <DistributionChart monthlySalary={rankResult.monthly.estimate} width={260} lang={lang} dark />
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "280px", marginBottom: "8px" }}>
+        <ComparisonRow t={t} label={t.comparisonAge} sub={ageLabel} percent={rankResult.groupComparisons.ageGroup} />
+        <ComparisonRow t={t} label={t.comparisonIndustry} sub={industryLabel} percent={rankResult.groupComparisons.industry} />
+        <ComparisonRow t={t} label={t.comparisonRegion} sub={regionLabel} percent={rankResult.groupComparisons.region} />
+      </div>
 
       <div style={{
         position: "absolute", bottom: 0, left: 0, right: 0,
         borderTop: "1px solid rgba(255,255,255,0.06)",
-        padding: "12px 20px", display: "flex", justifyContent: "center",
+        padding: "10px 20px", display: "flex", flexDirection: "column", alignItems: "center", gap: "3px",
       }}>
-        <span style={{
-          color: "rgba(255,255,255,0.18)", fontSize: "11px",
-          fontWeight: 600, letterSpacing: "0.1em",
-        }}>
-          {translations[lang].appTitle}
+        <span style={{ display: "flex", color: "rgba(255,255,255,0.3)", fontSize: "10px", textAlign: "center" }}>
+          {t.sourceLabel}: {t.sourceText}
+        </span>
+        <span style={{ display: "flex", color: "rgba(255,255,255,0.18)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em" }}>
+          {t.appTitle}
         </span>
       </div>
     </div>

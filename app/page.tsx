@@ -12,7 +12,9 @@ export default function Home() {
         <div className="w-full max-w-md text-center">
           <h1 className="text-display text-text mb-4 text-balance">{t.appTitle}</h1>
 
-          <p className="text-body text-text-secondary mb-12">{t.tagline}</p>
+          <p className="text-body text-text-secondary mb-4">{t.tagline}</p>
+
+          <p className="text-caption text-text-tertiary mb-12">🔒 {t.privacyNotice}</p>
 
           <Link href="/quiz" className="btn btn-primary px-10">
             {t.start}
