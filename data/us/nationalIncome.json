@@ -1,11 +1,75 @@
 {
   "meta": {
-    "source": "US Census Bureau, ACS 2022 5-Year Estimates, table B19013 (median household income) and B19001 (household income distribution)",
+    "source": "US Census Bureau, ACS 2022 5-Year Estimates, tables B19013 & B19001",
     "unit": "USD",
     "year": 2022,
-    "generatedAt": null,
-    "note": "Placeholder — run `npm run fetch:census` with a CENSUS_API_KEY set to populate this file from the live API. Until then this is empty and /us pages show a \"data not loaded yet\" state instead of real figures."
+    "generatedAt": "2026-07-29T21:13:36.484Z"
   },
-  "medianHouseholdIncome": null,
-  "percentileAnchors": []
+  "medianHouseholdIncome": 75149,
+  "percentileAnchors": [
+    {
+      "topPercent": 11.41124794672548,
+      "value": 200000
+    },
+    {
+      "topPercent": 20.21967584824096,
+      "value": 150000
+    },
+    {
+      "topPercent": 27.39691678507647,
+      "value": 125000
+    },
+    {
+      "topPercent": 37.292641214112514,
+      "value": 100000
+    },
+    {
+      "topPercent": 50.08552220374962,
+      "value": 75000
+    },
+    {
+      "topPercent": 59.25410688506291,
+      "value": 60000
+    },
+    {
+      "topPercent": 66.17348524495537,
+      "value": 50000
+    },
+    {
+      "topPercent": 69.76732337703481,
+      "value": 45000
+    },
+    {
+      "topPercent": 73.31894619211677,
+      "value": 40000
+    },
+    {
+      "topPercent": 76.88154355805119,
+      "value": 35000
+    },
+    {
+      "topPercent": 80.54639615640832,
+      "value": 30000
+    },
+    {
+      "topPercent": 84.28546913556495,
+      "value": 25000
+    },
+    {
+      "topPercent": 87.93432397391071,
+      "value": 20000
+    },
+    {
+      "topPercent": 91.3026028359515,
+      "value": 15000
+    },
+    {
+      "topPercent": 95.07534626839383,
+      "value": 10000
+    },
+    {
+      "topPercent": 100,
+      "value": 1
+    }
+  ]
 }

@@ -1,10 +1,3702 @@
 {
   "meta": {
-    "source": "US Census Bureau, ACS 2022 5-Year Estimates, table B19013 (median household income) and B19001 (household income distribution)",
+    "source": "US Census Bureau, ACS 2022 5-Year Estimates, tables B19013 & B19001",
     "unit": "USD",
     "year": 2022,
-    "generatedAt": null,
-    "note": "Placeholder — run `npm run fetch:census` with a CENSUS_API_KEY set to populate this file from the live API. Until then this is empty and /us pages show a \"data not loaded yet\" state instead of real figures."
+    "generatedAt": "2026-07-29T21:13:37.010Z"
   },
-  "states": []
+  "states": [
+    {
+      "fips": "01",
+      "name": "Alabama",
+      "medianHouseholdIncome": 59609,
+      "percentileAnchors": [
+        {
+          "topPercent": 6.485632258231385,
+          "value": 200000
+        },
+        {
+          "topPercent": 13.147194992628611,
+          "value": 150000
+        },
+        {
+          "topPercent": 19.21956392416522,
+          "value": 125000
+        },
+        {
+          "topPercent": 27.88614437575977,
+          "value": 100000
+        },
+        {
+          "topPercent": 40.33582494891757,
+          "value": 75000
+        },
+        {
+          "topPercent": 49.708248195949615,
+          "value": 60000
+        },
+        {
+          "topPercent": 57.15386803921062,
+          "value": 50000
+        },
+        {
+          "topPercent": 61.075291622481444,
+          "value": 45000
+        },
+        {
+          "topPercent": 65.25975739078706,
+          "value": 40000
+        },
+        {
+          "topPercent": 69.47665726922381,
+          "value": 35000
+        },
+        {
+          "topPercent": 73.97485968497013,
+          "value": 30000
+        },
+        {
+          "topPercent": 78.53156764865633,
+          "value": 25000
+        },
+        {
+          "topPercent": 83.36931950443577,
+          "value": 20000
+        },
+        {
+          "topPercent": 88.15213511626102,
+          "value": 15000
+        },
+        {
+          "topPercent": 93.5355249204666,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "02",
+      "name": "Alaska",
+      "medianHouseholdIncome": 86370,
+      "percentileAnchors": [
+        {
+          "topPercent": 12.329409628710625,
+          "value": 200000
+        },
+        {
+          "topPercent": 23.36558537840046,
+          "value": 150000
+        },
+        {
+          "topPercent": 31.57850939570914,
+          "value": 125000
+        },
+        {
+          "topPercent": 43.030002723393956,
+          "value": 100000
+        },
+        {
+          "topPercent": 57.24838865857718,
+          "value": 75000
+        },
+        {
+          "topPercent": 66.83700487184919,
+          "value": 60000
+        },
+        {
+          "topPercent": 72.96237177353466,
+          "value": 50000
+        },
+        {
+          "topPercent": 75.95054013980089,
+          "value": 45000
+        },
+        {
+          "topPercent": 79.40092897993767,
+          "value": 40000
+        },
+        {
+          "topPercent": 82.35581142009865,
+          "value": 35000
+        },
+        {
+          "topPercent": 85.19873210881472,
+          "value": 30000
+        },
+        {
+          "topPercent": 87.89262262837777,
+          "value": 25000
+        },
+        {
+          "topPercent": 90.4832511271825,
+          "value": 20000
+        },
+        {
+          "topPercent": 93.65903107695101,
+          "value": 15000
+        },
+        {
+          "topPercent": 96.1297545919448,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "04",
+      "name": "Arizona",
+      "medianHouseholdIncome": 72581,
+      "percentileAnchors": [
+        {
+          "topPercent": 9.232509813313396,
+          "value": 200000
+        },
+        {
+          "topPercent": 17.53866912778336,
+          "value": 150000
+        },
+        {
+          "topPercent": 24.57742149349284,
+          "value": 125000
+        },
+        {
+          "topPercent": 34.885525946867915,
+          "value": 100000
+        },
+        {
+          "topPercent": 48.56140768475899,
+          "value": 75000
+        },
+        {
+          "topPercent": 58.52451283908503,
+          "value": 60000
+        },
+        {
+          "topPercent": 66.14468942031357,
+          "value": 50000
+        },
+        {
+          "topPercent": 70.05701797939204,
+          "value": 45000
+        },
+        {
+          "topPercent": 73.9901925278628,
+          "value": 40000
+        },
+        {
+          "topPercent": 77.60713597280309,
+          "value": 35000
+        },
+        {
+          "topPercent": 81.30465226991285,
+          "value": 30000
+        },
+        {
+          "topPercent": 85.27860610060984,
+          "value": 25000
+        },
+        {
+          "topPercent": 88.78299580597677,
+          "value": 20000
+        },
+        {
+          "topPercent": 91.94556239631767,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.09071473632561,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "05",
+      "name": "Arkansas",
+      "medianHouseholdIncome": 56335,
+      "percentileAnchors": [
+        {
+          "topPercent": 5.637820113442588,
+          "value": 200000
+        },
+        {
+          "topPercent": 11.239111918299487,
+          "value": 150000
+        },
+        {
+          "topPercent": 16.378423035365888,
+          "value": 125000
+        },
+        {
+          "topPercent": 24.944652784771453,
+          "value": 100000
+        },
+        {
+          "topPercent": 37.36914245528269,
+          "value": 75000
+        },
+        {
+          "topPercent": 47.13218638996188,
+          "value": 60000
+        },
+        {
+          "topPercent": 54.96622838386131,
+          "value": 50000
+        },
+        {
+          "topPercent": 59.35389273991333,
+          "value": 45000
+        },
+        {
+          "topPercent": 63.79413054944379,
+          "value": 40000
+        },
+        {
+          "topPercent": 68.48665265845861,
+          "value": 35000
+        },
+        {
+          "topPercent": 73.3549032426555,
+          "value": 30000
+        },
+        {
+          "topPercent": 78.46101456523633,
+          "value": 25000
+        },
+        {
+          "topPercent": 83.73380763236817,
+          "value": 20000
+        },
+        {
+          "topPercent": 88.64328058349706,
+          "value": 15000
+        },
+        {
+          "topPercent": 93.95968571999174,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "06",
+      "name": "California",
+      "medianHouseholdIncome": 91905,
+      "percentileAnchors": [
+        {
+          "topPercent": 17.87543420150855,
+          "value": 200000
+        },
+        {
+          "topPercent": 28.60739652422509,
+          "value": 150000
+        },
+        {
+          "topPercent": 36.362238846388905,
+          "value": 125000
+        },
+        {
+          "topPercent": 46.405584274106396,
+          "value": 100000
+        },
+        {
+          "topPercent": 58.38588860680174,
+          "value": 75000
+        },
+        {
+          "topPercent": 66.38712953657686,
+          "value": 60000
+        },
+        {
+          "topPercent": 72.12857756734807,
+          "value": 50000
+        },
+        {
+          "topPercent": 75.04920086795993,
+          "value": 45000
+        },
+        {
+          "topPercent": 77.95535266241919,
+          "value": 40000
+        },
+        {
+          "topPercent": 80.79100937215892,
+          "value": 35000
+        },
+        {
+          "topPercent": 83.7469815982821,
+          "value": 30000
+        },
+        {
+          "topPercent": 86.79522751205295,
+          "value": 25000
+        },
+        {
+          "topPercent": 89.74730962910138,
+          "value": 20000
+        },
+        {
+          "topPercent": 92.3652328786011,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.57461792445108,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "08",
+      "name": "Colorado",
+      "medianHouseholdIncome": 87598,
+      "percentileAnchors": [
+        {
+          "topPercent": 13.878616918725012,
+          "value": 200000
+        },
+        {
+          "topPercent": 24.675467199053223,
+          "value": 150000
+        },
+        {
+          "topPercent": 33.09145916408989,
+          "value": 125000
+        },
+        {
+          "topPercent": 43.90648293009266,
+          "value": 100000
+        },
+        {
+          "topPercent": 57.08357696339491,
+          "value": 75000
+        },
+        {
+          "topPercent": 66.1858155505337,
+          "value": 60000
+        },
+        {
+          "topPercent": 72.69600587170397,
+          "value": 50000
+        },
+        {
+          "topPercent": 75.87570740512474,
+          "value": 45000
+        },
+        {
+          "topPercent": 79.01603305291732,
+          "value": 40000
+        },
+        {
+          "topPercent": 82.06606193734625,
+          "value": 35000
+        },
+        {
+          "topPercent": 85.02544287994436,
+          "value": 30000
+        },
+        {
+          "topPercent": 87.98666750949499,
+          "value": 25000
+        },
+        {
+          "topPercent": 90.79477832737209,
+          "value": 20000
+        },
+        {
+          "topPercent": 93.36869700497445,
+          "value": 15000
+        },
+        {
+          "topPercent": 96.08853033567394,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "09",
+      "name": "Connecticut",
+      "medianHouseholdIncome": 90213,
+      "percentileAnchors": [
+        {
+          "topPercent": 16.9831047795904,
+          "value": 200000
+        },
+        {
+          "topPercent": 27.825581799494543,
+          "value": 150000
+        },
+        {
+          "topPercent": 35.569620522525426,
+          "value": 125000
+        },
+        {
+          "topPercent": 45.595177212199964,
+          "value": 100000
+        },
+        {
+          "topPercent": 57.5724194872064,
+          "value": 75000
+        },
+        {
+          "topPercent": 65.66849221205456,
+          "value": 60000
+        },
+        {
+          "topPercent": 71.44282869924749,
+          "value": 50000
+        },
+        {
+          "topPercent": 74.4767191537565,
+          "value": 45000
+        },
+        {
+          "topPercent": 77.41740536115937,
+          "value": 40000
+        },
+        {
+          "topPercent": 80.36114163144316,
+          "value": 35000
+        },
+        {
+          "topPercent": 83.30679305748943,
+          "value": 30000
+        },
+        {
+          "topPercent": 86.32146102267899,
+          "value": 25000
+        },
+        {
+          "topPercent": 89.45947920530966,
+          "value": 20000
+        },
+        {
+          "topPercent": 92.28582352052445,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.69636127498303,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "10",
+      "name": "Delaware",
+      "medianHouseholdIncome": 79325,
+      "percentileAnchors": [
+        {
+          "topPercent": 10.333419023136246,
+          "value": 200000
+        },
+        {
+          "topPercent": 20.360668380462723,
+          "value": 150000
+        },
+        {
+          "topPercent": 28.308226221079693,
+          "value": 125000
+        },
+        {
+          "topPercent": 38.65501285347044,
+          "value": 100000
+        },
+        {
+          "topPercent": 52.63290488431876,
+          "value": 75000
+        },
+        {
+          "topPercent": 61.92956298200514,
+          "value": 60000
+        },
+        {
+          "topPercent": 68.92262210796916,
+          "value": 50000
+        },
+        {
+          "topPercent": 72.3185089974293,
+          "value": 45000
+        },
+        {
+          "topPercent": 75.84035989717223,
+          "value": 40000
+        },
+        {
+          "topPercent": 79.51491002570694,
+          "value": 35000
+        },
+        {
+          "topPercent": 83.08894601542417,
+          "value": 30000
+        },
+        {
+          "topPercent": 86.64164524421594,
+          "value": 25000
+        },
+        {
+          "topPercent": 89.79511568123392,
+          "value": 20000
+        },
+        {
+          "topPercent": 92.56503856041131,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.6943444730077,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "11",
+      "name": "District of Columbia",
+      "medianHouseholdIncome": 101722,
+      "percentileAnchors": [
+        {
+          "topPercent": 23.94888927593141,
+          "value": 200000
+        },
+        {
+          "topPercent": 34.93706160837278,
+          "value": 150000
+        },
+        {
+          "topPercent": 42.065012587678325,
+          "value": 125000
+        },
+        {
+          "topPercent": 50.625900533590894,
+          "value": 100000
+        },
+        {
+          "topPercent": 61.406653260921196,
+          "value": 75000
+        },
+        {
+          "topPercent": 67.99056319964532,
+          "value": 60000
+        },
+        {
+          "topPercent": 72.76786421140966,
+          "value": 50000
+        },
+        {
+          "topPercent": 75.13054768275884,
+          "value": 45000
+        },
+        {
+          "topPercent": 77.27662808556455,
+          "value": 40000
+        },
+        {
+          "topPercent": 79.64817834919327,
+          "value": 35000
+        },
+        {
+          "topPercent": 82.15558053739095,
+          "value": 30000
+        },
+        {
+          "topPercent": 84.08759124087591,
+          "value": 25000
+        },
+        {
+          "topPercent": 86.33658976835505,
+          "value": 20000
+        },
+        {
+          "topPercent": 88.8829425083522,
+          "value": 15000
+        },
+        {
+          "topPercent": 92.6256788637839,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "12",
+      "name": "Florida",
+      "medianHouseholdIncome": 67917,
+      "percentileAnchors": [
+        {
+          "topPercent": 8.951891801234964,
+          "value": 200000
+        },
+        {
+          "topPercent": 16.32268666289736,
+          "value": 150000
+        },
+        {
+          "topPercent": 22.76524129397694,
+          "value": 125000
+        },
+        {
+          "topPercent": 32.276998185538154,
+          "value": 100000
+        },
+        {
+          "topPercent": 45.43636568451252,
+          "value": 75000
+        },
+        {
+          "topPercent": 55.34023643669717,
+          "value": 60000
+        },
+        {
+          "topPercent": 63.03038472409155,
+          "value": 50000
+        },
+        {
+          "topPercent": 67.12208777197326,
+          "value": 45000
+        },
+        {
+          "topPercent": 71.09395996212818,
+          "value": 40000
+        },
+        {
+          "topPercent": 75.12085139525136,
+          "value": 35000
+        },
+        {
+          "topPercent": 79.27474438378148,
+          "value": 30000
+        },
+        {
+          "topPercent": 83.46389230497947,
+          "value": 25000
+        },
+        {
+          "topPercent": 87.50669334948317,
+          "value": 20000
+        },
+        {
+          "topPercent": 91.10859824113201,
+          "value": 15000
+        },
+        {
+          "topPercent": 94.82001488967241,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "13",
+      "name": "Georgia",
+      "medianHouseholdIncome": 71355,
+      "percentileAnchors": [
+        {
+          "topPercent": 9.985936870484911,
+          "value": 200000
+        },
+        {
+          "topPercent": 18.108825817371894,
+          "value": 150000
+        },
+        {
+          "topPercent": 25.082693735445925,
+          "value": 125000
+        },
+        {
+          "topPercent": 34.713631606820236,
+          "value": 100000
+        },
+        {
+          "topPercent": 47.823204923869056,
+          "value": 75000
+        },
+        {
+          "topPercent": 57.244336106261514,
+          "value": 60000
+        },
+        {
+          "topPercent": 64.39902292923585,
+          "value": 50000
+        },
+        {
+          "topPercent": 68.12344640427317,
+          "value": 45000
+        },
+        {
+          "topPercent": 71.81135642051545,
+          "value": 40000
+        },
+        {
+          "topPercent": 75.54926022870956,
+          "value": 35000
+        },
+        {
+          "topPercent": 79.4640047231844,
+          "value": 30000
+        },
+        {
+          "topPercent": 83.42595572268016,
+          "value": 25000
+        },
+        {
+          "topPercent": 87.27704871924166,
+          "value": 20000
+        },
+        {
+          "topPercent": 90.88737080291601,
+          "value": 15000
+        },
+        {
+          "topPercent": 94.64861180441353,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "15",
+      "name": "Hawaii",
+      "medianHouseholdIncome": 94814,
+      "percentileAnchors": [
+        {
+          "topPercent": 15.887589738502934,
+          "value": 200000
+        },
+        {
+          "topPercent": 27.616520563911173,
+          "value": 150000
+        },
+        {
+          "topPercent": 36.37255995999223,
+          "value": 125000
+        },
+        {
+          "topPercent": 47.506127223055714,
+          "value": 100000
+        },
+        {
+          "topPercent": 60.48240774034627,
+          "value": 75000
+        },
+        {
+          "topPercent": 68.83919604220654,
+          "value": 60000
+        },
+        {
+          "topPercent": 74.56406822812694,
+          "value": 50000
+        },
+        {
+          "topPercent": 77.48984306869517,
+          "value": 45000
+        },
+        {
+          "topPercent": 80.3732543097213,
+          "value": 40000
+        },
+        {
+          "topPercent": 83.07398544345389,
+          "value": 35000
+        },
+        {
+          "topPercent": 85.78360260050506,
+          "value": 30000
+        },
+        {
+          "topPercent": 88.25557029671052,
+          "value": 25000
+        },
+        {
+          "topPercent": 90.99556525440892,
+          "value": 20000
+        },
+        {
+          "topPercent": 93.14970262819638,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.75413406736018,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "16",
+      "name": "Idaho",
+      "medianHouseholdIncome": 70214,
+      "percentileAnchors": [
+        {
+          "topPercent": 7.251641066571107,
+          "value": 200000
+        },
+        {
+          "topPercent": 14.361720243498297,
+          "value": 150000
+        },
+        {
+          "topPercent": 21.60654975470997,
+          "value": 125000
+        },
+        {
+          "topPercent": 31.794119258488163,
+          "value": 100000
+        },
+        {
+          "topPercent": 46.706390867777344,
+          "value": 75000
+        },
+        {
+          "topPercent": 57.62753526830865,
+          "value": 60000
+        },
+        {
+          "topPercent": 65.86729609386916,
+          "value": 50000
+        },
+        {
+          "topPercent": 70.04529684314025,
+          "value": 45000
+        },
+        {
+          "topPercent": 73.9770450584387,
+          "value": 40000
+        },
+        {
+          "topPercent": 77.8557816037659,
+          "value": 35000
+        },
+        {
+          "topPercent": 81.90865704262997,
+          "value": 30000
+        },
+        {
+          "topPercent": 85.72549728056056,
+          "value": 25000
+        },
+        {
+          "topPercent": 89.60512228963029,
+          "value": 20000
+        },
+        {
+          "topPercent": 92.9713633328052,
+          "value": 15000
+        },
+        {
+          "topPercent": 96.31879856009643,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "17",
+      "name": "Illinois",
+      "medianHouseholdIncome": 78433,
+      "percentileAnchors": [
+        {
+          "topPercent": 12.069306613862087,
+          "value": 200000
+        },
+        {
+          "topPercent": 21.474327302118173,
+          "value": 150000
+        },
+        {
+          "topPercent": 28.985877968370787,
+          "value": 125000
+        },
+        {
+          "topPercent": 39.1096090152052,
+          "value": 100000
+        },
+        {
+          "topPercent": 51.97088368710027,
+          "value": 75000
+        },
+        {
+          "topPercent": 60.81395341816602,
+          "value": 60000
+        },
+        {
+          "topPercent": 67.40070613177008,
+          "value": 50000
+        },
+        {
+          "topPercent": 70.82345075563103,
+          "value": 45000
+        },
+        {
+          "topPercent": 74.10760952277641,
+          "value": 40000
+        },
+        {
+          "topPercent": 77.47965740352575,
+          "value": 35000
+        },
+        {
+          "topPercent": 80.91510137034163,
+          "value": 30000
+        },
+        {
+          "topPercent": 84.54310843286686,
+          "value": 25000
+        },
+        {
+          "topPercent": 88.11703762769028,
+          "value": 20000
+        },
+        {
+          "topPercent": 91.23296532073087,
+          "value": 15000
+        },
+        {
+          "topPercent": 94.72739783620102,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "18",
+      "name": "Indiana",
+      "medianHouseholdIncome": 67173,
+      "percentileAnchors": [
+        {
+          "topPercent": 6.6865491205142,
+          "value": 200000
+        },
+        {
+          "topPercent": 13.886326328499138,
+          "value": 150000
+        },
+        {
+          "topPercent": 20.608223708507246,
+          "value": 125000
+        },
+        {
+          "topPercent": 30.70915844009412,
+          "value": 100000
+        },
+        {
+          "topPercent": 44.737782239647636,
+          "value": 75000
+        },
+        {
+          "topPercent": 54.9918676392337,
+          "value": 60000
+        },
+        {
+          "topPercent": 62.77263004617131,
+          "value": 50000
+        },
+        {
+          "topPercent": 66.94093599779319,
+          "value": 45000
+        },
+        {
+          "topPercent": 70.98861318753872,
+          "value": 40000
+        },
+        {
+          "topPercent": 75.26688312765017,
+          "value": 35000
+        },
+        {
+          "topPercent": 79.45406911979065,
+          "value": 30000
+        },
+        {
+          "topPercent": 83.6495457484862,
+          "value": 25000
+        },
+        {
+          "topPercent": 87.83107903388458,
+          "value": 20000
+        },
+        {
+          "topPercent": 91.363417792309,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.04434736862733,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "19",
+      "name": "Iowa",
+      "medianHouseholdIncome": 70571,
+      "percentileAnchors": [
+        {
+          "topPercent": 7.111791830182638,
+          "value": 200000
+        },
+        {
+          "topPercent": 14.748023275011452,
+          "value": 150000
+        },
+        {
+          "topPercent": 22.07638091709498,
+          "value": 125000
+        },
+        {
+          "topPercent": 32.93133530573063,
+          "value": 100000
+        },
+        {
+          "topPercent": 47.186931020610956,
+          "value": 75000
+        },
+        {
+          "topPercent": 57.375290569465776,
+          "value": 60000
+        },
+        {
+          "topPercent": 65.10283000513898,
+          "value": 50000
+        },
+        {
+          "topPercent": 69.20184569259591,
+          "value": 45000
+        },
+        {
+          "topPercent": 73.06018963848081,
+          "value": 40000
+        },
+        {
+          "topPercent": 76.96387753567639,
+          "value": 35000
+        },
+        {
+          "topPercent": 80.99809400382439,
+          "value": 30000
+        },
+        {
+          "topPercent": 84.7730360837088,
+          "value": 25000
+        },
+        {
+          "topPercent": 88.52394974494996,
+          "value": 20000
+        },
+        {
+          "topPercent": 92.21804782275397,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.8497495231134,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "20",
+      "name": "Kansas",
+      "medianHouseholdIncome": 69747,
+      "percentileAnchors": [
+        {
+          "topPercent": 7.980516003778399,
+          "value": 200000
+        },
+        {
+          "topPercent": 15.915325582103975,
+          "value": 150000
+        },
+        {
+          "topPercent": 22.77973420625351,
+          "value": 125000
+        },
+        {
+          "topPercent": 33.043307926364776,
+          "value": 100000
+        },
+        {
+          "topPercent": 46.591824208734714,
+          "value": 75000
+        },
+        {
+          "topPercent": 56.60884441097477,
+          "value": 60000
+        },
+        {
+          "topPercent": 64.56498365451165,
+          "value": 50000
+        },
+        {
+          "topPercent": 68.75439108158815,
+          "value": 45000
+        },
+        {
+          "topPercent": 72.61793346015052,
+          "value": 40000
+        },
+        {
+          "topPercent": 76.47851580354073,
+          "value": 35000
+        },
+        {
+          "topPercent": 80.2950458587802,
+          "value": 30000
+        },
+        {
+          "topPercent": 84.70236411044414,
+          "value": 25000
+        },
+        {
+          "topPercent": 88.49025147239985,
+          "value": 20000
+        },
+        {
+          "topPercent": 91.95209966612545,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.53678931949662,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "21",
+      "name": "Kentucky",
+      "medianHouseholdIncome": 60183,
+      "percentileAnchors": [
+        {
+          "topPercent": 6.043235494618174,
+          "value": 200000
+        },
+        {
+          "topPercent": 12.325631874250325,
+          "value": 150000
+        },
+        {
+          "topPercent": 18.38215094437743,
+          "value": 125000
+        },
+        {
+          "topPercent": 27.559349319598304,
+          "value": 100000
+        },
+        {
+          "topPercent": 40.373703720870814,
+          "value": 75000
+        },
+        {
+          "topPercent": 50.124074247838735,
+          "value": 60000
+        },
+        {
+          "topPercent": 57.816790665546705,
+          "value": 50000
+        },
+        {
+          "topPercent": 61.903157647213106,
+          "value": 45000
+        },
+        {
+          "topPercent": 65.97143635584607,
+          "value": 40000
+        },
+        {
+          "topPercent": 70.2418515156277,
+          "value": 35000
+        },
+        {
+          "topPercent": 74.75764540427855,
+          "value": 30000
+        },
+        {
+          "topPercent": 79.3389527568224,
+          "value": 25000
+        },
+        {
+          "topPercent": 83.90878536116062,
+          "value": 20000
+        },
+        {
+          "topPercent": 88.32243703302579,
+          "value": 15000
+        },
+        {
+          "topPercent": 93.88814211956122,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "22",
+      "name": "Louisiana",
+      "medianHouseholdIncome": 57852,
+      "percentileAnchors": [
+        {
+          "topPercent": 6.822095731856538,
+          "value": 200000
+        },
+        {
+          "topPercent": 13.632805064851489,
+          "value": 150000
+        },
+        {
+          "topPercent": 19.5874384794569,
+          "value": 125000
+        },
+        {
+          "topPercent": 28.27531745959811,
+          "value": 100000
+        },
+        {
+          "topPercent": 39.74023148945427,
+          "value": 75000
+        },
+        {
+          "topPercent": 48.58678361990048,
+          "value": 60000
+        },
+        {
+          "topPercent": 55.61927281131888,
+          "value": 50000
+        },
+        {
+          "topPercent": 59.52514751334645,
+          "value": 45000
+        },
+        {
+          "topPercent": 63.41663343273301,
+          "value": 40000
+        },
+        {
+          "topPercent": 67.38884382166067,
+          "value": 35000
+        },
+        {
+          "topPercent": 71.88556499197854,
+          "value": 30000
+        },
+        {
+          "topPercent": 76.6282550372069,
+          "value": 25000
+        },
+        {
+          "topPercent": 81.84118636079363,
+          "value": 20000
+        },
+        {
+          "topPercent": 86.67564738192134,
+          "value": 15000
+        },
+        {
+          "topPercent": 92.64393314541054,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "23",
+      "name": "Maine",
+      "medianHouseholdIncome": 68251,
+      "percentileAnchors": [
+        {
+          "topPercent": 7.3755713822797375,
+          "value": 200000
+        },
+        {
+          "topPercent": 15.205146060133892,
+          "value": 150000
+        },
+        {
+          "topPercent": 22.26650027922754,
+          "value": 125000
+        },
+        {
+          "topPercent": 32.41917913997918,
+          "value": 100000
+        },
+        {
+          "topPercent": 45.96257661521066,
+          "value": 75000
+        },
+        {
+          "topPercent": 55.72933543845618,
+          "value": 60000
+        },
+        {
+          "topPercent": 63.28812834814504,
+          "value": 50000
+        },
+        {
+          "topPercent": 67.17438966375488,
+          "value": 45000
+        },
+        {
+          "topPercent": 71.26817564446407,
+          "value": 40000
+        },
+        {
+          "topPercent": 75.17063905186737,
+          "value": 35000
+        },
+        {
+          "topPercent": 79.13584247430072,
+          "value": 30000
+        },
+        {
+          "topPercent": 83.3268410057707,
+          "value": 25000
+        },
+        {
+          "topPercent": 87.51197920616644,
+          "value": 20000
+        },
+        {
+          "topPercent": 91.35790765497129,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.8124487221031,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "24",
+      "name": "Maryland",
+      "medianHouseholdIncome": 98461,
+      "percentileAnchors": [
+        {
+          "topPercent": 17.851978582681514,
+          "value": 200000
+        },
+        {
+          "topPercent": 29.984418434906846,
+          "value": 150000
+        },
+        {
+          "topPercent": 38.50894085044631,
+          "value": 125000
+        },
+        {
+          "topPercent": 49.27186811404394,
+          "value": 100000
+        },
+        {
+          "topPercent": 61.56646495183175,
+          "value": 75000
+        },
+        {
+          "topPercent": 69.48726642750776,
+          "value": 60000
+        },
+        {
+          "topPercent": 75.17824758295933,
+          "value": 50000
+        },
+        {
+          "topPercent": 77.93780660568632,
+          "value": 45000
+        },
+        {
+          "topPercent": 80.60647316536993,
+          "value": 40000
+        },
+        {
+          "topPercent": 83.27086903030208,
+          "value": 35000
+        },
+        {
+          "topPercent": 85.87513006206743,
+          "value": 30000
+        },
+        {
+          "topPercent": 88.42456227535715,
+          "value": 25000
+        },
+        {
+          "topPercent": 90.90061618791748,
+          "value": 20000
+        },
+        {
+          "topPercent": 93.18375548503877,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.83300979585216,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "25",
+      "name": "Massachusetts",
+      "medianHouseholdIncome": 96505,
+      "percentileAnchors": [
+        {
+          "topPercent": 19.305215806668745,
+          "value": 200000
+        },
+        {
+          "topPercent": 30.91220523933827,
+          "value": 150000
+        },
+        {
+          "topPercent": 38.914043987676,
+          "value": 125000
+        },
+        {
+          "topPercent": 48.56480949436245,
+          "value": 100000
+        },
+        {
+          "topPercent": 59.90561821528314,
+          "value": 75000
+        },
+        {
+          "topPercent": 67.31008265246744,
+          "value": 60000
+        },
+        {
+          "topPercent": 72.60524006793153,
+          "value": 50000
+        },
+        {
+          "topPercent": 75.19302297158514,
+          "value": 45000
+        },
+        {
+          "topPercent": 77.85410042703471,
+          "value": 40000
+        },
+        {
+          "topPercent": 80.4383444698002,
+          "value": 35000
+        },
+        {
+          "topPercent": 83.13419032139788,
+          "value": 30000
+        },
+        {
+          "topPercent": 86.01329079403646,
+          "value": 25000
+        },
+        {
+          "topPercent": 88.9608335659131,
+          "value": 20000
+        },
+        {
+          "topPercent": 91.9075007433432,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.5876606852621,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "26",
+      "name": "Michigan",
+      "medianHouseholdIncome": 68505,
+      "percentileAnchors": [
+        {
+          "topPercent": 8.154237210772182,
+          "value": 200000
+        },
+        {
+          "topPercent": 15.95763599852641,
+          "value": 150000
+        },
+        {
+          "topPercent": 22.69490102021499,
+          "value": 125000
+        },
+        {
+          "topPercent": 32.43200167213194,
+          "value": 100000
+        },
+        {
+          "topPercent": 45.87834691400119,
+          "value": 75000
+        },
+        {
+          "topPercent": 55.59836208889786,
+          "value": 60000
+        },
+        {
+          "topPercent": 63.065314162014715,
+          "value": 50000
+        },
+        {
+          "topPercent": 67.00973971959365,
+          "value": 45000
+        },
+        {
+          "topPercent": 71.00719261169101,
+          "value": 40000
+        },
+        {
+          "topPercent": 75.15577091293565,
+          "value": 35000
+        },
+        {
+          "topPercent": 79.21899665598553,
+          "value": 30000
+        },
+        {
+          "topPercent": 83.31489681494283,
+          "value": 25000
+        },
+        {
+          "topPercent": 87.2618166027437,
+          "value": 20000
+        },
+        {
+          "topPercent": 90.8325316461695,
+          "value": 15000
+        },
+        {
+          "topPercent": 94.9575145295146,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "27",
+      "name": "Minnesota",
+      "medianHouseholdIncome": 84313,
+      "percentileAnchors": [
+        {
+          "topPercent": 11.864762872286388,
+          "value": 200000
+        },
+        {
+          "topPercent": 22.273179778079772,
+          "value": 150000
+        },
+        {
+          "topPercent": 30.75103074916915,
+          "value": 125000
+        },
+        {
+          "topPercent": 41.829002458196044,
+          "value": 100000
+        },
+        {
+          "topPercent": 55.42101815235496,
+          "value": 75000
+        },
+        {
+          "topPercent": 64.5628391322116,
+          "value": 60000
+        },
+        {
+          "topPercent": 71.48350757005592,
+          "value": 50000
+        },
+        {
+          "topPercent": 74.87560535182875,
+          "value": 45000
+        },
+        {
+          "topPercent": 78.21376111085995,
+          "value": 40000
+        },
+        {
+          "topPercent": 81.3505983265119,
+          "value": 35000
+        },
+        {
+          "topPercent": 84.60108167717583,
+          "value": 30000
+        },
+        {
+          "topPercent": 87.66079554067458,
+          "value": 25000
+        },
+        {
+          "topPercent": 90.66005178788772,
+          "value": 20000
+        },
+        {
+          "topPercent": 93.44699719785153,
+          "value": 15000
+        },
+        {
+          "topPercent": 96.41580301809385,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "28",
+      "name": "Mississippi",
+      "medianHouseholdIncome": 52985,
+      "percentileAnchors": [
+        {
+          "topPercent": 4.728125008361062,
+          "value": 200000
+        },
+        {
+          "topPercent": 10.192201871272639,
+          "value": 150000
+        },
+        {
+          "topPercent": 15.438489782558868,
+          "value": 125000
+        },
+        {
+          "topPercent": 23.525487639451374,
+          "value": 100000
+        },
+        {
+          "topPercent": 35.57380075610759,
+          "value": 75000
+        },
+        {
+          "topPercent": 44.78149311182241,
+          "value": 60000
+        },
+        {
+          "topPercent": 52.27933707254905,
+          "value": 50000
+        },
+        {
+          "topPercent": 56.51444925347976,
+          "value": 45000
+        },
+        {
+          "topPercent": 60.799861585400116,
+          "value": 40000
+        },
+        {
+          "topPercent": 65.33293973167902,
+          "value": 35000
+        },
+        {
+          "topPercent": 70.13392861124316,
+          "value": 30000
+        },
+        {
+          "topPercent": 75.16474637219079,
+          "value": 25000
+        },
+        {
+          "topPercent": 80.61169977944633,
+          "value": 20000
+        },
+        {
+          "topPercent": 86.12411473072028,
+          "value": 15000
+        },
+        {
+          "topPercent": 92.55959096345302,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "29",
+      "name": "Missouri",
+      "medianHouseholdIncome": 65920,
+      "percentileAnchors": [
+        {
+          "topPercent": 7.28288866723833,
+          "value": 200000
+        },
+        {
+          "topPercent": 14.530916185173313,
+          "value": 150000
+        },
+        {
+          "topPercent": 21.043605318094766,
+          "value": 125000
+        },
+        {
+          "topPercent": 30.6772825713779,
+          "value": 100000
+        },
+        {
+          "topPercent": 44.05607234847807,
+          "value": 75000
+        },
+        {
+          "topPercent": 54.02062543423894,
+          "value": 60000
+        },
+        {
+          "topPercent": 61.74108864413316,
+          "value": 50000
+        },
+        {
+          "topPercent": 65.84620253473504,
+          "value": 45000
+        },
+        {
+          "topPercent": 69.93089600882553,
+          "value": 40000
+        },
+        {
+          "topPercent": 74.05602353473341,
+          "value": 35000
+        },
+        {
+          "topPercent": 78.45178259659833,
+          "value": 30000
+        },
+        {
+          "topPercent": 82.68198170786275,
+          "value": 25000
+        },
+        {
+          "topPercent": 86.8023498936674,
+          "value": 20000
+        },
+        {
+          "topPercent": 90.70452064089193,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.00065898555276,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "30",
+      "name": "Montana",
+      "medianHouseholdIncome": 66341,
+      "percentileAnchors": [
+        {
+          "topPercent": 7.192786038831583,
+          "value": 200000
+        },
+        {
+          "topPercent": 14.242076784624153,
+          "value": 150000
+        },
+        {
+          "topPercent": 20.565556173789247,
+          "value": 125000
+        },
+        {
+          "topPercent": 30.150906588393777,
+          "value": 100000
+        },
+        {
+          "topPercent": 43.84513321183915,
+          "value": 75000
+        },
+        {
+          "topPercent": 54.374579031665824,
+          "value": 60000
+        },
+        {
+          "topPercent": 62.14990640142189,
+          "value": 50000
+        },
+        {
+          "topPercent": 66.29775385939264,
+          "value": 45000
+        },
+        {
+          "topPercent": 70.417442900362,
+          "value": 40000
+        },
+        {
+          "topPercent": 74.59795412205435,
+          "value": 35000
+        },
+        {
+          "topPercent": 78.86226479274279,
+          "value": 30000
+        },
+        {
+          "topPercent": 83.34936485874613,
+          "value": 25000
+        },
+        {
+          "topPercent": 87.4447250274263,
+          "value": 20000
+        },
+        {
+          "topPercent": 91.09901175219693,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.38494808714242,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "31",
+      "name": "Nebraska",
+      "medianHouseholdIncome": 71722,
+      "percentileAnchors": [
+        {
+          "topPercent": 7.789108154651273,
+          "value": 200000
+        },
+        {
+          "topPercent": 15.933068771824072,
+          "value": 150000
+        },
+        {
+          "topPercent": 23.178627963919684,
+          "value": 125000
+        },
+        {
+          "topPercent": 34.05475933790069,
+          "value": 100000
+        },
+        {
+          "topPercent": 47.87764738613486,
+          "value": 75000
+        },
+        {
+          "topPercent": 58.17519536205899,
+          "value": 60000
+        },
+        {
+          "topPercent": 65.71262231461697,
+          "value": 50000
+        },
+        {
+          "topPercent": 69.62565963273092,
+          "value": 45000
+        },
+        {
+          "topPercent": 73.52130853616598,
+          "value": 40000
+        },
+        {
+          "topPercent": 77.35010864539097,
+          "value": 35000
+        },
+        {
+          "topPercent": 81.41899768025668,
+          "value": 30000
+        },
+        {
+          "topPercent": 85.29403809222043,
+          "value": 25000
+        },
+        {
+          "topPercent": 88.93246726147925,
+          "value": 20000
+        },
+        {
+          "topPercent": 92.32475376072769,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.79406449685011,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "32",
+      "name": "Nevada",
+      "medianHouseholdIncome": 71646,
+      "percentileAnchors": [
+        {
+          "topPercent": 8.671437201752042,
+          "value": 200000
+        },
+        {
+          "topPercent": 16.90675457238343,
+          "value": 150000
+        },
+        {
+          "topPercent": 24.091001666278526,
+          "value": 125000
+        },
+        {
+          "topPercent": 34.37724236489523,
+          "value": 100000
+        },
+        {
+          "topPercent": 48.011078732734596,
+          "value": 75000
+        },
+        {
+          "topPercent": 58.002390710089024,
+          "value": 60000
+        },
+        {
+          "topPercent": 65.42166987060776,
+          "value": 50000
+        },
+        {
+          "topPercent": 69.37845834432585,
+          "value": 45000
+        },
+        {
+          "topPercent": 73.24389797459935,
+          "value": 40000
+        },
+        {
+          "topPercent": 76.95989674057358,
+          "value": 35000
+        },
+        {
+          "topPercent": 80.88849855328525,
+          "value": 30000
+        },
+        {
+          "topPercent": 84.66336275459301,
+          "value": 25000
+        },
+        {
+          "topPercent": 88.4176885047406,
+          "value": 20000
+        },
+        {
+          "topPercent": 91.51590097201013,
+          "value": 15000
+        },
+        {
+          "topPercent": 94.60268409198133,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "33",
+      "name": "New Hampshire",
+      "medianHouseholdIncome": 90845,
+      "percentileAnchors": [
+        {
+          "topPercent": 13.972071999354267,
+          "value": 200000
+        },
+        {
+          "topPercent": 25.534748567277422,
+          "value": 150000
+        },
+        {
+          "topPercent": 34.18428371209063,
+          "value": 125000
+        },
+        {
+          "topPercent": 45.44445585893644,
+          "value": 100000
+        },
+        {
+          "topPercent": 58.586979652037364,
+          "value": 75000
+        },
+        {
+          "topPercent": 67.27668973209371,
+          "value": 60000
+        },
+        {
+          "topPercent": 73.67129198189009,
+          "value": 50000
+        },
+        {
+          "topPercent": 76.93830304008688,
+          "value": 45000
+        },
+        {
+          "topPercent": 79.66854761188445,
+          "value": 40000
+        },
+        {
+          "topPercent": 82.69744421370864,
+          "value": 35000
+        },
+        {
+          "topPercent": 85.77532121603475,
+          "value": 30000
+        },
+        {
+          "topPercent": 88.7170804012357,
+          "value": 25000
+        },
+        {
+          "topPercent": 91.53941546386457,
+          "value": 20000
+        },
+        {
+          "topPercent": 94.24727947812943,
+          "value": 15000
+        },
+        {
+          "topPercent": 97.06025873392086,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "34",
+      "name": "New Jersey",
+      "medianHouseholdIncome": 97126,
+      "percentileAnchors": [
+        {
+          "topPercent": 19.238505922641224,
+          "value": 200000
+        },
+        {
+          "topPercent": 30.780632209884235,
+          "value": 150000
+        },
+        {
+          "topPercent": 38.78892268601654,
+          "value": 125000
+        },
+        {
+          "topPercent": 48.82326661745432,
+          "value": 100000
+        },
+        {
+          "topPercent": 60.39136608455332,
+          "value": 75000
+        },
+        {
+          "topPercent": 68.21545930645502,
+          "value": 60000
+        },
+        {
+          "topPercent": 73.64097445088393,
+          "value": 50000
+        },
+        {
+          "topPercent": 76.39922144448109,
+          "value": 45000
+        },
+        {
+          "topPercent": 79.04243604577097,
+          "value": 40000
+        },
+        {
+          "topPercent": 81.82162446097654,
+          "value": 35000
+        },
+        {
+          "topPercent": 84.66767999879005,
+          "value": 30000
+        },
+        {
+          "topPercent": 87.55137192488313,
+          "value": 25000
+        },
+        {
+          "topPercent": 90.40961420666042,
+          "value": 20000
+        },
+        {
+          "topPercent": 92.94599847243964,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.93038373409979,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "35",
+      "name": "New Mexico",
+      "medianHouseholdIncome": 58722,
+      "percentileAnchors": [
+        {
+          "topPercent": 6.104432295177966,
+          "value": 200000
+        },
+        {
+          "topPercent": 12.693454651031184,
+          "value": 150000
+        },
+        {
+          "topPercent": 18.836147293726288,
+          "value": 125000
+        },
+        {
+          "topPercent": 27.288854551628095,
+          "value": 100000
+        },
+        {
+          "topPercent": 39.42292077770615,
+          "value": 75000
+        },
+        {
+          "topPercent": 49.02725219351124,
+          "value": 60000
+        },
+        {
+          "topPercent": 56.70921643792474,
+          "value": 50000
+        },
+        {
+          "topPercent": 60.71117497404202,
+          "value": 45000
+        },
+        {
+          "topPercent": 64.60142805824431,
+          "value": 40000
+        },
+        {
+          "topPercent": 68.74129607849892,
+          "value": 35000
+        },
+        {
+          "topPercent": 73.38383863237095,
+          "value": 30000
+        },
+        {
+          "topPercent": 77.98812083872588,
+          "value": 25000
+        },
+        {
+          "topPercent": 82.85370522555151,
+          "value": 20000
+        },
+        {
+          "topPercent": 87.67869181597634,
+          "value": 15000
+        },
+        {
+          "topPercent": 93.17489530689474,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "36",
+      "name": "New York",
+      "medianHouseholdIncome": 81386,
+      "percentileAnchors": [
+        {
+          "topPercent": 15.168591113472862,
+          "value": 200000
+        },
+        {
+          "topPercent": 24.87639264158975,
+          "value": 150000
+        },
+        {
+          "topPercent": 32.10314440498109,
+          "value": 125000
+        },
+        {
+          "topPercent": 41.65428916448803,
+          "value": 100000
+        },
+        {
+          "topPercent": 53.16822633056669,
+          "value": 75000
+        },
+        {
+          "topPercent": 61.23300567307114,
+          "value": 60000
+        },
+        {
+          "topPercent": 67.30470800075166,
+          "value": 50000
+        },
+        {
+          "topPercent": 70.420524732452,
+          "value": 45000
+        },
+        {
+          "topPercent": 73.44338362840115,
+          "value": 40000
+        },
+        {
+          "topPercent": 76.55914775982662,
+          "value": 35000
+        },
+        {
+          "topPercent": 79.72265979075873,
+          "value": 30000
+        },
+        {
+          "topPercent": 83.17020015588092,
+          "value": 25000
+        },
+        {
+          "topPercent": 86.68313581272619,
+          "value": 20000
+        },
+        {
+          "topPercent": 90.09465813963611,
+          "value": 15000
+        },
+        {
+          "topPercent": 94.40548736587424,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "37",
+      "name": "North Carolina",
+      "medianHouseholdIncome": 66186,
+      "percentileAnchors": [
+        {
+          "topPercent": 8.452506460049031,
+          "value": 200000
+        },
+        {
+          "topPercent": 15.64269692918695,
+          "value": 150000
+        },
+        {
+          "topPercent": 22.147834763053588,
+          "value": 125000
+        },
+        {
+          "topPercent": 31.552906145133818,
+          "value": 100000
+        },
+        {
+          "topPercent": 44.43281159262132,
+          "value": 75000
+        },
+        {
+          "topPercent": 54.06447187394038,
+          "value": 60000
+        },
+        {
+          "topPercent": 61.68508868682696,
+          "value": 50000
+        },
+        {
+          "topPercent": 65.70776024351365,
+          "value": 45000
+        },
+        {
+          "topPercent": 69.95777583337556,
+          "value": 40000
+        },
+        {
+          "topPercent": 73.98271279187144,
+          "value": 35000
+        },
+        {
+          "topPercent": 78.29501475190683,
+          "value": 30000
+        },
+        {
+          "topPercent": 82.53226614232764,
+          "value": 25000
+        },
+        {
+          "topPercent": 86.64945123686067,
+          "value": 20000
+        },
+        {
+          "topPercent": 90.6412840979511,
+          "value": 15000
+        },
+        {
+          "topPercent": 94.90111642898623,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "38",
+      "name": "North Dakota",
+      "medianHouseholdIncome": 73959,
+      "percentileAnchors": [
+        {
+          "topPercent": 8.355882738924752,
+          "value": 200000
+        },
+        {
+          "topPercent": 16.75707259762903,
+          "value": 150000
+        },
+        {
+          "topPercent": 24.67988176404052,
+          "value": 125000
+        },
+        {
+          "topPercent": 35.59077359563552,
+          "value": 100000
+        },
+        {
+          "topPercent": 49.46068904317612,
+          "value": 75000
+        },
+        {
+          "topPercent": 59.01486698454559,
+          "value": 60000
+        },
+        {
+          "topPercent": 66.67645717071098,
+          "value": 50000
+        },
+        {
+          "topPercent": 70.30758847386873,
+          "value": 45000
+        },
+        {
+          "topPercent": 73.95371799598797,
+          "value": 40000
+        },
+        {
+          "topPercent": 77.43611696111087,
+          "value": 35000
+        },
+        {
+          "topPercent": 80.93226429361513,
+          "value": 30000
+        },
+        {
+          "topPercent": 84.77837006855435,
+          "value": 25000
+        },
+        {
+          "topPercent": 88.3023265987164,
+          "value": 20000
+        },
+        {
+          "topPercent": 91.79503683937533,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.42554321674301,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "39",
+      "name": "Ohio",
+      "medianHouseholdIncome": 66990,
+      "percentileAnchors": [
+        {
+          "topPercent": 7.637561886563016,
+          "value": 200000
+        },
+        {
+          "topPercent": 15.0335699109368,
+          "value": 150000
+        },
+        {
+          "topPercent": 21.801713280639277,
+          "value": 125000
+        },
+        {
+          "topPercent": 31.562314173275695,
+          "value": 100000
+        },
+        {
+          "topPercent": 44.85468767747496,
+          "value": 75000
+        },
+        {
+          "topPercent": 54.71799437425252,
+          "value": 60000
+        },
+        {
+          "topPercent": 62.171504286124716,
+          "value": 50000
+        },
+        {
+          "topPercent": 66.2072640292913,
+          "value": 45000
+        },
+        {
+          "topPercent": 70.22419054714068,
+          "value": 40000
+        },
+        {
+          "topPercent": 74.27995276242909,
+          "value": 35000
+        },
+        {
+          "topPercent": 78.38572115802204,
+          "value": 30000
+        },
+        {
+          "topPercent": 82.56229162351589,
+          "value": 25000
+        },
+        {
+          "topPercent": 86.56946745819107,
+          "value": 20000
+        },
+        {
+          "topPercent": 90.41785540091803,
+          "value": 15000
+        },
+        {
+          "topPercent": 94.80919144913108,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "40",
+      "name": "Oklahoma",
+      "medianHouseholdIncome": 61364,
+      "percentileAnchors": [
+        {
+          "topPercent": 6.290753793727109,
+          "value": 200000
+        },
+        {
+          "topPercent": 12.731371875556164,
+          "value": 150000
+        },
+        {
+          "topPercent": 18.858798550742723,
+          "value": 125000
+        },
+        {
+          "topPercent": 27.972215344868463,
+          "value": 100000
+        },
+        {
+          "topPercent": 40.99747095804785,
+          "value": 75000
+        },
+        {
+          "topPercent": 50.93172637486694,
+          "value": 60000
+        },
+        {
+          "topPercent": 59.22627471660742,
+          "value": 50000
+        },
+        {
+          "topPercent": 63.46798571757871,
+          "value": 45000
+        },
+        {
+          "topPercent": 67.81982923877217,
+          "value": 40000
+        },
+        {
+          "topPercent": 72.07920610017266,
+          "value": 35000
+        },
+        {
+          "topPercent": 76.28184205670019,
+          "value": 30000
+        },
+        {
+          "topPercent": 81.44198078295881,
+          "value": 25000
+        },
+        {
+          "topPercent": 85.91538381216134,
+          "value": 20000
+        },
+        {
+          "topPercent": 89.91371310774008,
+          "value": 15000
+        },
+        {
+          "topPercent": 94.35276950123826,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "41",
+      "name": "Oregon",
+      "medianHouseholdIncome": 76632,
+      "percentileAnchors": [
+        {
+          "topPercent": 10.52219181342218,
+          "value": 200000
+        },
+        {
+          "topPercent": 19.595668729176584,
+          "value": 150000
+        },
+        {
+          "topPercent": 27.228819609709664,
+          "value": 125000
+        },
+        {
+          "topPercent": 37.62987862922418,
+          "value": 100000
+        },
+        {
+          "topPercent": 51.001725368871966,
+          "value": 75000
+        },
+        {
+          "topPercent": 60.46031651594479,
+          "value": 60000
+        },
+        {
+          "topPercent": 67.5252260828177,
+          "value": 50000
+        },
+        {
+          "topPercent": 71.07365540218943,
+          "value": 45000
+        },
+        {
+          "topPercent": 74.78998096144693,
+          "value": 40000
+        },
+        {
+          "topPercent": 78.39641837220371,
+          "value": 35000
+        },
+        {
+          "topPercent": 81.90569966682533,
+          "value": 30000
+        },
+        {
+          "topPercent": 85.31627796287482,
+          "value": 25000
+        },
+        {
+          "topPercent": 88.81211327939077,
+          "value": 20000
+        },
+        {
+          "topPercent": 92.09412184673965,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.62981913374583,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "42",
+      "name": "Pennsylvania",
+      "medianHouseholdIncome": 73170,
+      "percentileAnchors": [
+        {
+          "topPercent": 10.159371102870828,
+          "value": 200000
+        },
+        {
+          "topPercent": 18.687216328467013,
+          "value": 150000
+        },
+        {
+          "topPercent": 25.857847360864366,
+          "value": 125000
+        },
+        {
+          "topPercent": 35.937044823495725,
+          "value": 100000
+        },
+        {
+          "topPercent": 48.93770889382519,
+          "value": 75000
+        },
+        {
+          "topPercent": 58.30036888731348,
+          "value": 60000
+        },
+        {
+          "topPercent": 65.27574514409402,
+          "value": 50000
+        },
+        {
+          "topPercent": 68.91407653887084,
+          "value": 45000
+        },
+        {
+          "topPercent": 72.5554115570572,
+          "value": 40000
+        },
+        {
+          "topPercent": 76.2322316902679,
+          "value": 35000
+        },
+        {
+          "topPercent": 80.0578659602247,
+          "value": 30000
+        },
+        {
+          "topPercent": 83.88197916448054,
+          "value": 25000
+        },
+        {
+          "topPercent": 87.72505755500819,
+          "value": 20000
+        },
+        {
+          "topPercent": 91.33123477610586,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.19271998701511,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "44",
+      "name": "Rhode Island",
+      "medianHouseholdIncome": 81370,
+      "percentileAnchors": [
+        {
+          "topPercent": 11.308387646077566,
+          "value": 200000
+        },
+        {
+          "topPercent": 21.296842572862367,
+          "value": 150000
+        },
+        {
+          "topPercent": 29.771250222688035,
+          "value": 125000
+        },
+        {
+          "topPercent": 40.49914510930801,
+          "value": 100000
+        },
+        {
+          "topPercent": 53.44952443090193,
+          "value": 75000
+        },
+        {
+          "topPercent": 62.091902484620064,
+          "value": 60000
+        },
+        {
+          "topPercent": 68.17284756107436,
+          "value": 50000
+        },
+        {
+          "topPercent": 71.57829711326896,
+          "value": 45000
+        },
+        {
+          "topPercent": 74.66076225246924,
+          "value": 40000
+        },
+        {
+          "topPercent": 77.57016697553787,
+          "value": 35000
+        },
+        {
+          "topPercent": 80.89209405417162,
+          "value": 30000
+        },
+        {
+          "topPercent": 84.06895578398913,
+          "value": 25000
+        },
+        {
+          "topPercent": 87.38995740585213,
+          "value": 20000
+        },
+        {
+          "topPercent": 90.8893408202786,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.44628995948813,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "45",
+      "name": "South Carolina",
+      "medianHouseholdIncome": 63623,
+      "percentileAnchors": [
+        {
+          "topPercent": 7.369487688357138,
+          "value": 200000
+        },
+        {
+          "topPercent": 14.261733936043223,
+          "value": 150000
+        },
+        {
+          "topPercent": 20.433002073565866,
+          "value": 125000
+        },
+        {
+          "topPercent": 29.65579795213745,
+          "value": 100000
+        },
+        {
+          "topPercent": 42.595590397833014,
+          "value": 75000
+        },
+        {
+          "topPercent": 52.421030258244215,
+          "value": 60000
+        },
+        {
+          "topPercent": 60.14290057016882,
+          "value": 50000
+        },
+        {
+          "topPercent": 64.20812768618224,
+          "value": 45000
+        },
+        {
+          "topPercent": 68.2769631528087,
+          "value": 40000
+        },
+        {
+          "topPercent": 72.56902206283968,
+          "value": 35000
+        },
+        {
+          "topPercent": 77.03858216535637,
+          "value": 30000
+        },
+        {
+          "topPercent": 81.31773998620918,
+          "value": 25000
+        },
+        {
+          "topPercent": 85.64464666585931,
+          "value": 20000
+        },
+        {
+          "topPercent": 89.71639847065249,
+          "value": 15000
+        },
+        {
+          "topPercent": 93.9358455032784,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "46",
+      "name": "South Dakota",
+      "medianHouseholdIncome": 69457,
+      "percentileAnchors": [
+        {
+          "topPercent": 6.467586607514053,
+          "value": 200000
+        },
+        {
+          "topPercent": 13.884823254039217,
+          "value": 150000
+        },
+        {
+          "topPercent": 20.790928920047154,
+          "value": 125000
+        },
+        {
+          "topPercent": 31.49506523682877,
+          "value": 100000
+        },
+        {
+          "topPercent": 46.5416792432414,
+          "value": 75000
+        },
+        {
+          "topPercent": 56.279080362888756,
+          "value": 60000
+        },
+        {
+          "topPercent": 64.38541838704718,
+          "value": 50000
+        },
+        {
+          "topPercent": 68.78000580895376,
+          "value": 45000
+        },
+        {
+          "topPercent": 72.63242421308608,
+          "value": 40000
+        },
+        {
+          "topPercent": 76.64430409303438,
+          "value": 35000
+        },
+        {
+          "topPercent": 80.77549532720926,
+          "value": 30000
+        },
+        {
+          "topPercent": 84.83350513409002,
+          "value": 25000
+        },
+        {
+          "topPercent": 88.61074884248053,
+          "value": 20000
+        },
+        {
+          "topPercent": 92.15648865830254,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.81698378618493,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "47",
+      "name": "Tennessee",
+      "medianHouseholdIncome": 64035,
+      "percentileAnchors": [
+        {
+          "topPercent": 7.295749059840398,
+          "value": 200000
+        },
+        {
+          "topPercent": 14.010321948235486,
+          "value": 150000
+        },
+        {
+          "topPercent": 20.259025255791585,
+          "value": 125000
+        },
+        {
+          "topPercent": 29.73826620013377,
+          "value": 100000
+        },
+        {
+          "topPercent": 42.90798136079466,
+          "value": 75000
+        },
+        {
+          "topPercent": 52.76044862334102,
+          "value": 60000
+        },
+        {
+          "topPercent": 60.54812087845271,
+          "value": 50000
+        },
+        {
+          "topPercent": 64.77654511384176,
+          "value": 45000
+        },
+        {
+          "topPercent": 68.93152542622718,
+          "value": 40000
+        },
+        {
+          "topPercent": 73.30068340067842,
+          "value": 35000
+        },
+        {
+          "topPercent": 77.56636393619628,
+          "value": 30000
+        },
+        {
+          "topPercent": 81.79091882290727,
+          "value": 25000
+        },
+        {
+          "topPercent": 86.06039500522363,
+          "value": 20000
+        },
+        {
+          "topPercent": 90.1662898658073,
+          "value": 15000
+        },
+        {
+          "topPercent": 94.66991691955624,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "48",
+      "name": "Texas",
+      "medianHouseholdIncome": 73035,
+      "percentileAnchors": [
+        {
+          "topPercent": 10.60397864631159,
+          "value": 200000
+        },
+        {
+          "topPercent": 19.272396793572273,
+          "value": 150000
+        },
+        {
+          "topPercent": 26.44038879551917,
+          "value": 125000
+        },
+        {
+          "topPercent": 36.12602691202266,
+          "value": 100000
+        },
+        {
+          "topPercent": 48.84813031305404,
+          "value": 75000
+        },
+        {
+          "topPercent": 58.40870352592471,
+          "value": 60000
+        },
+        {
+          "topPercent": 65.54833667967742,
+          "value": 50000
+        },
+        {
+          "topPercent": 69.28372603427103,
+          "value": 45000
+        },
+        {
+          "topPercent": 72.94675504713621,
+          "value": 40000
+        },
+        {
+          "topPercent": 76.61513172851802,
+          "value": 35000
+        },
+        {
+          "topPercent": 80.42433987989003,
+          "value": 30000
+        },
+        {
+          "topPercent": 84.33591632395357,
+          "value": 25000
+        },
+        {
+          "topPercent": 87.99709605394492,
+          "value": 20000
+        },
+        {
+          "topPercent": 91.29371921575536,
+          "value": 15000
+        },
+        {
+          "topPercent": 94.91982929784541,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "49",
+      "name": "Utah",
+      "medianHouseholdIncome": 86833,
+      "percentileAnchors": [
+        {
+          "topPercent": 10.957086766420247,
+          "value": 200000
+        },
+        {
+          "topPercent": 21.373253583159503,
+          "value": 150000
+        },
+        {
+          "topPercent": 30.552144814874403,
+          "value": 125000
+        },
+        {
+          "topPercent": 42.61515836657041,
+          "value": 100000
+        },
+        {
+          "topPercent": 57.490033580506186,
+          "value": 75000
+        },
+        {
+          "topPercent": 67.36019962006701,
+          "value": 60000
+        },
+        {
+          "topPercent": 74.33137721474682,
+          "value": 50000
+        },
+        {
+          "topPercent": 77.83921815473754,
+          "value": 45000
+        },
+        {
+          "topPercent": 80.85657106242927,
+          "value": 40000
+        },
+        {
+          "topPercent": 83.90403257751319,
+          "value": 35000
+        },
+        {
+          "topPercent": 87.09441588831211,
+          "value": 30000
+        },
+        {
+          "topPercent": 89.98615944953939,
+          "value": 25000
+        },
+        {
+          "topPercent": 92.37998191601768,
+          "value": 20000
+        },
+        {
+          "topPercent": 94.60538435989572,
+          "value": 15000
+        },
+        {
+          "topPercent": 96.91160959674225,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "50",
+      "name": "Vermont",
+      "medianHouseholdIncome": 74014,
+      "percentileAnchors": [
+        {
+          "topPercent": 8.857359944030271,
+          "value": 200000
+        },
+        {
+          "topPercent": 17.593602599884147,
+          "value": 150000
+        },
+        {
+          "topPercent": 25.48202423850326,
+          "value": 125000
+        },
+        {
+          "topPercent": 36.015466903384514,
+          "value": 100000
+        },
+        {
+          "topPercent": 49.43466060829466,
+          "value": 75000
+        },
+        {
+          "topPercent": 59.39411264660082,
+          "value": 60000
+        },
+        {
+          "topPercent": 66.30682544817158,
+          "value": 50000
+        },
+        {
+          "topPercent": 69.99526062785397,
+          "value": 45000
+        },
+        {
+          "topPercent": 73.8104552054104,
+          "value": 40000
+        },
+        {
+          "topPercent": 77.33978289161884,
+          "value": 35000
+        },
+        {
+          "topPercent": 81.30881899359808,
+          "value": 30000
+        },
+        {
+          "topPercent": 85.11649075822432,
+          "value": 25000
+        },
+        {
+          "topPercent": 88.70073497882328,
+          "value": 20000
+        },
+        {
+          "topPercent": 92.0938997509949,
+          "value": 15000
+        },
+        {
+          "topPercent": 96.13440257581115,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "51",
+      "name": "Virginia",
+      "medianHouseholdIncome": 87249,
+      "percentileAnchors": [
+        {
+          "topPercent": 15.551301973143461,
+          "value": 200000
+        },
+        {
+          "topPercent": 25.99815306574065,
+          "value": 150000
+        },
+        {
+          "topPercent": 33.81987101857391,
+          "value": 125000
+        },
+        {
+          "topPercent": 44.05774131734197,
+          "value": 100000
+        },
+        {
+          "topPercent": 56.33967175880667,
+          "value": 75000
+        },
+        {
+          "topPercent": 64.95162588577459,
+          "value": 60000
+        },
+        {
+          "topPercent": 71.32731833413581,
+          "value": 50000
+        },
+        {
+          "topPercent": 74.51103053824941,
+          "value": 45000
+        },
+        {
+          "topPercent": 77.64072690663437,
+          "value": 40000
+        },
+        {
+          "topPercent": 80.68789485971082,
+          "value": 35000
+        },
+        {
+          "topPercent": 83.80701300027722,
+          "value": 30000
+        },
+        {
+          "topPercent": 86.9891445496593,
+          "value": 25000
+        },
+        {
+          "topPercent": 90.01196434042926,
+          "value": 20000
+        },
+        {
+          "topPercent": 92.8336154194085,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.80175063590956,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "53",
+      "name": "Washington",
+      "medianHouseholdIncome": 90325,
+      "percentileAnchors": [
+        {
+          "topPercent": 15.372278865440952,
+          "value": 200000
+        },
+        {
+          "topPercent": 26.168406241524778,
+          "value": 150000
+        },
+        {
+          "topPercent": 34.3808823095038,
+          "value": 125000
+        },
+        {
+          "topPercent": 45.21698589454068,
+          "value": 100000
+        },
+        {
+          "topPercent": 58.246914011208105,
+          "value": 75000
+        },
+        {
+          "topPercent": 67.11408021825466,
+          "value": 60000
+        },
+        {
+          "topPercent": 73.44915133629961,
+          "value": 50000
+        },
+        {
+          "topPercent": 76.58448104100599,
+          "value": 45000
+        },
+        {
+          "topPercent": 79.65049851104565,
+          "value": 40000
+        },
+        {
+          "topPercent": 82.50142987951419,
+          "value": 35000
+        },
+        {
+          "topPercent": 85.37535344204893,
+          "value": 30000
+        },
+        {
+          "topPercent": 88.22423733046195,
+          "value": 25000
+        },
+        {
+          "topPercent": 90.94201536482738,
+          "value": 20000
+        },
+        {
+          "topPercent": 93.49146368643078,
+          "value": 15000
+        },
+        {
+          "topPercent": 96.28808648555754,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "54",
+      "name": "West Virginia",
+      "medianHouseholdIncome": 55217,
+      "percentileAnchors": [
+        {
+          "topPercent": 4.842327244288028,
+          "value": 200000
+        },
+        {
+          "topPercent": 10.315764482431149,
+          "value": 150000
+        },
+        {
+          "topPercent": 15.942964080218983,
+          "value": 125000
+        },
+        {
+          "topPercent": 24.461063627730294,
+          "value": 100000
+        },
+        {
+          "topPercent": 36.619602256857156,
+          "value": 75000
+        },
+        {
+          "topPercent": 46.18498966538182,
+          "value": 60000
+        },
+        {
+          "topPercent": 54.11345734875147,
+          "value": 50000
+        },
+        {
+          "topPercent": 58.23375789062064,
+          "value": 45000
+        },
+        {
+          "topPercent": 62.65543824367354,
+          "value": 40000
+        },
+        {
+          "topPercent": 67.02027819674879,
+          "value": 35000
+        },
+        {
+          "topPercent": 71.92936148818502,
+          "value": 30000
+        },
+        {
+          "topPercent": 76.88481090441874,
+          "value": 25000
+        },
+        {
+          "topPercent": 82.36257750963634,
+          "value": 20000
+        },
+        {
+          "topPercent": 87.49134126585108,
+          "value": 15000
+        },
+        {
+          "topPercent": 93.54742751801575,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "55",
+      "name": "Wisconsin",
+      "medianHouseholdIncome": 72458,
+      "percentileAnchors": [
+        {
+          "topPercent": 7.627289848475853,
+          "value": 200000
+        },
+        {
+          "topPercent": 15.870414531013965,
+          "value": 150000
+        },
+        {
+          "topPercent": 23.255526310581622,
+          "value": 125000
+        },
+        {
+          "topPercent": 34.227009162692205,
+          "value": 100000
+        },
+        {
+          "topPercent": 48.37814081125118,
+          "value": 75000
+        },
+        {
+          "topPercent": 58.50216533744962,
+          "value": 60000
+        },
+        {
+          "topPercent": 66.58321954179942,
+          "value": 50000
+        },
+        {
+          "topPercent": 70.51471703838568,
+          "value": 45000
+        },
+        {
+          "topPercent": 74.24641968956351,
+          "value": 40000
+        },
+        {
+          "topPercent": 77.992016451947,
+          "value": 35000
+        },
+        {
+          "topPercent": 81.6523107927147,
+          "value": 30000
+        },
+        {
+          "topPercent": 85.88135665894863,
+          "value": 25000
+        },
+        {
+          "topPercent": 89.50322574261345,
+          "value": 20000
+        },
+        {
+          "topPercent": 92.5302454598827,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.96270935993087,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "56",
+      "name": "Wyoming",
+      "medianHouseholdIncome": 72495,
+      "percentileAnchors": [
+        {
+          "topPercent": 7.354071644544663,
+          "value": 200000
+        },
+        {
+          "topPercent": 15.862074856078854,
+          "value": 150000
+        },
+        {
+          "topPercent": 23.329318915594733,
+          "value": 125000
+        },
+        {
+          "topPercent": 34.59488546097474,
+          "value": 100000
+        },
+        {
+          "topPercent": 48.50825945096432,
+          "value": 75000
+        },
+        {
+          "topPercent": 58.77406515314577,
+          "value": 60000
+        },
+        {
+          "topPercent": 66.42836399665181,
+          "value": 50000
+        },
+        {
+          "topPercent": 69.75904952254052,
+          "value": 45000
+        },
+        {
+          "topPercent": 72.9927911306992,
+          "value": 40000
+        },
+        {
+          "topPercent": 76.98841797775842,
+          "value": 35000
+        },
+        {
+          "topPercent": 81.073301559644,
+          "value": 30000
+        },
+        {
+          "topPercent": 84.69268351013855,
+          "value": 25000
+        },
+        {
+          "topPercent": 88.62510463110064,
+          "value": 20000
+        },
+        {
+          "topPercent": 91.95877961700747,
+          "value": 15000
+        },
+        {
+          "topPercent": 95.4244179094279,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    },
+    {
+      "fips": "72",
+      "name": "Puerto Rico",
+      "medianHouseholdIncome": 24002,
+      "percentileAnchors": [
+        {
+          "topPercent": 1.4285152067218845,
+          "value": 200000
+        },
+        {
+          "topPercent": 2.6740282931772676,
+          "value": 150000
+        },
+        {
+          "topPercent": 3.9803781059936476,
+          "value": 125000
+        },
+        {
+          "topPercent": 6.54642530939001,
+          "value": 100000
+        },
+        {
+          "topPercent": 11.819132904469942,
+          "value": 75000
+        },
+        {
+          "topPercent": 17.512368221255468,
+          "value": 60000
+        },
+        {
+          "topPercent": 23.154605635350237,
+          "value": 50000
+        },
+        {
+          "topPercent": 26.696664146834603,
+          "value": 45000
+        },
+        {
+          "topPercent": 30.974338708064064,
+          "value": 40000
+        },
+        {
+          "topPercent": 35.81782762052969,
+          "value": 35000
+        },
+        {
+          "topPercent": 41.64191929212943,
+          "value": 30000
+        },
+        {
+          "topPercent": 48.47416242913997,
+          "value": 25000
+        },
+        {
+          "topPercent": 56.35260048308625,
+          "value": 20000
+        },
+        {
+          "topPercent": 66.39180819541217,
+          "value": 15000
+        },
+        {
+          "topPercent": 77.29273288085676,
+          "value": 10000
+        },
+        {
+          "topPercent": 100,
+          "value": 1
+        }
+      ]
+    }
+  ]
 }
