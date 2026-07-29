@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "source": "Federal Reserve, 2022 Survey of Consumer Finances (household net worth, 2023 dollars)",
+    "sourceUrl": "https://www.federalreserve.gov/publications/files/scf23.pdf",
+    "unit": "USD",
+    "year": 2022,
+    "note": "Nationwide only — the SCF is not granular enough to break out by state or county, so net worth is always compared against the whole US here, never a specific place. Percentile anchors below the 10th percentile are floored to a small positive value because a meaningful share of US households report zero or negative net worth, which the log-log interpolation used for percentile lookup (lib/percentileTable.ts) cannot represent."
+  },
+  "overall": { "average": 1059470, "median": 192084 },
+  "percentileAnchors": [
+    { "topPercent": 1, "value": 13666778 },
+    { "topPercent": 5, "value": 3779600 },
+    { "topPercent": 10, "value": 1920758 },
+    { "topPercent": 25, "value": 658340 },
+    { "topPercent": 50, "value": 192084 },
+    { "topPercent": 75, "value": 27016 },
+    { "topPercent": 90, "value": 440 },
+    { "topPercent": 100, "value": 100 }
+  ]
+}

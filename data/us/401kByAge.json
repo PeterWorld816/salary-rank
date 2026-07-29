@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "source": "Vanguard, \"How America Saves 2026\" (record year-end 2025 plan data)",
+    "sourceUrl": "https://institutional.vanguard.com/insights-and-research/report/how-america-saves.html",
+    "unit": "USD",
+    "asOf": "2025-12-31",
+    "note": "Real published averages/medians by age band across Vanguard-administered defined-contribution plans. Not a full distribution, so we can only compare a user's balance against these two reference points (average, median) rather than a true percentile."
+  },
+  "bands": [
+    { "id": "under25", "label": { "ko": "25세 미만", "en": "Under 25" }, "average": 7259, "median": 2234 },
+    { "id": "25-34", "label": { "ko": "25~34세", "en": "25–34" }, "average": 50261, "median": 18732 },
+    { "id": "35-44", "label": { "ko": "35~44세", "en": "35–44" }, "average": 120742, "median": 46919 },
+    { "id": "45-54", "label": { "ko": "45~54세", "en": "45–54" }, "average": 214991, "median": 78730 },
+    { "id": "55-64", "label": { "ko": "55~64세", "en": "55–64" }, "average": 305006, "median": 107269 },
+    { "id": "65plus", "label": { "ko": "65세 이상", "en": "65+" }, "average": 330186, "median": 103202 }
+  ],
+  "allParticipants": { "average": 167970, "median": 44115 }
+}

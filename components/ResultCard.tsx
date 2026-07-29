@@ -1,11 +1,12 @@
 import type { RefObject } from "react";
 import type { SalaryInput, SalaryRankResult } from "@/lib/salaryCalc";
-import { getAgeGroup, getIndustry, getRegion } from "@/lib/salaryCalc";
-import { pick, translations, formatTemplate, formatCurrency, type LangCode, type Translations } from "@/lib/i18n";
+import { getAgeGroup, getIndustry, getRegion, overallAverage } from "@/lib/salaryCalc";
+import type { NetWorthRankResult } from "@/lib/netWorthCalc";
+import { pick, translations, formatTemplate, formatManwon, type LangCode, type Translations } from "@/lib/i18n";
 import DistributionChart from "@/components/DistributionChart";
 
 export const CARD_WIDTH = 360;
-export const CARD_HEIGHT = 740;
+export const CARD_HEIGHT = 780;
 
 const ACCENT = "#34D399";
 
@@ -24,10 +25,11 @@ function ComparisonRow({ label, sub, percent, t }: { label: string; sub: string;
 }
 
 export default function ResultCard({
-  input, rankResult, cardRef, lang = "ko",
+  input, rankResult, netWorthResult, cardRef, lang = "ko",
 }: {
   input: SalaryInput;
   rankResult: SalaryRankResult;
+  netWorthResult?: NetWorthRankResult | null;
   cardRef?: RefObject<HTMLDivElement>;
   lang?: LangCode;
 }) {
@@ -64,25 +66,46 @@ export default function ResultCard({
         {t.percentileHeroLabel}
       </div>
       <div style={{
-        display: "flex", color: ACCENT, fontSize: "58px", fontWeight: 900,
-        letterSpacing: "-0.02em", lineHeight: 1, marginBottom: "12px",
+        display: "flex", color: ACCENT, fontSize: "52px", fontWeight: 900,
+        letterSpacing: "-0.02em", lineHeight: 1, marginBottom: "10px",
       }}>
         {rankResult.percentileRounded}%
       </div>
 
-      <div style={{ display: "flex", color: "rgba(255,255,255,0.75)", fontSize: "14px", marginBottom: "22px", textAlign: "center" }}>
-        {formatTemplate(t.annualEstimateTemplate, { value: formatCurrency(rankResult.annual.estimate, lang) })}
+      <div style={{ display: "flex", color: "rgba(255,255,255,0.75)", fontSize: "14px", marginBottom: "18px", textAlign: "center" }}>
+        {formatTemplate(t.annualEstimateTemplate, { value: formatManwon(rankResult.annual, lang) })}
       </div>
 
-      <div style={{ display: "flex", marginBottom: "20px" }}>
-        <DistributionChart monthlySalary={rankResult.monthly.estimate} width={260} lang={lang} dark />
+      <div style={{ display: "flex", marginBottom: "16px" }}>
+        <DistributionChart monthlySalary={rankResult.monthly} width={240} lang={lang} dark averageValue={overallAverage} />
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "280px", marginBottom: "8px" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "280px", marginBottom: "8px" }}>
         <ComparisonRow t={t} label={t.comparisonAge} sub={ageLabel} percent={rankResult.groupComparisons.ageGroup} />
         <ComparisonRow t={t} label={t.comparisonIndustry} sub={industryLabel} percent={rankResult.groupComparisons.industry} />
         <ComparisonRow t={t} label={t.comparisonRegion} sub={regionLabel} percent={rankResult.groupComparisons.region} />
       </div>
+
+      {netWorthResult && (
+        <>
+          <div style={{
+            display: "flex", width: "280px", height: "1px",
+            background: "rgba(255,255,255,0.08)", margin: "14px 0",
+          }} />
+          <div style={{ display: "flex", color: "rgba(255,255,255,0.6)", fontSize: "13px", marginBottom: "2px" }}>
+            {t.netWorthHeroLabel}
+          </div>
+          <div style={{
+            display: "flex", color: ACCENT, fontSize: "34px", fontWeight: 900,
+            letterSpacing: "-0.02em", lineHeight: 1, marginBottom: "6px",
+          }}>
+            {netWorthResult.percentileRounded}%
+          </div>
+          <div style={{ display: "flex", color: "rgba(255,255,255,0.6)", fontSize: "12px", marginBottom: "4px" }}>
+            {formatTemplate(t.netWorthValueTemplate, { value: formatManwon(netWorthResult.netWorth, lang) })}
+          </div>
+        </>
+      )}
 
       <div style={{
         position: "absolute", bottom: 0, left: 0, right: 0,

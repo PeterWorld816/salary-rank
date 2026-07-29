@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
             return (
               <>
                 <div style={{ display: "flex", marginRight: 70 }}>
-                  <DistributionChart monthlySalary={rankResult.monthly.estimate} width={420} lang={lang} dark />
+                  <DistributionChart monthlySalary={rankResult.monthly} width={420} lang={lang} dark />
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", maxWidth: 560 }}>
@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
                     {rankResult.percentileRounded}%
                   </div>
                   <div style={{ display: "flex", color: "rgba(255,255,255,0.7)", fontSize: 22, marginBottom: 26 }}>
-                    {formatTemplate(t.annualEstimateTemplate, { value: formatCurrency(rankResult.annual.estimate, lang) })}
+                    {formatTemplate(t.annualEstimateTemplate, { value: formatCurrency(rankResult.annual, lang) })}
                   </div>
 
                   <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 22 }}>

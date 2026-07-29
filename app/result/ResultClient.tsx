@@ -4,15 +4,21 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, RotateCcw, Home } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
-import { formatTemplate, formatCurrency, SOURCE_URL } from "@/lib/i18n";
+import { formatTemplate, formatManwon, SOURCE_URL, NETWORTH_SOURCE_URL } from "@/lib/i18n";
 import {
   decodeSalaryInput,
   computeSalaryRank,
   getAgeGroup,
   getIndustry,
   getRegion,
+  getSeoulDistrict,
+  getMaritalStatus,
+  overallAverage,
 } from "@/lib/salaryCalc";
+import { computeNetWorthRank, overallAverageNetWorth } from "@/lib/netWorthCalc";
+import { CHART_MIN_NETWORTH, CHART_MAX_NETWORTH } from "@/lib/distributionPath";
 import { getJobVibe } from "@/data/jobVibe";
+import { generateAdvice } from "@/lib/advice";
 import { buildResultShareText } from "@/lib/shareText";
 import ResultCard, { CARD_WIDTH, CARD_HEIGHT } from "@/components/ResultCard";
 import DistributionChart from "@/components/DistributionChart";
@@ -49,6 +55,7 @@ function ResultContent() {
   const cardRef = useRef<HTMLDivElement>(null);
 
   const d = sp.get("d") ?? "";
+  const nw = Number(sp.get("nw") ?? "0");
   const input = decodeSalaryInput(d);
 
   if (!input) {
@@ -66,14 +73,35 @@ function ResultContent() {
   }
 
   const rankResult = computeSalaryRank(input);
+  const hasNetWorth = Number.isFinite(nw) && nw > 0;
+  const netWorthResult = hasNetWorth
+    ? computeNetWorthRank({
+        ageGroup: input.ageGroup,
+        maritalStatus: input.maritalStatus,
+        region: input.region,
+        district: input.district,
+        netWorth: nw,
+      })
+    : null;
+
   const vibe = getJobVibe(input.industry);
-  const { title: shareTitle, description: shareText } = buildResultShareText(lang, input, rankResult);
+  const { title: shareTitle, description: shareText } = buildResultShareText(lang, input, rankResult, netWorthResult);
 
   const ageLabel = tr(getAgeGroup(input.ageGroup).label);
   const industryLabel = tr(getIndustry(input.industry).label);
   const regionLabel = tr(getRegion(input.region).label);
+  const maritalLabel = tr(getMaritalStatus(input.maritalStatus).label);
+  const districtLabel = input.district ? tr(getSeoulDistrict(input.district).label) : null;
 
   const fmtTop = (percent: number) => formatTemplate(t.topPercentTemplate, { percent });
+
+  const advice = netWorthResult
+    ? generateAdvice({
+        salaryPercentile: rankResult.percentileRounded,
+        netWorthPercentile: netWorthResult.percentileRounded,
+        ageGroup: input.ageGroup,
+      })
+    : [];
 
   return (
     <main className="min-h-screen bg-bg font-sans">
@@ -83,38 +111,113 @@ function ResultContent() {
           {t.retry}
         </Link>
 
-        {/* 상위 % 히어로 */}
+        {/* ── 소득 섹션 ── */}
+        <p className="text-caption font-bold text-accent mb-2">{t.incomeSectionTitle}</p>
         <div className="text-center mb-8">
           <p className="text-caption text-text-secondary mb-1">{t.percentileHeroLabel}</p>
           <p className="text-accent font-extrabold" style={{ fontSize: "64px", lineHeight: 1 }}>
             {rankResult.percentileRounded}%
           </p>
           <p className="text-body text-text-secondary mt-3">
-            {formatTemplate(t.monthlyRangeTemplate, {
-              min: formatCurrency(rankResult.monthly.min, lang),
-              max: formatCurrency(rankResult.monthly.max, lang),
-            })}
-          </p>
-          <p className="text-caption text-text-tertiary mt-1">
-            {formatTemplate(t.annualEstimateTemplate, { value: formatCurrency(rankResult.annual.estimate, lang) })}
+            {formatTemplate(t.annualEstimateTemplate, { value: formatManwon(rankResult.annual, lang) })}
           </p>
         </div>
 
-        {/* 분포 그래프 */}
         <div className="card p-5 mb-4 flex flex-col items-center">
           <h2 className="text-title text-text mb-3 self-start">{t.distributionTitle}</h2>
-          <DistributionChart monthlySalary={rankResult.monthly.estimate} width={280} lang={lang} />
+          <DistributionChart monthlySalary={rankResult.monthly} width={280} lang={lang} averageValue={overallAverage} />
         </div>
 
-        {/* 여러 각도로 비교 */}
         <div className="card p-5 mb-4">
           <h2 className="text-title text-text mb-1">{t.comparisonTitle}</h2>
           <div className="divide-y" style={{ borderColor: "var(--color-border)" }}>
             <ComparisonRow label={t.comparisonAge} sub={ageLabel} percentText={fmtTop(rankResult.groupComparisons.ageGroup)} />
             <ComparisonRow label={t.comparisonIndustry} sub={industryLabel} percentText={fmtTop(rankResult.groupComparisons.industry)} />
             <ComparisonRow label={t.comparisonRegion} sub={regionLabel} percentText={fmtTop(rankResult.groupComparisons.region)} />
+            {districtLabel && rankResult.groupComparisons.district !== null && (
+              <ComparisonRow
+                label={t.comparisonDistrict}
+                sub={districtLabel}
+                percentText={fmtTop(rankResult.groupComparisons.district)}
+              />
+            )}
+            <ComparisonRow
+              label={t.comparisonMarital}
+              sub={maritalLabel}
+              percentText={fmtTop(rankResult.groupComparisons.maritalStatus)}
+            />
           </div>
         </div>
+
+        {/* ── 자산 섹션 ── */}
+        {netWorthResult && (
+          <>
+            <p className="text-caption font-bold text-accent mb-2 mt-8">{t.assetSectionTitle}</p>
+            <div className="text-center mb-8">
+              <p className="text-caption text-text-secondary mb-1">{t.netWorthHeroLabel}</p>
+              <p className="text-accent font-extrabold" style={{ fontSize: "64px", lineHeight: 1 }}>
+                {netWorthResult.percentileRounded}%
+              </p>
+              <p className="text-body text-text-secondary mt-3">
+                {formatTemplate(t.netWorthValueTemplate, { value: formatManwon(netWorthResult.netWorth, lang) })}
+              </p>
+            </div>
+
+            <div className="card p-5 mb-4 flex flex-col items-center">
+              <h2 className="text-title text-text mb-3 self-start">{t.netWorthDistributionTitle}</h2>
+              <DistributionChart
+                monthlySalary={netWorthResult.netWorth}
+                width={280}
+                lang={lang}
+                averageValue={overallAverageNetWorth}
+                min={CHART_MIN_NETWORTH}
+                max={CHART_MAX_NETWORTH}
+              />
+            </div>
+
+            <div className="card p-5 mb-4">
+              <h2 className="text-title text-text mb-1">{t.comparisonTitle}</h2>
+              <div className="divide-y" style={{ borderColor: "var(--color-border)" }}>
+                <ComparisonRow
+                  label={t.comparisonAge}
+                  sub={ageLabel}
+                  percentText={fmtTop(netWorthResult.groupComparisons.ageGroup)}
+                />
+                <ComparisonRow
+                  label={t.comparisonRegion}
+                  sub={regionLabel}
+                  percentText={fmtTop(netWorthResult.groupComparisons.region)}
+                />
+                {districtLabel && netWorthResult.groupComparisons.district !== null && (
+                  <ComparisonRow
+                    label={t.comparisonDistrict}
+                    sub={districtLabel}
+                    percentText={fmtTop(netWorthResult.groupComparisons.district)}
+                  />
+                )}
+                <ComparisonRow
+                  label={t.comparisonMarital}
+                  sub={maritalLabel}
+                  percentText={fmtTop(netWorthResult.groupComparisons.maritalStatus)}
+                />
+              </div>
+            </div>
+
+            {/* ── 자산증식 제안 ── */}
+            <div className="card p-5 mb-4">
+              <h2 className="text-title text-text mb-1">{t.adviceTitle}</h2>
+              <p className="text-caption text-text-tertiary mb-4">{t.adviceDisclaimer}</p>
+              <div className="space-y-4">
+                {advice.map((item) => (
+                  <div key={item.id}>
+                    <p className="text-body text-text font-semibold mb-1">{tr(item.title)}</p>
+                    <p className="text-caption text-text-secondary">{tr(item.body)}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
 
         {/* 직업 MZ 지수 */}
         <div className="card p-5 mb-4">
@@ -132,15 +235,22 @@ function ResultContent() {
         <div className="rounded-md bg-bg-subtle px-4 py-3 mb-8 text-center">
           <p className="text-caption text-text-secondary font-medium">
             {t.sourceLabel}:{" "}
-            <a
-              href={SOURCE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline underline-offset-2 hover:text-accent"
-            >
+            <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-accent">
               {t.sourceText}
             </a>
           </p>
+          {netWorthResult && (
+            <p className="text-caption text-text-secondary font-medium mt-1">
+              <a
+                href={NETWORTH_SOURCE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-accent"
+              >
+                {t.netWorthSourceText}
+              </a>
+            </p>
+          )}
           <p className="text-caption text-text-tertiary mt-1">{t.sourceNote}</p>
         </div>
 
@@ -149,7 +259,7 @@ function ResultContent() {
         {/* 공유용 카드 */}
         <div className="flex justify-center mb-6">
           <div className="shadow-[0_12px_48px_rgba(0,0,0,0.35)] rounded-3xl overflow-hidden">
-            <ResultCard input={input} rankResult={rankResult} cardRef={cardRef} lang={lang} />
+            <ResultCard input={input} rankResult={rankResult} netWorthResult={netWorthResult} cardRef={cardRef} lang={lang} />
           </div>
         </div>
 

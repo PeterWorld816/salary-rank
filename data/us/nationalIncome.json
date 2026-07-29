@@ -1,0 +1,11 @@
+{
+  "meta": {
+    "source": "US Census Bureau, ACS 2022 5-Year Estimates, table B19013 (median household income) and B19001 (household income distribution)",
+    "unit": "USD",
+    "year": 2022,
+    "generatedAt": null,
+    "note": "Placeholder — run `npm run fetch:census` with a CENSUS_API_KEY set to populate this file from the live API. Until then this is empty and /us pages show a \"data not loaded yet\" state instead of real figures."
+  },
+  "medianHouseholdIncome": null,
+  "percentileAnchors": []
+}

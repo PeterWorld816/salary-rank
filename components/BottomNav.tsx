@@ -8,6 +8,10 @@ export default function BottomNav() {
   const pathname = usePathname();
   const { t } = useLanguage();
 
+  // /us is a fully separate dark-themed section with its own in-page
+  // navigation (back links, breadcrumbs) — the light bottom bar doesn't fit.
+  if (pathname.startsWith("/us")) return null;
+
   const tabs = [
     { href: "/", Icon: Home, label: t.home },
     { href: "/quiz", Icon: Target, label: t.start },

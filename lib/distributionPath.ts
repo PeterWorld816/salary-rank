@@ -61,16 +61,28 @@ export function buildDistributionPaths(): { linePath: string; areaPath: string }
 export const CHART_MIN_SALARY = 150;
 export const CHART_MAX_SALARY = 2200;
 
-function salaryToT(monthlySalary: number): number {
-  const clamped = Math.min(CHART_MAX_SALARY, Math.max(CHART_MIN_SALARY, monthlySalary));
-  return (Math.log(clamped) - Math.log(CHART_MIN_SALARY)) / (Math.log(CHART_MAX_SALARY) - Math.log(CHART_MIN_SALARY));
+// 자산 분포 차트용 범위(만원). 순자산 백분위 앵커(500~300000)보다 여유를 둔다.
+export const CHART_MIN_NETWORTH = 300;
+export const CHART_MAX_NETWORTH = 400000;
+
+function valueToT(value: number, min: number, max: number): number {
+  const clamped = Math.min(max, Math.max(min, value));
+  return (Math.log(clamped) - Math.log(min)) / (Math.log(max) - Math.log(min));
 }
 
-export function markerPosition(monthlySalary: number): ChartPoint {
-  const t = salaryToT(monthlySalary);
+export function markerPosition(
+  value: number,
+  min: number = CHART_MIN_SALARY,
+  max: number = CHART_MAX_SALARY
+): ChartPoint {
+  const t = valueToT(value, min, max);
   return { x: curveX(t), y: curveY(t) };
 }
 
-export function averageTickX(overallAverageSalary: number): number {
-  return curveX(salaryToT(overallAverageSalary));
+export function averageTickX(
+  overallAverageValue: number,
+  min: number = CHART_MIN_SALARY,
+  max: number = CHART_MAX_SALARY
+): number {
+  return curveX(valueToT(overallAverageValue, min, max));
 }

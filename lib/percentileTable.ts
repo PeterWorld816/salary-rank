@@ -1,0 +1,61 @@
+// 소득/자산 공용 백분위 계산 — lib/salaryCalc.ts에 있던 log-log 보간 로직을
+// 값(value) 컬럼 이름만 다른 두 테이블(소득: minSalary, 자산: minNetWorth)에
+// 동일하게 적용할 수 있도록 일반화했다.
+//
+// 백분위 계산: "상위 X%에 들기 위한 최소 값" 경계값 표를 받아, 소득/자산 분포가
+// 로그정규분포에 가까운 형태라는 가정 하에 log-log 공간에서 선형보간(및 양끝
+// 구간 바깥은 같은 직선으로 외삽)해서 완만하게 이어지는 백분위를 만든다.
+
+export type PercentileAnchor = { topPercent: number; value: number };
+
+export const MIN_PERCENT = 0.1;
+export const MAX_PERCENT = 99.9;
+
+function interpolatePercent(a: PercentileAnchor, b: PercentileAnchor, value: number): number {
+  const logA = Math.log(a.value);
+  const logB = Math.log(b.value);
+  const t = (Math.log(value) - logA) / (logB - logA);
+  const logPercentA = Math.log(a.topPercent);
+  const logPercentB = Math.log(b.topPercent);
+  return Math.exp(logPercentA + t * (logPercentB - logPercentA));
+}
+
+// value를 받아 "상위 몇 %"에 해당하는지 반환한다 (1 = 상위 1%, 100 = 최하위권).
+export function getPercentileRankFromTable(table: PercentileAnchor[], value: number): number {
+  if (value <= 0) return MAX_PERCENT;
+
+  const top = table[0];
+  const bottom = table[table.length - 1];
+
+  let percent: number;
+  if (value >= top.value) {
+    percent = interpolatePercent(top, table[1], value);
+  } else if (value <= bottom.value) {
+    percent = interpolatePercent(table[table.length - 2], bottom, value);
+  } else {
+    const upperIndex = table.findIndex((anchor, i) => {
+      const next = table[i + 1];
+      return next && value <= anchor.value && value >= next.value;
+    });
+    percent = interpolatePercent(table[upperIndex], table[upperIndex + 1], value);
+  }
+
+  return Math.min(MAX_PERCENT, Math.max(MIN_PERCENT, percent));
+}
+
+export function clampDisplayPercent(percent: number): number {
+  return Math.min(99, Math.max(1, Math.round(percent)));
+}
+
+// 같은 분포 모양(로그정규 형태)을 하고 평균만 다르다고 가정하고, 그룹 평균 대비로
+// value를 다시 스케일링한 뒤 같은 전체 백분위표에 대조한다 — "동일 연령대/직종/
+// 지역/결혼상태에서는 상위 몇 %?"를 구하는 근사 방법.
+export function getPercentileRankRelativeTo(
+  table: PercentileAnchor[],
+  overallAverage: number,
+  subgroupAverage: number,
+  value: number
+): number {
+  const rescaled = value * (overallAverage / subgroupAverage);
+  return getPercentileRankFromTable(table, rescaled);
+}

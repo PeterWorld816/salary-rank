@@ -9,6 +9,8 @@ import {
   CHART_VIEWBOX_W,
   CHART_VIEWBOX_H,
   CHART_BASELINE_Y,
+  CHART_MIN_SALARY,
+  CHART_MAX_SALARY,
 } from "@/lib/distributionPath";
 import { overallAverage } from "@/lib/salaryCalc";
 import { translations, type LangCode } from "@/lib/i18n";
@@ -17,12 +19,21 @@ const ACCENT = "#059669";
 const ACCENT_ON_DARK = "#34D399";
 
 export default function DistributionChart({
-  monthlySalary, width = 280, lang = "ko", dark = false,
+  monthlySalary,
+  width = 280,
+  lang = "ko",
+  dark = false,
+  averageValue = overallAverage,
+  min = CHART_MIN_SALARY,
+  max = CHART_MAX_SALARY,
 }: {
   monthlySalary: number;
   width?: number;
   lang?: LangCode;
   dark?: boolean;
+  averageValue?: number;
+  min?: number;
+  max?: number;
 }) {
   const t = translations[lang];
   const scale = width / CHART_VIEWBOX_W;
@@ -32,8 +43,8 @@ export default function DistributionChart({
   const labelColor = dark ? "rgba(255,255,255,0.4)" : "#9CA3AF";
 
   const { linePath, areaPath } = buildDistributionPaths();
-  const marker = markerPosition(monthlySalary);
-  const avgX = averageTickX(overallAverage);
+  const marker = markerPosition(monthlySalary, min, max);
+  const avgX = averageTickX(averageValue, min, max);
 
   const markerPx = { x: marker.x * scale, y: marker.y * scale };
   const avgPx = avgX * scale;
