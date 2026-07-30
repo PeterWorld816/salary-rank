@@ -10,7 +10,7 @@
     "fetch:census": "tsx scripts/fetchCensusData.ts"
   },
   "dependencies": {
-    "d3-geo": "^3.1.1",
+    "d3-geo": "^2.0.2",
     "html-to-image": "^1.11.13",
     "lucide-react": "^1.23.0",
     "next": "14.2.5",
@@ -22,7 +22,7 @@
     "us-atlas": "^3.0.1"
   },
   "devDependencies": {
-    "@types/d3-geo": "^3.1.0",
+    "@types/d3-geo": "^2.0.7",
     "@types/geojson": "^7946.0.16",
     "@types/node": "^20",
     "@types/react": "^18",
