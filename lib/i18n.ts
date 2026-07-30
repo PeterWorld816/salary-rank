@@ -104,6 +104,7 @@ export interface Translations {
   // ── Nav / actions
   home: string;
   start: string;
+  koreaTabLabel: string; // BottomNav tab + /us "back to Korean app" link
   back: string;
   next: string;
   retry: string;
@@ -217,6 +218,7 @@ export const translations: Record<LangCode, Translations> = {
 
     home: "홈",
     start: "시작하기",
+    koreaTabLabel: "🇰🇷 한국",
     back: "뒤로",
     next: "다음",
     retry: "다시 하기",
@@ -326,6 +328,7 @@ export const translations: Record<LangCode, Translations> = {
 
     home: "Home",
     start: "Start",
+    koreaTabLabel: "🇰🇷 Korea",
     back: "Back",
     next: "Next",
     retry: "Try Again",

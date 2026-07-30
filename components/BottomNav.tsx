@@ -4,6 +4,14 @@ import { usePathname } from "next/navigation";
 import { Home, Target } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
 
+function FlagIcon({ className }: { className?: string; strokeWidth?: number }) {
+  return (
+    <span className={className} style={{ fontSize: 18, lineHeight: 1 }}>
+      🇰🇷
+    </span>
+  );
+}
+
 export default function BottomNav() {
   const pathname = usePathname();
   const { t } = useLanguage();
@@ -12,9 +20,13 @@ export default function BottomNav() {
   // navigation (back links, breadcrumbs) — the light bottom bar doesn't fit.
   if (pathname.startsWith("/us")) return null;
 
+  // "/" is now the US section's home (this bar never renders there anyway),
+  // so within the Korean app these tabs mean: leave to the US home, jump to
+  // the Korean landing, or jump straight into the Korean quiz.
   const tabs = [
     { href: "/", Icon: Home, label: t.home },
-    { href: "/quiz", Icon: Target, label: t.start },
+    { href: "/kr", Icon: FlagIcon, label: t.koreaTabLabel },
+    { href: "/kr/quiz", Icon: Target, label: t.start },
   ];
 
   return (
@@ -24,7 +36,9 @@ export default function BottomNav() {
     >
       <div className="flex h-16 max-w-[600px] mx-auto">
         {tabs.map(({ href, Icon, label }) => {
-          const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
+          // Exact match only — "/kr" and "/kr/quiz" are sibling tabs, not
+          // nested, so a prefix match would light up both at once on /kr/quiz.
+          const isActive = pathname === href;
           return (
             <Link
               key={href}

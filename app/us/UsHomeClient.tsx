@@ -48,9 +48,9 @@ function UsHomeContent({ geo }: { geo: FeatureCollection<Geometry, UsMapFeatureP
       <UsInputPanel />
 
       <div className="mx-auto max-w-5xl px-4 pb-16 pt-8 sm:px-6">
-        <Link href="/" className="mb-6 inline-flex items-center gap-1 text-[13px] text-white/50 transition-colors hover:text-white/80">
+        <Link href="/kr" className="mb-6 inline-flex items-center gap-1 text-[13px] text-white/50 transition-colors hover:text-white/80">
           <ChevronLeft className="h-4 w-4" />
-          {t.home}
+          {t.koreaTabLabel}
         </Link>
 
         <h1 className="mb-2 text-[28px] font-extrabold tracking-tight text-balance">{t.usAppTitle}</h1>

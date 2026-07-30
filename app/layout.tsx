@@ -3,12 +3,15 @@ import "./globals.css";
 import { translations } from "@/lib/i18n";
 import RootBody from "@/components/RootBody";
 
+// Default/fallback metadata only — "/" now redirects into "/us" (which sets
+// its own metadata), and app/kr/* pages set their own Korean-app metadata.
+// This just covers any route that doesn't override it.
 export const metadata: Metadata = {
-  title: translations.ko.appTitle,
-  description: translations.ko.tagline,
+  title: translations.ko.usAppTitle,
+  description: translations.ko.usTagline,
   openGraph: {
-    title: translations.ko.appTitle,
-    description: translations.ko.tagline,
+    title: translations.ko.usAppTitle,
+    description: translations.ko.usTagline,
     type: "website",
   },
 };

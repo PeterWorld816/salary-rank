@@ -64,7 +64,7 @@ function ResultContent() {
         <div className="text-center fade-up">
           <h1 className="text-title text-text mb-2">{t.resultNotFound}</h1>
           <p className="text-body text-text-secondary mb-8">{t.resultNotFoundDesc}</p>
-          <Link href="/quiz" className="btn btn-primary">
+          <Link href="/kr/quiz" className="btn btn-primary">
             {t.retry}
           </Link>
         </div>
@@ -106,7 +106,7 @@ function ResultContent() {
   return (
     <main className="min-h-screen bg-bg font-sans">
       <div className="max-w-md mx-auto px-6 pt-10 pb-safe fade-up">
-        <Link href="/quiz" className="inline-flex items-center gap-1 text-caption text-text-secondary mb-8 touch-target">
+        <Link href="/kr/quiz" className="inline-flex items-center gap-1 text-caption text-text-secondary mb-8 touch-target">
           <ChevronLeft className="w-4 h-4" />
           {t.retry}
         </Link>
@@ -277,11 +277,11 @@ function ResultContent() {
         <p className="text-caption text-text-tertiary text-center mb-6">{t.disclaimer}</p>
 
         <div className="grid grid-cols-2 gap-4 pb-4">
-          <Link href="/quiz" className="btn btn-secondary">
+          <Link href="/kr/quiz" className="btn btn-secondary">
             <RotateCcw className="w-4 h-4" />
             {t.retry}
           </Link>
-          <Link href="/" className="btn btn-secondary">
+          <Link href="/kr" className="btn btn-secondary">
             <Home className="w-4 h-4" />
             {t.home}
           </Link>

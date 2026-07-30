@@ -1,28 +1,16 @@
-"use client";
-import Link from "next/link";
-import { useLanguage } from "@/lib/LanguageProvider";
-import Footer from "@/components/Footer";
+// The US section (app/us) is now the site's front door. Rather than
+// duplicating its content here, "/" just forwards straight into "/us",
+// carrying over any query string (e.g. a shared ?d=...&lang=... link).
+// The Korean statistics app that used to live here moved to app/kr — see
+// components/BottomNav.tsx and components/us/UsHomeClient.tsx for the way
+// back to it.
+import { redirect } from "next/navigation";
 
-export default function Home() {
-  const { t } = useLanguage();
+type RawSP = Record<string, string | string[] | undefined>;
 
-  return (
-    <main className="min-h-screen bg-bg font-sans flex flex-col">
-      <section className="flex-1 flex items-center justify-center px-6 fade-up">
-        <div className="w-full max-w-md text-center">
-          <h1 className="text-display text-text mb-4 text-balance">{t.appTitle}</h1>
-
-          <p className="text-body text-text-secondary mb-4">{t.tagline}</p>
-
-          <p className="text-caption text-text-tertiary mb-12">🔒 {t.privacyNotice}</p>
-
-          <Link href="/quiz" className="btn btn-primary px-10">
-            {t.start}
-          </Link>
-        </div>
-      </section>
-
-      <Footer />
-    </main>
-  );
+export default function RootPage({ searchParams }: { searchParams: RawSP }) {
+  const qs = new URLSearchParams(
+    Object.entries(searchParams).flatMap(([k, v]) => (v == null ? [] : [[k, Array.isArray(v) ? v[0] : v]]))
+  ).toString();
+  redirect(qs ? `/us?${qs}` : "/us");
 }

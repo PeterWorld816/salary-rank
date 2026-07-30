@@ -93,7 +93,7 @@ export default function QuizPage() {
       nw: String(next.netWorth ?? 0),
       lang,
     });
-    router.push(`/result?${params.toString()}`);
+    router.push(`/kr/result?${params.toString()}`);
   }
 
   function goBack() {
@@ -107,7 +107,7 @@ export default function QuizPage() {
   return (
     <main className="min-h-screen bg-bg font-sans">
       <section className="px-6 sm:px-8 pt-12 pb-safe max-w-xl mx-auto fade-up">
-        <Link href="/" className="inline-flex items-center gap-1 text-caption text-text-secondary mb-4 touch-target">
+        <Link href="/kr" className="inline-flex items-center gap-1 text-caption text-text-secondary mb-4 touch-target">
           <ChevronLeft className="w-4 h-4" />
           {t.home}
         </Link>
