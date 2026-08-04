@@ -1,7 +1,7 @@
 // 전체 소득 분포 곡선 + "너 여기!" 마커. SVG는 path/line/circle만 쓰고 텍스트는
-// 절대 위치 div로 올린다 — next/og(satori)가 SVG <text>를 지원하지 않기 때문에
-// components/BrainChart.tsx와 동일한 전략을 쓴다. 이 덕분에 브라우저 화면, 공유용
-// 카드, edge OG 이미지 세 군데 모두에서 같은 컴포넌트를 그대로 재사용할 수 있다.
+// 절대 위치 div로 올린다 — html-to-image로 카드를 PNG로 저장할 때 SVG <text>가
+// 폰트에 따라 깨지는 걸 피하기 위함. 브라우저 화면과 공유용 카드 양쪽에서 같은
+// 컴포넌트를 그대로 재사용할 수 있다.
 import {
   buildDistributionPaths,
   markerPosition,
@@ -12,18 +12,20 @@ import {
   CHART_MIN_SALARY,
   CHART_MAX_SALARY,
 } from "@/lib/distributionPath";
-import { overallAverage } from "@/lib/salaryCalc";
 import { translations, type LangCode } from "@/lib/i18n";
 
 const ACCENT = "#059669";
 const ACCENT_ON_DARK = "#34D399";
+// The "you're here" marker gets its own gold accent, distinct from the mint
+// curve/map colors, so it reads as "you" rather than blending into the data.
+const MARKER_ACCENT = "#FBBF24";
 
 export default function DistributionChart({
   monthlySalary,
   width = 280,
   lang = "ko",
   dark = false,
-  averageValue = overallAverage,
+  averageValue,
   min = CHART_MIN_SALARY,
   max = CHART_MAX_SALARY,
 }: {
@@ -31,7 +33,7 @@ export default function DistributionChart({
   width?: number;
   lang?: LangCode;
   dark?: boolean;
-  averageValue?: number;
+  averageValue: number;
   min?: number;
   max?: number;
 }) {
@@ -63,12 +65,12 @@ export default function DistributionChart({
           stroke={labelColor} strokeWidth={1.5}
         />
 
-        {/* 마커: 세로 가이드 라인 + 점 */}
+        {/* 마커: 세로 가이드 라인 + 점 — 골드로 지도/그래프의 민트색과 구분 */}
         <line
           x1={marker.x} y1={marker.y} x2={marker.x} y2={CHART_BASELINE_Y}
-          stroke={accent} strokeWidth={1.5}
+          stroke={MARKER_ACCENT} strokeWidth={1.5}
         />
-        <circle cx={marker.x} cy={marker.y} r={5.5} fill={accent} />
+        <circle cx={marker.x} cy={marker.y} r={5.5} fill={MARKER_ACCENT} />
         <circle cx={marker.x} cy={marker.y} r={5.5} fill="none" stroke={dark ? "#0D0D0D" : "#FFFFFF"} strokeWidth={2} />
       </svg>
 
@@ -83,8 +85,8 @@ export default function DistributionChart({
         }}
       >
         <span style={{
-          display: "flex", fontSize: "11px", fontWeight: 700, color: "#FFFFFF",
-          background: accent, borderRadius: "999px", padding: "3px 9px", whiteSpace: "nowrap",
+          display: "flex", fontSize: "11px", fontWeight: 700, color: "#1A1300",
+          background: MARKER_ACCENT, borderRadius: "999px", padding: "3px 9px", whiteSpace: "nowrap",
         }}>
           {t.distributionYouAreHere}
         </span>

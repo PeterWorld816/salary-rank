@@ -1,16 +1,8 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Target } from "lucide-react";
+import { Home } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
-
-function FlagIcon({ className }: { className?: string; strokeWidth?: number }) {
-  return (
-    <span className={className} style={{ fontSize: 18, lineHeight: 1 }}>
-      🇰🇷
-    </span>
-  );
-}
 
 export default function BottomNav() {
   const pathname = usePathname();
@@ -18,16 +10,11 @@ export default function BottomNav() {
 
   // /us is a fully separate dark-themed section with its own in-page
   // navigation (back links, breadcrumbs) — the light bottom bar doesn't fit.
+  // In practice every real route is under /us (or redirects there), so this
+  // bar never renders — it only exists as a fallback for any other route.
   if (pathname.startsWith("/us")) return null;
 
-  // "/" is now the US section's home (this bar never renders there anyway),
-  // so within the Korean app these tabs mean: leave to the US home, jump to
-  // the Korean landing, or jump straight into the Korean quiz.
-  const tabs = [
-    { href: "/", Icon: Home, label: t.home },
-    { href: "/kr", Icon: FlagIcon, label: t.koreaTabLabel },
-    { href: "/kr/quiz", Icon: Target, label: t.start },
-  ];
+  const tabs = [{ href: "/", Icon: Home, label: t.home }];
 
   return (
     <nav
@@ -36,8 +23,6 @@ export default function BottomNav() {
     >
       <div className="flex h-16 max-w-[600px] mx-auto">
         {tabs.map(({ href, Icon, label }) => {
-          // Exact match only — "/kr" and "/kr/quiz" are sibling tabs, not
-          // nested, so a prefix match would light up both at once on /kr/quiz.
           const isActive = pathname === href;
           return (
             <Link

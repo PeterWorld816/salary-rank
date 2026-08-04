@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "source": "US Census Bureau, ACS 2020-2024 5-Year Estimates, table B19049 (median household income by age of householder)",
+    "sourceUrl": "https://data.census.gov/table/ACSDT5Y2024.B19049",
+    "unit": "USD",
+    "acs5Vintage": 2024,
+    "acs5YearRange": "2020-2024",
+    "note": "B19049 only publishes four age brackets (Under 25 / 25-44 / 45-64 / 65+) — finer than that isn't available through the Census API's structured tables, so the 25-34/35-44 pair and the 45-54/55-64 pair below each share one underlying ACS figure. lib/usIncomeCalc.ts rescales by median (not mean) here, since median is the real reported statistic at this age granularity — no age-band mean is published by the Census API."
+  },
+  "bands": [
+    { "id": "under25", "label": { "ko": "25세 미만", "en": "Under 25" }, "median": 45332 },
+    { "id": "25-34", "label": { "ko": "25~34세", "en": "25–34" }, "median": 90756 },
+    { "id": "35-44", "label": { "ko": "35~44세", "en": "35–44" }, "median": 90756 },
+    { "id": "45-54", "label": { "ko": "45~54세", "en": "45–54" }, "median": 97843 },
+    { "id": "55-64", "label": { "ko": "55~64세", "en": "55–64" }, "median": 97843 },
+    { "id": "65plus", "label": { "ko": "65세 이상", "en": "65+" }, "median": 58390 }
+  ]
+}

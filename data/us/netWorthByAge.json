@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "source": "Federal Reserve, 2022 Survey of Consumer Finances, Table 2 (family net worth by age of reference person, 2022 dollars)",
+    "sourceUrl": "https://www.federalreserve.gov/publications/files/scf23.pdf",
+    "unit": "USD",
+    "year": 2022,
+    "note": "The SCF's published age brackets (<35 / 35-44 / 45-54 / 55-64 / 65-74 / 75-or-more) don't line up one-to-one with this app's six age bands: under25 and 25-34 both borrow the <35 bracket (SCF doesn't break out under-25 households separately), and 65plus is an unweighted average of the 65-74 and 75-or-more brackets. lib/usIncomeCalc.ts rescales by average/mean (not median) here to match overallUsNetWorth.average in data/us/netWorthPercentilesUS.json and the group-relative percentile convention this app uses elsewhere."
+  },
+  "bands": [
+    { "id": "under25", "label": { "ko": "25세 미만", "en": "Under 25" }, "average": 183500, "median": 39000 },
+    { "id": "25-34", "label": { "ko": "25~34세", "en": "25–34" }, "average": 183500, "median": 39000 },
+    { "id": "35-44", "label": { "ko": "35~44세", "en": "35–44" }, "average": 549600, "median": 135600 },
+    { "id": "45-54", "label": { "ko": "45~54세", "en": "45–54" }, "average": 975800, "median": 247200 },
+    { "id": "55-64", "label": { "ko": "55~64세", "en": "55–64" }, "average": 1566900, "median": 364500 },
+    { "id": "65plus", "label": { "ko": "65세 이상", "en": "65+" }, "average": 1709350, "median": 372750 }
+  ]
+}

@@ -3,10 +3,9 @@
 // "생김새"만 재현하는 매끄러운 단봉 곡선(베타분포 꼴 t^a * (1-t)^b)이다. 정확한
 // 밀도가 아니라 "소수가 훨씬 많이 번다"는 비대칭 모양이 핵심.
 //
-// 사용자의 위치(마커)는 이 곡선 모양과 무관하게, 월소득을 로그 스케일로
-// [CHART_MIN_SALARY, CHART_MAX_SALARY] 구간에 매핑해서 정한다 — lib/salaryCalc.ts의
-// 백분위 앵커(201~1500만원)를 감싸는 여유 있는 구간이라 대부분의 케이스가 양 끝에
-// 눌리지 않고 곡선 위 자연스러운 위치에 찍힌다.
+// 사용자의 위치(마커)는 이 곡선 모양과 무관하게, 입력값을 로그 스케일로
+// [min, max] 구간에 매핑해서 정한다 — 대부분의 케이스가 양 끝에 눌리지 않고
+// 곡선 위 자연스러운 위치에 찍히도록 호출하는 쪽에서 적절한 범위를 넘긴다.
 
 export const CHART_VIEWBOX_W = 320;
 export const CHART_VIEWBOX_H = 150;
@@ -60,10 +59,6 @@ export function buildDistributionPaths(): { linePath: string; areaPath: string }
 // 마커가 그래프 양 끝에 바짝 붙지 않게 한다.
 export const CHART_MIN_SALARY = 150;
 export const CHART_MAX_SALARY = 2200;
-
-// 자산 분포 차트용 범위(만원). 순자산 백분위 앵커(500~300000)보다 여유를 둔다.
-export const CHART_MIN_NETWORTH = 300;
-export const CHART_MAX_NETWORTH = 400000;
 
 function valueToT(value: number, min: number, max: number): number {
   const clamped = Math.min(max, Math.max(min, value));

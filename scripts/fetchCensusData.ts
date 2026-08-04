@@ -9,11 +9,28 @@
 // header) rather than just rate-limiting them, so there's no useful "no key"
 // fallback path anymore.
 //
-// Source: US Census Bureau, ACS 2022 5-Year Estimates
+// Source: US Census Bureau, American Community Survey
 //   B19013 = median household income (one value per geography)
 //   B19001 = household income distributed across 16 fixed brackets, used to
 //            build a real "top X% needs $Y" percentile curve per geography
 //            instead of estimating one from the median alone.
+//
+// Vintages: county geographies are too small a population to appear in the
+// 1-year release, so counties only ever get the 5-year (multi-year average)
+// numbers. States (and the nation) are big enough for both, so they get the
+// 5-year AND the latest 1-year (single most recent year) side by side.
+//
+// ACS5_YEAR/ACS1_YEAR below were picked by probing api.census.gov/data/{year}
+// for each candidate year and taking the newest one that returned real data
+// instead of a 404 (checked 2026-07-30: 2025 wasn't published yet for either
+// dataset, 2024 was the latest valid vintage for both acs5 and acs1). Bump
+// these — and re-run `npm run fetch:census` — once a newer vintage ships.
+const ACS5_YEAR = 2024; // covers the 5-year period ACS5_YEAR-4 .. ACS5_YEAR
+const ACS1_YEAR = 2024; // single most recent year
+const ACS5_BASE = `https://api.census.gov/data/${ACS5_YEAR}/acs/acs5`;
+const ACS1_BASE = `https://api.census.gov/data/${ACS1_YEAR}/acs/acs1`;
+const ACS5_YEAR_RANGE = `${ACS5_YEAR - 4}-${ACS5_YEAR}`;
+
 import { config } from "dotenv";
 import { existsSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -24,12 +41,13 @@ for (const file of [".env.local", ".env"]) {
 }
 
 const CENSUS_API_KEY = process.env.CENSUS_API_KEY;
-const ACS_BASE = "https://api.census.gov/data/2022/acs/acs5";
 
 // B19001 bracket lower bounds, for brackets 2..16 (bracket 1 is "< $10,000",
 // which has no useful lower bound as a percentile anchor). Bracket 16 is the
 // open-ended "$200,000 or more" — its lower bound doubles as the threshold
-// for whatever top-percent that bracket represents at each geography.
+// for whatever top-percent that bracket represents at each geography. These
+// bracket boundaries are fixed nominal-dollar cutoffs baked into the table
+// definition itself, not adjusted per release, so they don't change by year.
 const B19001_LOWER_BOUNDS = [
   10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 60000, 75000, 100000, 125000, 150000, 200000,
 ];
@@ -55,8 +73,8 @@ function buildIncomeAnchors(counts: number[]): PercentileAnchor[] {
   return anchors.sort((a, b) => a.topPercent - b.topPercent);
 }
 
-async function censusGet(params: Record<string, string>): Promise<string[][]> {
-  const url = new URL(ACS_BASE);
+async function censusGet(base: string, params: Record<string, string>): Promise<string[][]> {
+  const url = new URL(base);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
   if (CENSUS_API_KEY) url.searchParams.set("key", CENSUS_API_KEY);
 
@@ -86,7 +104,7 @@ function parseCounts(record: Record<string, string>): number[] {
 const GET_VARS = ["NAME", "B19013_001E", "B19001_001E", ...B19001_VARS].join(",");
 
 async function fetchNational() {
-  const rows = await censusGet({ get: GET_VARS, for: "us:*" });
+  const rows = await censusGet(ACS5_BASE, { get: GET_VARS, for: "us:*" });
   const [record] = rowsToRecords(rows);
   return {
     medianHouseholdIncome: parseMedian(record.B19013_001E),
@@ -95,7 +113,7 @@ async function fetchNational() {
 }
 
 async function fetchStates() {
-  const rows = await censusGet({ get: GET_VARS, for: "state:*" });
+  const rows = await censusGet(ACS5_BASE, { get: GET_VARS, for: "state:*" });
   return rowsToRecords(rows).map((record) => ({
     fips: record.state,
     name: record.NAME,
@@ -104,8 +122,19 @@ async function fetchStates() {
   }));
 }
 
+// States (and DC) all clear the ACS 1-year population threshold (65,000), so
+// unlike counties every state we care about should show up here.
+async function fetchStates1Year() {
+  const rows = await censusGet(ACS1_BASE, { get: GET_VARS, for: "state:*" });
+  return rowsToRecords(rows).map((record) => ({
+    fips: record.state,
+    medianHouseholdIncome: parseMedian(record.B19013_001E),
+    percentileAnchors: buildIncomeAnchors(parseCounts(record)),
+  }));
+}
+
 async function fetchCountiesForState(stateFips: string) {
-  const rows = await censusGet({ get: GET_VARS, for: "county:*", in: `state:${stateFips}` });
+  const rows = await censusGet(ACS5_BASE, { get: GET_VARS, for: "county:*", in: `state:${stateFips}` });
   return rowsToRecords(rows).map((record) => ({
     fips: `${record.state}${record.county}`,
     stateFips: record.state,
@@ -133,31 +162,45 @@ async function main() {
     return;
   }
 
-  console.log("Fetching national income distribution...");
+  const commonMeta = {
+    source: `US Census Bureau, ACS ${ACS5_YEAR_RANGE} 5-Year Estimates, tables B19013 & B19001`,
+    unit: "USD" as const,
+    acs5Vintage: ACS5_YEAR,
+    acs5YearRange: ACS5_YEAR_RANGE,
+    generatedAt: new Date().toISOString(),
+  };
+
+  console.log(`Fetching national income distribution (ACS5 ${ACS5_YEAR_RANGE})...`);
   const national = await fetchNational();
-  writeJson("data/us/nationalIncome.json", {
-    meta: {
-      source: "US Census Bureau, ACS 2022 5-Year Estimates, tables B19013 & B19001",
-      unit: "USD",
-      year: 2022,
-      generatedAt: new Date().toISOString(),
-    },
-    ...national,
+  writeJson("data/us/nationalIncome.json", { meta: commonMeta, ...national });
+
+  console.log(`Fetching state-level income (ACS5 ${ACS5_YEAR_RANGE})...`);
+  const states = await fetchStates();
+
+  console.log(`Fetching state-level income (ACS1 ${ACS1_YEAR}, latest single year)...`);
+  const states1Year = await fetchStates1Year();
+  const states1YearByFips = new Map(states1Year.map((s) => [s.fips, s]));
+
+  const statesWithLatest1Year = states.map((state) => {
+    const latest = states1YearByFips.get(state.fips);
+    return {
+      ...state,
+      latest1Year: latest
+        ? { year: ACS1_YEAR, medianHouseholdIncome: latest.medianHouseholdIncome, percentileAnchors: latest.percentileAnchors }
+        : null,
+    };
   });
 
-  console.log("Fetching state-level income...");
-  const states = await fetchStates();
   writeJson("data/us/stateIncome.json", {
     meta: {
-      source: "US Census Bureau, ACS 2022 5-Year Estimates, tables B19013 & B19001",
-      unit: "USD",
-      year: 2022,
-      generatedAt: new Date().toISOString(),
+      ...commonMeta,
+      source: `US Census Bureau, ACS 5-Year (${ACS5_YEAR_RANGE}) & 1-Year (${ACS1_YEAR}) Estimates, tables B19013 & B19001`,
+      acs1Vintage: ACS1_YEAR,
     },
-    states,
+    states: statesWithLatest1Year,
   });
 
-  console.log(`Fetching county-level income for ${states.length} states (one request per state)...`);
+  console.log(`Fetching county-level income (ACS5 ${ACS5_YEAR_RANGE}) for ${states.length} states (one request per state)...`);
   const counties = [];
   for (const state of states) {
     if (state.fips === "72" /* Puerto Rico, not in our 50+DC map */) continue;
@@ -172,15 +215,7 @@ async function main() {
     await new Promise((r) => setTimeout(r, 150));
   }
 
-  writeJson("data/us/countyIncome.json", {
-    meta: {
-      source: "US Census Bureau, ACS 2022 5-Year Estimates, tables B19013 & B19001",
-      unit: "USD",
-      year: 2022,
-      generatedAt: new Date().toISOString(),
-    },
-    counties,
-  });
+  writeJson("data/us/countyIncome.json", { meta: commonMeta, counties });
 
   console.log(`Done. ${states.length} states, ${counties.length} counties.`);
 }

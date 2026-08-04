@@ -19,17 +19,24 @@ import {
   getCountyIncome,
   getCountyIncomePercentile,
   getNationalIncomePercentile,
+  getNationalIncomePercentileForAgeBand,
   nationalMedianHouseholdIncome,
   getUsNetWorthPercentile,
+  getUsNetWorthPercentileForAgeBand,
   overallUsNetWorth,
   getK401Comparison,
+  acs5YearRange,
 } from "@/lib/usIncomeCalc";
 
+// Each section now shows 2-3 of these side by side (county/nationwide/same-
+// age), so this stays small enough to fit three across app's max-w-md column.
 function HeroStat({ label, percent }: { label: string; percent: number }) {
   return (
-    <div className="text-center">
-      <p className="mb-1 text-[13px] text-white/55">{label}</p>
-      <p className="font-extrabold text-[#34D399]" style={{ fontSize: "56px", lineHeight: 1 }}>
+    <div className="flex-1 text-center">
+      <p className="mb-1 text-[11px] leading-tight text-white/55">{label}</p>
+      {/* Gold, not mint — keeps the "this is you" number visually distinct
+          from the green map/choropleth. */}
+      <p className="font-extrabold text-[#FBBF24]" style={{ fontSize: "34px", lineHeight: 1 }}>
         {percent}%
       </p>
     </div>
@@ -76,6 +83,18 @@ function UsCountyContent({
   const ageBand = US_AGE_BANDS.find((b) => b.id === input.ageBand);
   const ageBandLabel = ageBand ? tr(ageBand.label) : input.ageBand;
 
+  const ageIncomePercentile = getNationalIncomePercentileForAgeBand(input.ageBand, input.annualIncome);
+  const ageNetWorthPercentile = getUsNetWorthPercentileForAgeBand(input.ageBand, input.netWorth);
+  const incomeHeroStats = [
+    countyPercentile != null && { key: "county", label: t.usCountyPercentileHeroLabel, percent: countyPercentile },
+    nationalPercentile != null && { key: "national", label: t.usNationalPercentileHeroLabel, percent: nationalPercentile },
+    ageIncomePercentile != null && {
+      key: "age",
+      label: formatTemplate(t.usAgeIncomePercentileHeroLabel, { age: ageBandLabel }),
+      percent: ageIncomePercentile,
+    },
+  ].filter((s): s is { key: string; label: string; percent: number } => Boolean(s));
+
   const heroPercent = countyPercentile ?? nationalPercentile;
   const shareTitle = `${t.usAppTitle} — ${countyName}, ${state.name}`;
   const shareText =
@@ -106,6 +125,7 @@ function UsCountyContent({
           <p className="text-[22px] font-bold tabular-nums text-white">
             {county?.medianHouseholdIncome ? formatUsd(county.medianHouseholdIncome) : "—"}
           </p>
+          <p className="mt-1 text-[11px] text-white/30">{formatTemplate(t.usAcs5YearLabel, { range: acs5YearRange })}</p>
         </div>
 
         {bothIncomeMissing ? (
@@ -113,41 +133,24 @@ function UsCountyContent({
             <NoDataCard title={t.usCountyNoDataTitle} desc={t.usCountyNoDataDesc} />
           </div>
         ) : (
-          <>
-            {countyPercentile != null && (
-              <div className="mb-8">
-                <HeroStat label={t.usCountyPercentileHeroLabel} percent={countyPercentile} />
-                <div className="mt-4 flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.02] p-5">
-                  <DistributionChart
-                    monthlySalary={input.annualIncome}
-                    width={260}
-                    lang={lang}
-                    dark
-                    min={15000}
-                    max={500000}
-                    averageValue={county?.medianHouseholdIncome ?? nationalMedianHouseholdIncome ?? 75000}
-                  />
-                </div>
-              </div>
-            )}
-
-            {nationalPercentile != null && (
-              <div className="mb-8">
-                <HeroStat label={t.usNationalPercentileHeroLabel} percent={nationalPercentile} />
-                <div className="mt-4 flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.02] p-5">
-                  <DistributionChart
-                    monthlySalary={input.annualIncome}
-                    width={260}
-                    lang={lang}
-                    dark
-                    min={15000}
-                    max={500000}
-                    averageValue={nationalMedianHouseholdIncome ?? 75000}
-                  />
-                </div>
-              </div>
-            )}
-          </>
+          <div className="mb-8">
+            <div className="flex items-start justify-around gap-2">
+              {incomeHeroStats.map((s) => (
+                <HeroStat key={s.key} label={s.label} percent={s.percent} />
+              ))}
+            </div>
+            <div className="mt-4 flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.02] p-5">
+              <DistributionChart
+                monthlySalary={input.annualIncome}
+                width={260}
+                lang={lang}
+                dark
+                min={15000}
+                max={500000}
+                averageValue={county?.medianHouseholdIncome ?? nationalMedianHouseholdIncome ?? 75000}
+              />
+            </div>
+          </div>
         )}
 
         {/* ── Net worth (nationwide only) ── */}
@@ -158,7 +161,15 @@ function UsCountyContent({
           </span>
         </div>
         <div className="mb-8">
-          <HeroStat label={t.usNetWorthHeroLabel} percent={netWorthPercentile} />
+          <div className="flex items-start justify-around gap-2">
+            <HeroStat label={t.usNetWorthHeroLabel} percent={netWorthPercentile} />
+            {ageNetWorthPercentile != null && (
+              <HeroStat
+                label={formatTemplate(t.usAgeNetWorthPercentileHeroLabel, { age: ageBandLabel })}
+                percent={ageNetWorthPercentile}
+              />
+            )}
+          </div>
           <div className="mt-4 flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.02] p-5">
             <DistributionChart
               monthlySalary={input.netWorth}
@@ -202,7 +213,7 @@ function UsCountyContent({
 
         {/* ── Sources ── */}
         <div className="mb-8 rounded-lg bg-white/[0.03] px-4 py-3 text-center">
-          <p className="text-[12px] text-white/40">{t.usSourceCensus}</p>
+          <p className="text-[12px] text-white/40">{formatTemplate(t.usSourceCensus, { range: acs5YearRange })}</p>
           <p className="mt-1 text-[12px] text-white/40">{t.usSourceScf}</p>
           <p className="mt-1 text-[12px] text-white/40">{t.usSourceVanguard}</p>
           <p className="mt-2 text-[12px] text-white/25">{t.usDisclaimer}</p>
@@ -220,6 +231,9 @@ function UsCountyContent({
               netWorthPercentile={netWorthPercentile}
               netWorth={input.netWorth}
               k401VsMedianPercent={k401.vsMedianPercent}
+              ageBandLabel={ageBandLabel}
+              ageIncomePercentile={ageIncomePercentile}
+              ageNetWorthPercentile={ageNetWorthPercentile}
               cardRef={cardRef}
               lang={lang}
             />

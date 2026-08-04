@@ -1,6 +1,6 @@
 // Shared dark/neon page shell for the whole /us section — deliberately not
 // using the light-theme `bg-bg` tokens from app/globals.css so this section
-// can look completely different from /quiz and /result without touching them.
+// can have its own distinct look.
 export default function UsShell({ children }: { children: React.ReactNode }) {
   return (
     <div

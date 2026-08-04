@@ -4,18 +4,17 @@ import { toPng } from "html-to-image";
 import type { RefObject } from "react";
 import { Share2, Download } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
-import { CARD_WIDTH, CARD_HEIGHT } from "@/components/ResultCard";
 import Spinner from "@/components/Spinner";
 
 export default function ShareButtons({
-  cardRef, shareTitle, shareText, downloadName, width = CARD_WIDTH, height = CARD_HEIGHT,
+  cardRef, shareTitle, shareText, downloadName, width, height,
 }: {
   cardRef: RefObject<HTMLDivElement>;
   shareTitle: string;
   shareText: string;
   downloadName: string;
-  width?: number;
-  height?: number;
+  width: number;
+  height: number;
 }) {
   const { t } = useLanguage();
   const [saving, setSaving] = useState(false);

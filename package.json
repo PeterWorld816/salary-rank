@@ -10,6 +10,7 @@
     "fetch:census": "tsx scripts/fetchCensusData.ts"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "d3-geo": "^2.0.2",
     "html-to-image": "^1.11.13",
     "lucide-react": "^1.23.0",

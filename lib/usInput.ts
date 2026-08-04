@@ -7,12 +7,23 @@
 // age) — so it's folded in here as a sixth field alongside gender/marital/
 // income/net worth/401k.
 import k401Data from "@/data/us/401kByAge.json";
+import type { Localized } from "@/lib/i18n";
 
 export type UsGenderId = "male" | "female";
 export type UsMaritalStatusId = "single" | "married";
 export type UsAgeBandId = (typeof k401Data.bands)[number]["id"];
 
 export const US_AGE_BANDS = k401Data.bands;
+
+export const US_GENDERS: { id: UsGenderId; label: Localized }[] = [
+  { id: "male", label: { ko: "남성", en: "Male" } },
+  { id: "female", label: { ko: "여성", en: "Female" } },
+];
+
+export const US_MARITAL_STATUSES: { id: UsMaritalStatusId; label: Localized }[] = [
+  { id: "single", label: { ko: "미혼", en: "Single" } },
+  { id: "married", label: { ko: "기혼", en: "Married" } },
+];
 
 export type UsInput = {
   gender: UsGenderId;

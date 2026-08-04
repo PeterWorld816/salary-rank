@@ -1,12 +1,15 @@
 import type { RefObject } from "react";
 import { translations, formatTemplate, type LangCode } from "@/lib/i18n";
 import { formatUsd as fmtUsd } from "@/lib/usFormat";
+import { acs5YearRange } from "@/lib/usIncomeCalc";
 import DistributionChart from "@/components/DistributionChart";
 
 export const CARD_WIDTH = 360;
 export const CARD_HEIGHT = 780;
 
 const ACCENT = "#34D399";
+// Gold, not mint — keeps the hero percent visually distinct from the map.
+const HERO_ACCENT = "#FBBF24";
 
 function Row({ label, sub, value }: { label: string; sub: string; value: string }) {
   return (
@@ -29,6 +32,9 @@ export default function UsResultCard({
   netWorthPercentile,
   netWorth,
   k401VsMedianPercent,
+  ageBandLabel,
+  ageIncomePercentile,
+  ageNetWorthPercentile,
   cardRef,
   lang = "en",
 }: {
@@ -40,6 +46,9 @@ export default function UsResultCard({
   netWorthPercentile: number;
   netWorth: number;
   k401VsMedianPercent: number;
+  ageBandLabel: string;
+  ageIncomePercentile: number | null;
+  ageNetWorthPercentile: number | null;
   cardRef?: RefObject<HTMLDivElement>;
   lang?: LangCode;
 }) {
@@ -90,7 +99,7 @@ export default function UsResultCard({
           <div
             style={{
               display: "flex",
-              color: ACCENT,
+              color: HERO_ACCENT,
               fontSize: "52px",
               fontWeight: 900,
               letterSpacing: "-0.02em",
@@ -119,7 +128,21 @@ export default function UsResultCard({
         {nationalPercentile != null && (
           <Row label={t.usNationalPercentileHeroLabel} sub="" value={formatTemplate(t.topPercentTemplate, { percent: nationalPercentile })} />
         )}
+        {ageIncomePercentile != null && (
+          <Row
+            label={formatTemplate(t.usAgeIncomePercentileHeroLabel, { age: ageBandLabel })}
+            sub=""
+            value={formatTemplate(t.topPercentTemplate, { percent: ageIncomePercentile })}
+          />
+        )}
         <Row label={t.usNetWorthSectionTitle} sub={t.usNetWorthNationalBadge} value={formatTemplate(t.topPercentTemplate, { percent: netWorthPercentile })} />
+        {ageNetWorthPercentile != null && (
+          <Row
+            label={formatTemplate(t.usAgeNetWorthPercentileHeroLabel, { age: ageBandLabel })}
+            sub=""
+            value={formatTemplate(t.topPercentTemplate, { percent: ageNetWorthPercentile })}
+          />
+        )}
         <Row label={t.usK401SectionTitle} sub={fmtUsd(netWorth)} value={formatTemplate(t.usK401VsMedianTemplate, { percent: k401VsMedianPercent })} />
       </div>
 
@@ -138,7 +161,7 @@ export default function UsResultCard({
         }}
       >
         <span style={{ display: "flex", color: "rgba(255,255,255,0.3)", fontSize: "10px", textAlign: "center" }}>
-          {t.usSourceCensus}
+          {formatTemplate(t.usSourceCensus, { range: acs5YearRange })}
         </span>
         <span style={{ display: "flex", color: "rgba(255,255,255,0.18)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em" }}>
           {t.usAppTitle}
