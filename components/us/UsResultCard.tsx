@@ -1,7 +1,6 @@
 import type { RefObject } from "react";
 import { translations, formatTemplate, type LangCode } from "@/lib/i18n";
 import { formatUsd as fmtUsd } from "@/lib/usFormat";
-import { acs5YearRange } from "@/lib/usIncomeCalc";
 import DistributionChart from "@/components/DistributionChart";
 
 export const CARD_WIDTH = 360;
@@ -160,8 +159,11 @@ export default function UsResultCard({
           gap: "3px",
         }}
       >
+        {/* Condensed one-liner (no table codes/date range) — the full source
+            list stays on the page body, this is just for when the image is
+            shared standalone and has no surrounding page context. */}
         <span style={{ display: "flex", color: "rgba(255,255,255,0.3)", fontSize: "10px", textAlign: "center" }}>
-          {formatTemplate(t.usSourceCensus, { range: acs5YearRange })}
+          {t.usShareCardSource}
         </span>
         <span style={{ display: "flex", color: "rgba(255,255,255,0.18)", fontSize: "11px", fontWeight: 600, letterSpacing: "0.1em" }}>
           {t.usAppTitle}

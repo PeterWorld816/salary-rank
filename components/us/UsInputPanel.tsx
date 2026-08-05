@@ -137,9 +137,15 @@ export default function UsInputPanel() {
   // exists (a shared link, or coming back from the map), start collapsed.
   const [expanded, setExpanded] = useState(() => !sp.get("d"));
 
+  // A pending "compare with a friend" challenge (see lib/usInput.ts) lives in
+  // its own query param, independent of "d" — apply()/homeHref below rebuild
+  // the query string from scratch, so without this a friend editing their
+  // own answers would silently drop the challenge they arrived with.
+  const from = sp.get("from");
+
   function apply(next: UsInput) {
     setForm(next);
-    const params = buildUsSearchParams(next, lang);
+    const params = buildUsSearchParams(next, lang, from);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
@@ -150,7 +156,7 @@ export default function UsInputPanel() {
   // Always points at /us (the state-picker map) carrying the current
   // answers along — same "d"/"lang" encoding apply() writes to the URL, just
   // targeting a fixed destination instead of the current pathname.
-  const homeHref = `/us?${buildUsSearchParams(form, lang).toString()}`;
+  const homeHref = `/us?${buildUsSearchParams(form, lang, from).toString()}`;
 
   return (
     <div

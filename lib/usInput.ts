@@ -76,10 +76,40 @@ export function decodeUsInput(raw: string): UsInput | null {
 }
 
 // Builds the query string used for every /us link (map clicks, back links).
-export function buildUsSearchParams(input: UsInput, lang: string): URLSearchParams {
-  return new URLSearchParams({ d: encodeUsInput(input), lang });
+// `from` (a friend-challenge snapshot, see encodeFriendChallenge below) is
+// carried through explicitly here because apply()/homeHref in
+// UsInputPanel.tsx rebuild the query string from scratch rather than
+// patching the existing one — every other /us link just reuses the current
+// search string verbatim and so preserves it automatically.
+export function buildUsSearchParams(input: UsInput, lang: string, from?: string | null): URLSearchParams {
+  const params = new URLSearchParams({ d: encodeUsInput(input), lang });
+  if (from) params.set("from", from);
+  return params;
 }
 
 export function appendUsQuery(pathname: string, queryString: string): string {
   return queryString ? `${pathname}?${queryString}` : pathname;
+}
+
+// "Compare with a friend" challenge snapshot — deliberately just a
+// percentile + location code, no personal data, decodable by anyone with
+// the link (same no-server-storage principle as the rest of /us).
+export type FriendChallenge = {
+  percentile: number; // the sharer's own county (or nationwide) top-%
+  stateAbbr: string;
+  countyFips: string;
+};
+
+export function encodeFriendChallenge(challenge: FriendChallenge): string {
+  return [challenge.percentile, challenge.stateAbbr, challenge.countyFips].join(".");
+}
+
+export function decodeFriendChallenge(raw: string): FriendChallenge | null {
+  const parts = raw.split(".");
+  if (parts.length !== 3) return null;
+  const [percentileRaw, stateAbbr, countyFips] = parts;
+  const percentile = Number(percentileRaw);
+  if (!Number.isFinite(percentile) || percentile < 1 || percentile > 99) return null;
+  if (!stateAbbr || !countyFips) return null;
+  return { percentile, stateAbbr, countyFips };
 }

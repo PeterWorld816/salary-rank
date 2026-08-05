@@ -37,6 +37,17 @@ export interface Translations {
   copied: string;
   shareFailed: string;
   saveFailed: string;
+  usDismiss: string;
+
+  // ── "Compare with a friend" challenge links (see lib/usInput.ts)
+  usCompareButton: string;
+  usFriendBannerTemplate: string; // template: {percent}, {place}
+  usCompareCardTitle: string;
+  usCompareCardYou: string;
+  usCompareCardFriend: string;
+
+  // ── Share card footer (components/us/UsResultCard.tsx)
+  usShareCardSource: string;
 
   // ── /us section (US Census-based income map)
   usAppTitle: string;
@@ -109,6 +120,15 @@ export const translations: Record<LangCode, Translations> = {
     copied: "링크 복사됨!",
     shareFailed: "공유 실패",
     saveFailed: "저장 실패. 다시 시도해주세요.",
+    usDismiss: "닫기",
+
+    usCompareButton: "친구와 비교하기",
+    usFriendBannerTemplate: "친구가 {place} 주민의 {percent}%보다 소득이 높아요 — 내 정보를 입력하고 비교해보세요.",
+    usCompareCardTitle: "당신 vs. 친구",
+    usCompareCardYou: "당신",
+    usCompareCardFriend: "친구",
+
+    usShareCardSource: "출처: 미국 인구조사국 ACS 5년 추정치",
 
     usAppTitle: "미국 소득 상위 몇 %?",
     usTagline: "성별·결혼상태·연소득·자산을 입력하고 지도에서 주와 카운티를 골라 내 위치를 확인하세요",
@@ -178,6 +198,15 @@ export const translations: Record<LangCode, Translations> = {
     copied: "Link copied!",
     shareFailed: "Share failed",
     saveFailed: "Save failed. Please try again.",
+    usDismiss: "Dismiss",
+
+    usCompareButton: "Compare with a friend",
+    usFriendBannerTemplate: "A friend out-earns {percent}% of people in {place} — enter your info to see how you compare.",
+    usCompareCardTitle: "You vs. your friend",
+    usCompareCardYou: "You",
+    usCompareCardFriend: "Your friend",
+
+    usShareCardSource: "Source: US Census Bureau ACS 5-Year Estimates",
 
     usAppTitle: "US Income Percentile",
     usTagline: "Enter your gender, marital status, income, and assets, then pick a state and county on the map to see where you rank",

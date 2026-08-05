@@ -1,13 +1,14 @@
 "use client";
-import { Suspense, useRef } from "react";
+import { Suspense, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Link2, X } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { formatTemplate } from "@/lib/i18n";
 import { formatUsd } from "@/lib/usFormat";
 import { readUsInputFromSearch } from "@/components/us/UsInputPanel";
-import { US_AGE_BANDS } from "@/lib/usInput";
+import { US_AGE_BANDS, decodeFriendChallenge, encodeFriendChallenge } from "@/lib/usInput";
+import { buildResultHeadline } from "@/lib/narrative";
 import UsShell from "@/components/us/UsShell";
 import UsInputPanel from "@/components/us/UsInputPanel";
 import UsResultCard, { CARD_WIDTH, CARD_HEIGHT } from "@/components/us/UsResultCard";
@@ -71,6 +72,8 @@ function UsCountyContent({
   const sp = useSearchParams();
   const qs = sp.toString();
   const cardRef = useRef<HTMLDivElement>(null);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [compareToast, setCompareToast] = useState<string | null>(null);
 
   const input = readUsInputFromSearch(sp);
   const county = getCountyIncome(countyFips);
@@ -96,17 +99,72 @@ function UsCountyContent({
   ].filter((s): s is { key: string; label: string; percent: number } => Boolean(s));
 
   const heroPercent = countyPercentile ?? nationalPercentile;
+  const headline = buildResultHeadline({
+    countyPercentile,
+    nationwidePercentile: nationalPercentile,
+    agePercentile: ageIncomePercentile,
+    netWorthPercentile,
+    countyName,
+    ageBandLabel,
+  });
   const shareTitle = `${t.usAppTitle} — ${countyName}, ${state.name}`;
   const shareText =
     heroPercent != null
       ? `${countyName}, ${state.name} · ${formatTemplate(t.topPercentTemplate, { percent: heroPercent })}`
       : `${countyName}, ${state.name}`;
 
+  // "Compare with a friend" — decode whatever challenge snapshot the current
+  // URL carries (arrived via a friend's share link), and build a fresh one
+  // from the current viewer's own result for a new challenge link.
+  const friendChallenge = decodeFriendChallenge(sp.get("from") ?? "");
+  const friendCounty = friendChallenge ? getCountyIncome(friendChallenge.countyFips) : null;
+  const friendPlaceName = friendChallenge ? friendCounty?.name ?? friendChallenge.stateAbbr.toUpperCase() : null;
+  const friendOutEarnsPercent = friendChallenge ? Math.max(1, Math.min(99, 100 - friendChallenge.percentile)) : null;
+
+  async function handleCompare() {
+    if (heroPercent == null || typeof window === "undefined") return;
+    const challenge = encodeFriendChallenge({ percentile: heroPercent, stateAbbr: state.abbr, countyFips });
+    const params = new URLSearchParams(sp.toString());
+    params.set("from", challenge);
+    const compareUrl = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: shareTitle, text: shareText, url: compareUrl });
+        return;
+      } catch {}
+    }
+    try {
+      await navigator.clipboard.writeText(compareUrl);
+      setCompareToast(t.copied);
+    } catch {
+      setCompareToast(t.shareFailed);
+    } finally {
+      setTimeout(() => setCompareToast(null), 2800);
+    }
+  }
+
   return (
     <UsShell>
       <UsInputPanel />
 
       <div className="mx-auto max-w-md px-6 pb-16 pt-10">
+        {friendChallenge && friendPlaceName && friendOutEarnsPercent != null && !bannerDismissed && (
+          <div className="mb-6 flex items-start justify-between gap-3 rounded-xl border border-[#FBBF24]/30 bg-[#FBBF24]/10 px-4 py-3">
+            <p className="text-[13px] leading-snug text-white/85">
+              {formatTemplate(t.usFriendBannerTemplate, { percent: friendOutEarnsPercent, place: friendPlaceName })}
+            </p>
+            <button
+              type="button"
+              onClick={() => setBannerDismissed(true)}
+              aria-label={t.usDismiss}
+              className="shrink-0 rounded-full p-1 text-white/40 transition-colors hover:text-white"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
         <Link
           href={qs ? `/us/${state.abbr}?${qs}` : `/us/${state.abbr}`}
           className="mb-8 inline-flex items-center gap-1 text-[13px] text-white/50 transition-colors hover:text-white/80"
@@ -134,6 +192,9 @@ function UsCountyContent({
           </div>
         ) : (
           <div className="mb-8">
+            {/* Sentence-form headline — same numbers as the hero stats below,
+                phrased to read well as a social-share caption. */}
+            {headline && <p className="mb-4 text-[19px] font-extrabold leading-snug text-white">{headline}</p>}
             <div className="flex items-start justify-around gap-2">
               {incomeHeroStats.map((s) => (
                 <HeroStat key={s.key} label={s.label} percent={s.percent} />
@@ -149,6 +210,28 @@ function UsCountyContent({
                 max={500000}
                 averageValue={county?.medianHouseholdIncome ?? nationalMedianHouseholdIncome ?? 75000}
               />
+            </div>
+          </div>
+        )}
+
+        {/* ── Compare with a friend (see lib/usInput.ts's FriendChallenge) ── */}
+        {friendChallenge && heroPercent != null && (
+          <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.02] p-5">
+            <h2 className="mb-4 text-[15px] font-bold text-white/90">{t.usCompareCardTitle}</h2>
+            <div className="flex items-center justify-around gap-3">
+              <div className="text-center">
+                <p className="mb-1 text-[11px] text-white/55">{t.usCompareCardYou}</p>
+                <p className="font-extrabold text-[#FBBF24]" style={{ fontSize: "32px", lineHeight: 1 }}>
+                  {heroPercent}%
+                </p>
+              </div>
+              <div className="text-[12px] font-semibold text-white/30">vs</div>
+              <div className="text-center">
+                <p className="mb-1 text-[11px] text-white/55">{t.usCompareCardFriend}</p>
+                <p className="font-extrabold text-[#34D399]" style={{ fontSize: "32px", lineHeight: 1 }}>
+                  {friendChallenge.percentile}%
+                </p>
+              </div>
             </div>
           </div>
         )}
@@ -240,7 +323,7 @@ function UsCountyContent({
           </div>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-3">
           <ShareButtons
             cardRef={cardRef}
             width={CARD_WIDTH}
@@ -249,6 +332,23 @@ function UsCountyContent({
             shareText={shareText}
             downloadName={`us-income-${state.abbr}-${countyFips}.png`}
           />
+        </div>
+
+        <div className="relative mb-6">
+          {compareToast && (
+            <div className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-md bg-white px-5 py-3 text-[14px] font-semibold text-[#0D0D0D] shadow-lg">
+              {compareToast}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={handleCompare}
+            disabled={heroPercent == null}
+            className="flex w-full items-center justify-center gap-2 rounded-md border border-white/15 py-3 text-[14px] font-semibold text-white/80 transition-colors hover:border-[#34D399] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Link2 className="h-4 w-4" />
+            {t.usCompareButton}
+          </button>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
