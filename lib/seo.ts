@@ -6,6 +6,7 @@
 import type { Metadata } from "next";
 import { translations } from "./i18n";
 import type { AppLocale } from "./serverLocale";
+import { absoluteUrl } from "./site-url";
 
 const SITE_TITLE: Record<AppLocale, string> = {
   us: "What's Your US Income Percentile?",
@@ -42,15 +43,19 @@ export function pageMetadata(
   description: string,
   opts?: { image?: string; type?: "website" | "article"; publishedTime?: string }
 ): Metadata {
-  const image = opts?.image ?? OG_IMAGE[locale];
+  // Built as absolute URLs directly (not left relative for metadataBase to
+  // resolve) so canonical/og:url/og:image/twitter:image are all correct
+  // regardless of metadataBase — see lib/site-url.ts.
+  const url = absoluteUrl(pathname);
+  const image = absoluteUrl(opts?.image ?? OG_IMAGE[locale]);
   return {
     title,
     description,
-    alternates: { canonical: pathname },
+    alternates: { canonical: url },
     openGraph: {
       title,
       description,
-      url: pathname,
+      url,
       siteName: SITE_TITLE[locale],
       type: opts?.type ?? "website",
       locale: OG_LOCALE[locale],
