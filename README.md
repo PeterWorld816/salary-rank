@@ -30,12 +30,16 @@ Bureau / Federal Reserve data — county, nationwide, and by age band. Every cal
 ## Structure
 
 ```
+middleware.ts                            # "/" -> /us or /kr by Accept-Language; /kr/* rewrites to /us/*
 app/
-  page.tsx                              # redirects to /us
+  page.tsx                              # fallback redirect (middleware handles this first)
   us/
     page.tsx / UsHomeClient.tsx          # US map — pick a state
-    [state]/page.tsx / UsStateClient.tsx  # county map for that state
-    [state]/[county]/page.tsx / UsCountyClient.tsx  # county-level result
+    [state]/page.tsx / UsStateClient.tsx  # county map for that state; picking a county starts the result flow
+    [state]/[county]/page.tsx             # old single-page result URL — redirects into /us/result/overall
+    about/ · privacy/ · contact/          # static info pages
+    result/
+      overall/ state/ demographic/        # 3-step result flow (?st=&co=&d= carry state), see below
 data/us/
   stateIncome.json / countyIncome.json / nationalIncome.json
   netWorthPercentilesUS.json / 401kByAge.json / stateMeta.ts
@@ -43,9 +47,19 @@ data/us/
 lib/
   usIncomeCalc.ts / usInput.ts / usFormat.ts / usGeo.ts / percentileTable.ts
   i18n.ts                                # ko/en copy
+  serverLocale.ts / seo.ts / useLocaleBase.ts  # /us vs /kr locale plumbing
 components/us/
-  UsMap.tsx / UsGeoList.tsx / UsInputPanel.tsx / UsResultCard.tsx / UsShell.tsx
+  UsMap.tsx / UsGeoList.tsx / UsInputPanel.tsx / UsResultCard.tsx / UsShell.tsx / Footer.tsx
+  result/                                 # shared pieces for the 3-step result flow
 ```
+
+### Result flow
+
+Picking a county navigates to `/us/result/overall?st=<state>&co=<county>&d=<answers>`, then
+`/us/result/state` and `/us/result/demographic` (final step — share/save/compare-with-a-friend
+live here). Each step is a real page (own URL, works with browser back) that re-derives
+everything from the query string — nothing is kept in memory between steps. `/kr/result/**`
+serves the same pages in Korean via the middleware rewrite.
 
 ## Local dev
 

@@ -8,7 +8,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, Home } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { formatUsdCompact } from "@/lib/usFormat";
-import { US_AGE_BANDS, US_GENDERS, US_MARITAL_STATUSES, buildUsSearchParams, decodeUsInput, type UsInput } from "@/lib/usInput";
+import { US_AGE_BANDS, US_GENDERS, US_MARITAL_STATUSES, buildUsSearchParams, decodeUsInput, encodeUsInput, type UsInput } from "@/lib/usInput";
 
 const DEFAULT_INPUT: UsInput = {
   gender: "male",
@@ -145,9 +145,13 @@ export default function UsInputPanel({ collapsible = false }: { collapsible?: bo
   // own answers would silently drop the challenge they arrived with.
   const from = sp.get("from");
 
+  // Preserves every other param already on the URL (st/co on the result-step
+  // pages, from's friend challenge, etc.) — only d/lang are ours to rewrite.
   function apply(next: UsInput) {
     setForm(next);
-    const params = buildUsSearchParams(next, lang, from);
+    const params = new URLSearchParams(sp.toString());
+    params.set("d", encodeUsInput(next));
+    params.set("lang", lang);
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
@@ -155,10 +159,12 @@ export default function UsInputPanel({ collapsible = false }: { collapsible?: bo
   const maritalLabel = tr(US_MARITAL_STATUSES.find((m) => m.id === form.maritalStatus)?.label ?? { ko: "", en: "" });
   const ageLabel = tr(US_AGE_BANDS.find((b) => b.id === form.ageBand)?.label ?? { ko: "", en: "" });
   const summary = `${genderLabel} · ${maritalLabel} · ${ageLabel} · ${formatUsdCompact(form.annualIncome)}`;
-  // Always points at /us (the state-picker map) carrying the current
-  // answers along — same "d"/"lang" encoding apply() writes to the URL, just
-  // targeting a fixed destination instead of the current pathname.
-  const homeHref = `/us?${buildUsSearchParams(form, lang, from).toString()}`;
+  // Always points at /us or /kr (the state-picker map, matching whichever
+  // section we're in) carrying the current answers along — same "d"/"lang"
+  // encoding apply() writes to the URL, just targeting a fixed destination
+  // instead of the current pathname.
+  const localeBase = pathname.startsWith("/kr") ? "/kr" : "/us";
+  const homeHref = `${localeBase}?${buildUsSearchParams(form, lang, from).toString()}`;
 
   return (
     <div

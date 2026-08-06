@@ -111,6 +111,12 @@ export function getCountyIncomePercentile(countyFips: string, annualIncome: numb
   return clampDisplayPercent(getPercentileRankFromTable(county.percentileAnchors, annualIncome));
 }
 
+export function getStateIncomePercentile(stateFips: string, annualIncome: number): number | null {
+  const state = getStateIncome(stateFips);
+  if (!state || state.percentileAnchors.length < 2) return null;
+  return clampDisplayPercent(getPercentileRankFromTable(state.percentileAnchors, annualIncome));
+}
+
 export function getNationalIncomePercentile(annualIncome: number): number | null {
   const anchors = nationalIncomeData.percentileAnchors as PercentileAnchor[];
   if (anchors.length < 2) return null;

@@ -3,12 +3,14 @@ import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { FeatureCollection, Geometry } from "geojson";
 import { useLanguage } from "@/lib/LanguageProvider";
+import { useLocaleBase } from "@/lib/useLocaleBase";
 import { formatTemplate } from "@/lib/i18n";
 import UsShell from "@/components/us/UsShell";
 import UsInputPanel from "@/components/us/UsInputPanel";
 import UsMap, { type UsMapFeatureProps } from "@/components/us/UsMap";
 import UsGeoList from "@/components/us/UsGeoList";
 import IncomeLegend from "@/components/us/IncomeLegend";
+import Footer from "@/components/us/Footer";
 import Spinner from "@/components/Spinner";
 import { US_STATES, getStateByFips } from "@/data/us/stateMeta";
 import { getStateIncome, getAllStateIncomes, acs5YearRange } from "@/lib/usIncomeCalc";
@@ -20,6 +22,7 @@ function UsHomeContent({ geo }: { geo: FeatureCollection<Geometry, UsMapFeatureP
   const router = useRouter();
   const sp = useSearchParams();
   const qs = sp.toString();
+  const base = useLocaleBase();
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
 
   const values = getAllStateIncomes()
@@ -30,8 +33,8 @@ function UsHomeContent({ geo }: { geo: FeatureCollection<Geometry, UsMapFeatureP
 
   function getHref(fips: string) {
     const state = getStateByFips(fips);
-    if (!state) return "/us";
-    return qs ? `/us/${state.abbr}?${qs}` : `/us/${state.abbr}`;
+    if (!state) return base;
+    return qs ? `${base}/${state.abbr}?${qs}` : `${base}/${state.abbr}`;
   }
 
   function getLabel(fips: string) {
@@ -126,6 +129,8 @@ function UsHomeContent({ geo }: { geo: FeatureCollection<Geometry, UsMapFeatureP
           <p className="mt-1 text-[12px] text-white/30">{t.usDisclaimer}</p>
           <p className="mt-1 text-[12px] text-white/25">🔒 {t.privacyNotice}</p>
         </div>
+
+        <Footer />
       </div>
     </UsShell>
   );

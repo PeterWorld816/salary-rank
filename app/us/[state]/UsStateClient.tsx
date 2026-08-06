@@ -5,15 +5,18 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import type { FeatureCollection, Geometry } from "geojson";
 import { useLanguage } from "@/lib/LanguageProvider";
+import { useLocaleBase } from "@/lib/useLocaleBase";
 import { formatTemplate } from "@/lib/i18n";
 import UsShell from "@/components/us/UsShell";
 import UsInputPanel from "@/components/us/UsInputPanel";
 import UsMap, { type UsMapFeatureProps } from "@/components/us/UsMap";
 import UsGeoList from "@/components/us/UsGeoList";
 import IncomeLegend from "@/components/us/IncomeLegend";
+import Footer from "@/components/us/Footer";
 import Spinner from "@/components/Spinner";
 import type { StateMeta } from "@/data/us/stateMeta";
 import { getCountyIncome, getCountiesForState, getStateIncome, acs5YearRange, acs1Vintage } from "@/lib/usIncomeCalc";
+import { buildResultQuery } from "@/components/us/result/useResultLocation";
 import { incomeFill } from "@/components/us/colorScale";
 import { formatUsd } from "@/lib/usFormat";
 
@@ -24,6 +27,7 @@ function UsStateContent({
   const router = useRouter();
   const sp = useSearchParams();
   const qs = sp.toString();
+  const base = useLocaleBase();
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
 
   const values = getCountiesForState(state.fips)
@@ -34,8 +38,10 @@ function UsStateContent({
 
   const stateIncome = getStateIncome(state.fips);
 
+  // Picking a county starts the 3-step result flow at its first step, not
+  // the old single-page result — see app/us/result/**.
   function getHref(fips: string) {
-    return qs ? `/us/${state.abbr}/${fips}?${qs}` : `/us/${state.abbr}/${fips}`;
+    return `${base}/result/overall?${buildResultQuery(sp, state.abbr, fips)}`;
   }
 
   function getLabel(fips: string) {
@@ -71,7 +77,7 @@ function UsStateContent({
 
       <div className="mx-auto max-w-5xl px-4 pb-16 pt-8 sm:px-6">
         <Link
-          href={qs ? `/us?${qs}` : "/us"}
+          href={qs ? `${base}?${qs}` : base}
           className="mb-6 inline-flex items-center gap-1 text-[13px] text-white/50 transition-colors hover:text-white/80"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -162,6 +168,8 @@ function UsStateContent({
           <p className="text-[12px] text-white/40">{formatTemplate(t.usSourceCensus, { range: acs5YearRange })}</p>
           <p className="mt-1 text-[12px] text-white/30">{t.usDisclaimer}</p>
         </div>
+
+        <Footer />
       </div>
     </UsShell>
   );

@@ -5,7 +5,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getStateByAbbr } from "@/data/us/stateMeta";
-import { translations, isLangCode, DEFAULT_LANG } from "@/lib/i18n";
+import { translations, isLangCode } from "@/lib/i18n";
+import { getAppLocale, getLangForLocale } from "@/lib/serverLocale";
 import UsShell from "@/components/us/UsShell";
 
 type RawSP = Record<string, string | string[] | undefined>;
@@ -21,13 +22,16 @@ export default function UsPlacePage({
   if (!state) notFound();
 
   const langParam = Array.isArray(searchParams.lang) ? searchParams.lang[0] : searchParams.lang;
-  const lang = isLangCode(langParam) ? langParam : DEFAULT_LANG;
+  const lang = isLangCode(langParam) ? langParam : getLangForLocale(getAppLocale());
   const t = translations[lang];
 
   const qs = new URLSearchParams(
     Object.entries(searchParams).flatMap(([k, v]) => (v == null ? [] : [[k, Array.isArray(v) ? v[0] : v]]))
-  ).toString();
-  const countyHref = qs ? `/us/${state.abbr}/${params.county}?${qs}` : `/us/${state.abbr}/${params.county}`;
+  );
+  qs.set("st", params.state);
+  qs.set("co", params.county);
+  const base = getAppLocale() === "kr" ? "/kr" : "/us";
+  const countyHref = `${base}/result/overall?${qs.toString()}`;
 
   return (
     <UsShell>

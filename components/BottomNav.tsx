@@ -8,11 +8,12 @@ export default function BottomNav() {
   const pathname = usePathname();
   const { t } = useLanguage();
 
-  // /us is a fully separate dark-themed section with its own in-page
-  // navigation (back links, breadcrumbs) — the light bottom bar doesn't fit.
-  // In practice every real route is under /us (or redirects there), so this
-  // bar never renders — it only exists as a fallback for any other route.
-  if (pathname.startsWith("/us")) return null;
+  // /us and /kr are a fully separate dark-themed section with its own
+  // in-page navigation (back links, breadcrumbs) — the light bottom bar
+  // doesn't fit. In practice every real route is under /us or /kr (or
+  // redirects there), so this bar never renders — it only exists as a
+  // fallback for any other route.
+  if (pathname.startsWith("/us") || pathname.startsWith("/kr")) return null;
 
   const tabs = [{ href: "/", Icon: Home, label: t.home }];
 

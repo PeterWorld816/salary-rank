@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { translations } from "@/lib/i18n";
 import { getUsStatesGeo } from "@/lib/usGeo";
+import { getAppLocale, getOriginalPathname } from "@/lib/serverLocale";
+import { homeMetadata } from "@/lib/seo";
 import UsHomeClient from "./UsHomeClient";
 
-export const metadata: Metadata = {
-  title: translations.ko.usAppTitle,
-  description: translations.ko.usTagline,
-};
+export function generateMetadata(): Metadata {
+  return homeMetadata(getAppLocale(), getOriginalPathname());
+}
 
 export default function UsPage() {
   const geo = getUsStatesGeo();

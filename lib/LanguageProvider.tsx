@@ -5,7 +5,6 @@ import type { ReactNode } from "react";
 import {
   translations,
   LANGUAGES,
-  detectBrowserLang,
   pick,
   type LangCode,
   type Translations,
@@ -26,13 +25,20 @@ interface LangCtx {
 
 const LanguageContext = createContext<LangCtx | null>(null);
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<LangCode>("ko");
+// initialLang comes from the route (/us -> en, /kr -> ko, see app/layout.tsx +
+// middleware.ts) so SSR and first paint already match the URL. A saved manual
+// preference (LS_KEY) still overrides it once we're mounted, everywhere.
+export function LanguageProvider({ children, initialLang }: { children: ReactNode; initialLang: LangCode }) {
+  const [lang, setLangState] = useState<LangCode>(initialLang);
 
   useEffect(() => {
     const saved = localStorage.getItem(LS_KEY) as LangCode | null;
-    setLangState(saved ?? detectBrowserLang());
+    if (saved) setLangState(saved);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = lang === "ko" ? "ko" : "en";
+  }, [lang]);
 
   function setLang(code: LangCode) {
     localStorage.setItem(LS_KEY, code);
