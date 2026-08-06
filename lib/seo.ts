@@ -74,3 +74,18 @@ export function pageMetadata(
 export function homeMetadata(locale: AppLocale, pathname: string): Metadata {
   return pageMetadata(locale, pathname, SITE_TITLE[locale], SITE_DESCRIPTION[locale]);
 }
+
+// Points a /us/result/* page's og:image/twitter:image at the dynamic per-share
+// card (app/us/og/route.tsx) instead of the static OG_IMAGE fallback, carrying
+// over just the two params that image needs (d, st) plus the locale it should
+// render text in. Falls back to the static image when there's no "d" yet
+// (e.g. a bare /us/result/overall hit with no answers) so the route never
+// renders its own "no data" fallback where the static one already works.
+export function resultOgImage(locale: AppLocale, searchParams: Record<string, string | string[] | undefined>): string | undefined {
+  const d = searchParams.d;
+  if (typeof d !== "string") return undefined;
+  const params = new URLSearchParams({ d, lang: locale === "kr" ? "ko" : "en" });
+  const st = searchParams.st;
+  if (typeof st === "string") params.set("st", st);
+  return `/us/og?${params.toString()}`;
+}

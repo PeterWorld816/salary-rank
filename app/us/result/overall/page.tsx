@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getAppLocale, getOriginalPathname } from "@/lib/serverLocale";
-import { pageMetadata } from "@/lib/seo";
+import { pageMetadata, resultOgImage } from "@/lib/seo";
 import OverallResultClient from "./OverallResultClient";
 
 const META = {
@@ -14,10 +14,10 @@ const META = {
   },
 } as const;
 
-export function generateMetadata(): Metadata {
+export function generateMetadata({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }): Metadata {
   const locale = getAppLocale();
   const m = META[locale];
-  return pageMetadata(locale, getOriginalPathname(), m.title, m.description);
+  return pageMetadata(locale, getOriginalPathname(), m.title, m.description, { image: resultOgImage(locale, searchParams) });
 }
 
 export default function OverallResultPage() {
