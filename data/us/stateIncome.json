@@ -1,10 +1,10 @@
 {
   "meta": {
-    "source": "US Census Bureau, ACS 5-Year (2020-2024) & 1-Year (2024) Estimates, tables B19013 & B19001",
+    "source": "US Census Bureau, ACS 5-Year (2020-2024) & 1-Year (2024) Estimates, tables B19013, B19001, B19126, B19215 & B20017",
     "unit": "USD",
     "acs5Vintage": 2024,
     "acs5YearRange": "2020-2024",
-    "generatedAt": "2026-07-30T18:58:15.790Z",
+    "generatedAt": "2026-08-06T00:56:58.939Z",
     "acs1Vintage": 2024
   },
   "states": [
@@ -78,6 +78,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 49404,
+        "female": 33157
+      },
+      "byMaritalStatus": {
+        "married": 101926,
+        "single": 35721
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 66659,
@@ -219,6 +227,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 56729,
+        "female": 43575
+      },
+      "byMaritalStatus": {
+        "married": 128954,
+        "single": 59702
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 95665,
@@ -360,6 +376,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 50965,
+        "female": 40140
+      },
+      "byMaritalStatus": {
+        "married": 112105,
+        "single": 50719
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 81486,
@@ -501,6 +525,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 45196,
+        "female": 33913
+      },
+      "byMaritalStatus": {
+        "married": 92785,
+        "single": 34983
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 62106,
@@ -642,6 +674,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 55195,
+        "female": 42107
+      },
+      "byMaritalStatus": {
+        "married": 136752,
+        "single": 63335
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 100149,
@@ -783,6 +823,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 60488,
+        "female": 44398
+      },
+      "byMaritalStatus": {
+        "married": 135701,
+        "single": 60936
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 97113,
@@ -924,6 +972,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 61184,
+        "female": 44998
+      },
+      "byMaritalStatus": {
+        "married": 149039,
+        "single": 54568
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 96049,
@@ -1065,6 +1121,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 51658,
+        "female": 41152
+      },
+      "byMaritalStatus": {
+        "married": 122560,
+        "single": 50924
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 87534,
@@ -1206,6 +1270,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 88606,
+        "female": 77036
+      },
+      "byMaritalStatus": {
+        "married": 242981,
+        "single": 91910
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 109707,
@@ -1347,6 +1419,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 47554,
+        "female": 36752
+      },
+      "byMaritalStatus": {
+        "married": 106034,
+        "single": 46706
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 77735,
@@ -1488,6 +1568,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 50253,
+        "female": 37895
+      },
+      "byMaritalStatus": {
+        "married": 114998,
+        "single": 47454
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 79991,
@@ -1629,6 +1717,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 54394,
+        "female": 42018
+      },
+      "byMaritalStatus": {
+        "married": 133498,
+        "single": 58278
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 100745,
@@ -1770,6 +1866,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 48840,
+        "female": 31083
+      },
+      "byMaritalStatus": {
+        "married": 102154,
+        "single": 46275
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 81166,
@@ -1911,6 +2015,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 56296,
+        "female": 41075
+      },
+      "byMaritalStatus": {
+        "married": 127091,
+        "single": 50093
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 83211,
@@ -2052,6 +2164,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 51010,
+        "female": 36194
+      },
+      "byMaritalStatus": {
+        "married": 106272,
+        "single": 42125
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 71959,
@@ -2193,6 +2313,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 51585,
+        "female": 36731
+      },
+      "byMaritalStatus": {
+        "married": 111233,
+        "single": 44491
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 75501,
@@ -2334,6 +2462,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 50548,
+        "female": 35890
+      },
+      "byMaritalStatus": {
+        "married": 110507,
+        "single": 43284
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 75514,
@@ -2475,6 +2611,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 47324,
+        "female": 34618
+      },
+      "byMaritalStatus": {
+        "married": 97954,
+        "single": 37284
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 64526,
@@ -2616,6 +2760,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 49941,
+        "female": 32250
+      },
+      "byMaritalStatus": {
+        "married": 103015,
+        "single": 35287
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 60986,
@@ -2757,6 +2909,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 50269,
+        "female": 39126
+      },
+      "byMaritalStatus": {
+        "married": 109194,
+        "single": 43369
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 76442,
@@ -2898,6 +3058,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 63402,
+        "female": 50262
+      },
+      "byMaritalStatus": {
+        "married": 155311,
+        "single": 62625
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 102905,
@@ -3039,6 +3207,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 65943,
+        "female": 49062
+      },
+      "byMaritalStatus": {
+        "married": 158929,
+        "single": 61123
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 104828,
@@ -3180,6 +3356,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 51300,
+        "female": 35621
+      },
+      "byMaritalStatus": {
+        "married": 110391,
+        "single": 43188
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 72389,
@@ -3321,6 +3505,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 58371,
+        "female": 43813
+      },
+      "byMaritalStatus": {
+        "married": 129925,
+        "single": 52488
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 87117,
@@ -3462,6 +3654,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 45131,
+        "female": 31588
+      },
+      "byMaritalStatus": {
+        "married": 94437,
+        "single": 31201
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 59127,
@@ -3603,6 +3803,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 49936,
+        "female": 36795
+      },
+      "byMaritalStatus": {
+        "married": 106807,
+        "single": 41464
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 71589,
@@ -3744,6 +3952,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 47765,
+        "female": 34648
+      },
+      "byMaritalStatus": {
+        "married": 104628,
+        "single": 43461
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 75340,
@@ -3885,6 +4101,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 51479,
+        "female": 37198
+      },
+      "byMaritalStatus": {
+        "married": 113559,
+        "single": 44033
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 76376,
@@ -4026,6 +4250,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 48423,
+        "female": 37818
+      },
+      "byMaritalStatus": {
+        "married": 109702,
+        "single": 50180
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 81134,
@@ -4167,6 +4399,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 61635,
+        "female": 43873
+      },
+      "byMaritalStatus": {
+        "married": 137469,
+        "single": 55852
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 99782,
@@ -4308,6 +4548,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 64333,
+        "female": 46614
+      },
+      "byMaritalStatus": {
+        "married": 152364,
+        "single": 59515
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 104294,
@@ -4449,6 +4697,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 43578,
+        "female": 33708
+      },
+      "byMaritalStatus": {
+        "married": 99681,
+        "single": 41069
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 67816,
@@ -4590,6 +4846,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 57182,
+        "female": 45034
+      },
+      "byMaritalStatus": {
+        "married": 131509,
+        "single": 53448
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 85820,
@@ -4731,6 +4995,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 49116,
+        "female": 37444
+      },
+      "byMaritalStatus": {
+        "married": 108556,
+        "single": 43909
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 73958,
@@ -4872,6 +5144,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 53086,
+        "female": 38061
+      },
+      "byMaritalStatus": {
+        "married": 117721,
+        "single": 46658
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 77871,
@@ -5013,6 +5293,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 51435,
+        "female": 37051
+      },
+      "byMaritalStatus": {
+        "married": 111943,
+        "single": 42800
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 72212,
@@ -5154,6 +5442,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 47012,
+        "female": 33688
+      },
+      "byMaritalStatus": {
+        "married": 98986,
+        "single": 39121
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 66148,
@@ -5295,6 +5591,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 52173,
+        "female": 39811
+      },
+      "byMaritalStatus": {
+        "married": 118451,
+        "single": 51063
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 85220,
@@ -5436,6 +5740,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 54553,
+        "female": 39025
+      },
+      "byMaritalStatus": {
+        "married": 118451,
+        "single": 45541
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 77545,
@@ -5577,6 +5889,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 55852,
+        "female": 42581
+      },
+      "byMaritalStatus": {
+        "married": 133424,
+        "single": 50634
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 83504,
@@ -5718,6 +6038,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 48505,
+        "female": 35601
+      },
+      "byMaritalStatus": {
+        "married": 105187,
+        "single": 41238
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 72350,
@@ -5859,6 +6187,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 49869,
+        "female": 37722
+      },
+      "byMaritalStatus": {
+        "married": 109302,
+        "single": 45364
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 76881,
@@ -6000,6 +6336,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 48878,
+        "female": 36420
+      },
+      "byMaritalStatus": {
+        "married": 103699,
+        "single": 42377
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 71997,
@@ -6141,6 +6485,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 51337,
+        "female": 36550
+      },
+      "byMaritalStatus": {
+        "married": 115089,
+        "single": 48857
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 79721,
@@ -6282,6 +6634,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 55223,
+        "female": 33163
+      },
+      "byMaritalStatus": {
+        "married": 120307,
+        "single": 54412
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 96658,
@@ -6423,6 +6783,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 50096,
+        "female": 42174
+      },
+      "byMaritalStatus": {
+        "married": 119135,
+        "single": 48868
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 82730,
@@ -6564,6 +6932,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 59809,
+        "female": 42953
+      },
+      "byMaritalStatus": {
+        "married": 136059,
+        "single": 56367
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 92090,
@@ -6705,6 +7081,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 64373,
+        "female": 45374
+      },
+      "byMaritalStatus": {
+        "married": 134984,
+        "single": 61397
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 99389,
@@ -6846,6 +7230,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 47745,
+        "female": 33244
+      },
+      "byMaritalStatus": {
+        "married": 91390,
+        "single": 34162
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 60798,
@@ -6987,6 +7379,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 53912,
+        "female": 39495
+      },
+      "byMaritalStatus": {
+        "married": 114415,
+        "single": 47939
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 77488,
@@ -7128,6 +7528,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 53791,
+        "female": 34310
+      },
+      "byMaritalStatus": {
+        "married": 109945,
+        "single": 44412
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 75532,
@@ -7269,6 +7677,14 @@
           "value": 1
         }
       ],
+      "byGender": {
+        "male": 21609,
+        "female": 21193
+      },
+      "byMaritalStatus": {
+        "married": 43188,
+        "single": 16129
+      },
       "latest1Year": {
         "year": 2024,
         "medianHouseholdIncome": 27213,

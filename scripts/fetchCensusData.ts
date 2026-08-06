@@ -14,6 +14,24 @@
 //   B19001 = household income distributed across 16 fixed brackets, used to
 //            build a real "top X% needs $Y" percentile curve per geography
 //            instead of estimating one from the median alone.
+//   B20017 = median earnings in the past 12 months by sex, for the population
+//            16+ with earnings (individual earnings, not household income —
+//            _002E is male, _005E is female; verified against the live
+//            groups/B20017.json shell 2026-08).
+//   B19126 = median family income by family type — _002E is the
+//            married-couple family figure, used as the "married" reference.
+//   B19215 = median NONFAMILY household income by sex of householder —
+//            _001E is the all-householders total, used as the "single"
+//            reference. (The spec named B19216 as the alternative, but that
+//            table turned out to be an *aggregate*-income table, not
+//            median, and no ACS table cross-tabulates "married vs.
+//            nonfamily" directly — B19126 + B19215's totals are the closest
+//            real median-income tables to that split.)
+// None of these breakdowns exist below the state/county level, and small
+// counties routinely fail to publish them at all — ACS represents that with
+// the sentinel -666666666, which parseReliableMedian below turns into null
+// rather than a guess. A large margin of error (>= the estimate itself) is
+// treated the same way: too unreliable to show as someone's "reference".
 //
 // Vintages: county geographies are too small a population to appear in the
 // 1-year release, so counties only ever get the 5-year (multi-year average)
@@ -97,11 +115,40 @@ function parseMedian(raw: string | undefined): number | null {
   return Number.isFinite(n) && n >= 0 ? n : null;
 }
 
+// Same as parseMedian, but also nulls out estimates whose 90%-confidence
+// margin of error is at least as large as the estimate itself — the
+// standard rule of thumb for "this number could plausibly be anything,
+// including zero" on small-population ACS breakouts.
+function parseReliableMedian(estimateRaw: string | undefined, moeRaw: string | undefined): number | null {
+  const value = parseMedian(estimateRaw);
+  if (value == null) return null;
+  const moe = Number(moeRaw);
+  if (Number.isFinite(moe) && moe >= value) return null;
+  return value;
+}
+
 function parseCounts(record: Record<string, string>): number[] {
   return [Number(record.B19001_001E), ...B19001_VARS.map((v) => Number(record[v]))];
 }
 
-const GET_VARS = ["NAME", "B19013_001E", "B19001_001E", ...B19001_VARS].join(",");
+// Sex (B20017) and household-type (B19126/B19215) median income/earnings —
+// see the file-header comment for exactly which variable is which and why.
+const GENDER_MARITAL_VARS = ["B20017_002E", "B20017_002M", "B20017_005E", "B20017_005M", "B19126_002E", "B19126_002M", "B19215_001E", "B19215_001M"];
+
+function parseByGenderAndMaritalStatus(record: Record<string, string>) {
+  return {
+    byGender: {
+      male: parseReliableMedian(record.B20017_002E, record.B20017_002M),
+      female: parseReliableMedian(record.B20017_005E, record.B20017_005M),
+    },
+    byMaritalStatus: {
+      married: parseReliableMedian(record.B19126_002E, record.B19126_002M),
+      single: parseReliableMedian(record.B19215_001E, record.B19215_001M),
+    },
+  };
+}
+
+const GET_VARS = ["NAME", "B19013_001E", "B19001_001E", ...B19001_VARS, ...GENDER_MARITAL_VARS].join(",");
 
 async function fetchNational() {
   const rows = await censusGet(ACS5_BASE, { get: GET_VARS, for: "us:*" });
@@ -119,6 +166,7 @@ async function fetchStates() {
     name: record.NAME,
     medianHouseholdIncome: parseMedian(record.B19013_001E),
     percentileAnchors: buildIncomeAnchors(parseCounts(record)),
+    ...parseByGenderAndMaritalStatus(record),
   }));
 }
 
@@ -141,6 +189,7 @@ async function fetchCountiesForState(stateFips: string) {
     name: record.NAME,
     medianHouseholdIncome: parseMedian(record.B19013_001E),
     percentileAnchors: buildIncomeAnchors(parseCounts(record)),
+    ...parseByGenderAndMaritalStatus(record),
   }));
 }
 
@@ -163,7 +212,7 @@ async function main() {
   }
 
   const commonMeta = {
-    source: `US Census Bureau, ACS ${ACS5_YEAR_RANGE} 5-Year Estimates, tables B19013 & B19001`,
+    source: `US Census Bureau, ACS ${ACS5_YEAR_RANGE} 5-Year Estimates, tables B19013, B19001, B19126, B19215 & B20017`,
     unit: "USD" as const,
     acs5Vintage: ACS5_YEAR,
     acs5YearRange: ACS5_YEAR_RANGE,
@@ -194,7 +243,7 @@ async function main() {
   writeJson("data/us/stateIncome.json", {
     meta: {
       ...commonMeta,
-      source: `US Census Bureau, ACS 5-Year (${ACS5_YEAR_RANGE}) & 1-Year (${ACS1_YEAR}) Estimates, tables B19013 & B19001`,
+      source: `US Census Bureau, ACS 5-Year (${ACS5_YEAR_RANGE}) & 1-Year (${ACS1_YEAR}) Estimates, tables B19013, B19001, B19126, B19215 & B20017`,
       acs1Vintage: ACS1_YEAR,
     },
     states: statesWithLatest1Year,
@@ -217,7 +266,22 @@ async function main() {
 
   writeJson("data/us/countyIncome.json", { meta: commonMeta, counties });
 
-  console.log(`Done. ${states.length} states, ${counties.length} counties.`);
+  const pct = (n: number) => `${((n / counties.length) * 100).toFixed(1)}%`;
+  const withMale = counties.filter((c) => c.byGender.male != null).length;
+  const withFemale = counties.filter((c) => c.byGender.female != null).length;
+  const withMarried = counties.filter((c) => c.byMaritalStatus.married != null).length;
+  const withSingle = counties.filter((c) => c.byMaritalStatus.single != null).length;
+  const withBothGender = counties.filter((c) => c.byGender.male != null && c.byGender.female != null).length;
+  const withBothMarital = counties.filter((c) => c.byMaritalStatus.married != null && c.byMaritalStatus.single != null).length;
+  console.log(`\nCounty-level breakdown coverage (of ${counties.length} counties):`);
+  console.log(`  byGender.male:          ${withMale} (${pct(withMale)})`);
+  console.log(`  byGender.female:        ${withFemale} (${pct(withFemale)})`);
+  console.log(`  byGender (both):        ${withBothGender} (${pct(withBothGender)})`);
+  console.log(`  byMaritalStatus.married:${withMarried} (${pct(withMarried)})`);
+  console.log(`  byMaritalStatus.single: ${withSingle} (${pct(withSingle)})`);
+  console.log(`  byMaritalStatus (both): ${withBothMarital} (${pct(withBothMarital)})`);
+
+  console.log(`\nDone. ${states.length} states, ${counties.length} counties.`);
 }
 
 main().catch((err) => {

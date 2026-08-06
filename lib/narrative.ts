@@ -13,9 +13,20 @@ export type ResultHeadlineInput = {
   ageBandLabel?: string | null;
 };
 
-type Scope = "county" | "nationwide" | "age" | "netWorth";
+export type Scope = "county" | "nationwide" | "age" | "netWorth";
 
 type Candidate = { scope: Scope; percentile: number; place: string };
+
+// What buildResultHeadline actually picked — callers that show the
+// headline sentence next to a big percent number MUST use this percentile
+// (and scope, to label it), not some other percentile of their own, or the
+// two end up pointing at different metrics.
+export type ResultHeadline = {
+  text: string;
+  scope: Scope;
+  percentile: number;
+  place: string;
+};
 
 type TierTemplate = (pct100: number, subject: string, median: string) => string;
 
@@ -78,7 +89,9 @@ function sentenceFor(candidate: Candidate): string {
 // Picks whichever of county/nationwide/age is most impressive (lowest top-%
 // value) and turns it into a sentence. Falls back to net worth only when
 // none of the three income comparisons are available (e.g. no county data).
-export function buildResultHeadline(input: ResultHeadlineInput): string | null {
+// Returns the winning scope/percentile alongside the sentence so callers
+// can show a matching number instead of a different metric of their own.
+export function buildResultHeadline(input: ResultHeadlineInput): ResultHeadline | null {
   const candidates: Candidate[] = [];
   if (input.countyPercentile != null && input.countyName) {
     candidates.push({ scope: "county", percentile: input.countyPercentile, place: input.countyName });
@@ -99,5 +112,5 @@ export function buildResultHeadline(input: ResultHeadlineInput): string | null {
     best = { scope: "netWorth", percentile: input.netWorthPercentile, place: "" };
   }
 
-  return best ? sentenceFor(best) : null;
+  return best ? { text: sentenceFor(best), scope: best.scope, percentile: best.percentile, place: best.place } : null;
 }

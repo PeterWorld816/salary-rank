@@ -15,7 +15,7 @@ import {
   clampDisplayPercent,
   type PercentileAnchor,
 } from "@/lib/percentileTable";
-import type { UsAgeBandId } from "@/lib/usInput";
+import type { UsAgeBandId, UsGenderId, UsMaritalStatusId } from "@/lib/usInput";
 
 export type UsAcs1YearIncome = {
   year: number;
@@ -23,11 +23,23 @@ export type UsAcs1YearIncome = {
   percentileAnchors: PercentileAnchor[];
 };
 
+// Sex/household-type breakdowns (Census tables B20017, B19126, B19215 — see
+// scripts/fetchCensusData.ts) — either side is null when that geography's
+// estimate wasn't published or its margin of error was too large to trust.
+// Note byGender is *individual median earnings*, not household income like
+// the rest of this file — the two aren't directly comparable, but each is
+// the right "does someone like me clear the local median" reference for its
+// own axis.
+export type UsByGenderIncome = { male: number | null; female: number | null };
+export type UsByMaritalStatusIncome = { married: number | null; single: number | null };
+
 export type UsStateIncome = {
   fips: string;
   name: string;
   medianHouseholdIncome: number | null; // ACS 5-Year (acs5YearRange)
   percentileAnchors: PercentileAnchor[]; // ACS 5-Year
+  byGender: UsByGenderIncome;
+  byMaritalStatus: UsByMaritalStatusIncome;
   latest1Year: UsAcs1YearIncome | null; // ACS 1-Year, latest single year (acs1Vintage)
 };
 
@@ -42,6 +54,8 @@ export type UsCountyIncome = {
   name: string;
   medianHouseholdIncome: number | null;
   percentileAnchors: PercentileAnchor[];
+  byGender: UsByGenderIncome;
+  byMaritalStatus: UsByMaritalStatusIncome;
 };
 
 const stateByFips = new Map<string, UsStateIncome>((stateIncomeData.states as UsStateIncome[]).map((s) => [s.fips, s]));
@@ -63,6 +77,29 @@ export function getCountyIncome(countyFips: string): UsCountyIncome | null {
 
 export function getCountiesForState(stateFips: string): UsCountyIncome[] {
   return (countyIncomeData.counties as UsCountyIncome[]).filter((c) => c.stateFips === stateFips);
+}
+
+// The "reference value" shown alongside a county's overall median — prefers
+// the gender/marital-status-specific figure, and falls back to the overall
+// household median (with usedFallback: true) when this county never
+// published (or couldn't reliably estimate) that breakdown. Never guesses.
+export type UsIncomeReference = { value: number | null; usedFallback: boolean };
+
+function resolveReference(detail: number | null, overallMedian: number | null): UsIncomeReference {
+  if (detail != null) return { value: detail, usedFallback: false };
+  return { value: overallMedian, usedFallback: overallMedian != null };
+}
+
+export function getCountyGenderIncomeReference(countyFips: string, gender: UsGenderId): UsIncomeReference | null {
+  const county = getCountyIncome(countyFips);
+  if (!county) return null;
+  return resolveReference(county.byGender[gender], county.medianHouseholdIncome);
+}
+
+export function getCountyMaritalIncomeReference(countyFips: string, maritalStatus: UsMaritalStatusId): UsIncomeReference | null {
+  const county = getCountyIncome(countyFips);
+  if (!county) return null;
+  return resolveReference(county.byMaritalStatus[maritalStatus], county.medianHouseholdIncome);
 }
 
 // null = no data yet (data/us/countyIncome.json still a placeholder, or this

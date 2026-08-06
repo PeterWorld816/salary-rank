@@ -126,7 +126,7 @@ function CurrencyField({
   );
 }
 
-export default function UsInputPanel() {
+export default function UsInputPanel({ collapsible = false }: { collapsible?: boolean } = {}) {
   const { t, tr, lang } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
@@ -135,7 +135,9 @@ export default function UsInputPanel() {
   // No "d" param yet means this is a fresh visit with nothing changed —
   // start expanded so the fields are immediately visible. Once a "d" param
   // exists (a shared link, or coming back from the map), start collapsed.
-  const [expanded, setExpanded] = useState(() => !sp.get("d"));
+  // `collapsible` (the result page) always starts collapsed regardless — the
+  // summary chip is enough there, and the full form is one tap away.
+  const [expanded, setExpanded] = useState(() => (collapsible ? false : !sp.get("d")));
 
   // A pending "compare with a friend" challenge (see lib/usInput.ts) lives in
   // its own query param, independent of "d" — apply()/homeHref below rebuild
@@ -186,14 +188,16 @@ export default function UsInputPanel() {
             onClick={() => setExpanded((v) => !v)}
             aria-expanded={expanded}
             aria-label={expanded ? "Collapse input panel" : "Expand input panel"}
-            className="flex w-fit items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[12px] font-semibold text-white/70 transition-colors hover:text-white md:hidden"
+            className={`flex w-fit items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[12px] font-semibold text-white/70 transition-colors hover:text-white ${
+              collapsible ? "" : "md:hidden"
+            }`}
           >
             {!expanded && <span className="max-w-[260px] truncate">{summary}</span>}
             <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`} />
           </button>
         </div>
 
-        <div className={expanded ? "flex flex-col gap-5" : "hidden md:flex md:flex-col md:gap-5"}>
+        <div className={expanded ? "flex flex-col gap-5" : collapsible ? "hidden" : "hidden md:flex md:flex-col md:gap-5"}>
           <div>
             <h3 className="mb-2.5 text-[12px] font-semibold text-white/50">{t.usGroupWho}</h3>
             <div className="flex flex-col gap-3 sm:flex-row sm:gap-6">

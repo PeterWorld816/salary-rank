@@ -41,6 +41,8 @@ export interface Translations {
 
   // ── "Compare with a friend" challenge links (see lib/usInput.ts)
   usCompareButton: string;
+  usCompareCopiedShort: string;
+  usCompareCopyFailedHelper: string;
   usFriendBannerTemplate: string; // template: {percent}, {place}
   usCompareCardTitle: string;
   usCompareCardYou: string;
@@ -81,11 +83,16 @@ export interface Translations {
   usCountyNoDataTitle: string;
   usCountyNoDataDesc: string;
   usCountyResultLabel: string;
+  usSeeFullBreakdown: string;
   usCountyMedianLabel: string;
+  usByGenderMedianLabelTemplate: string; // template: {gender}
+  usByMaritalMedianLabelTemplate: string; // template: {status}
+  usRegionalDetailFallbackNote: string;
   usStateMedianLabel: string;
   usAcs1YearLabel: string; // template: {year}
   usAcs5YearLabel: string; // template: {range}
   usCountyPercentileHeroLabel: string;
+  usHeadlineCountyLabelTemplate: string; // template: {county} — the summary card's dynamic label, e.g. "Top in Lee County"
   usNationalPercentileHeroLabel: string;
   usAgeIncomePercentileHeroLabel: string; // template: {age}
   usNetWorthSectionTitle: string;
@@ -123,6 +130,8 @@ export const translations: Record<LangCode, Translations> = {
     usDismiss: "닫기",
 
     usCompareButton: "친구와 비교하기",
+    usCompareCopiedShort: "복사됨!",
+    usCompareCopyFailedHelper: "자동 복사에 실패했어요 — 아래 링크를 직접 복사해주세요.",
     usFriendBannerTemplate: "친구가 {place} 주민의 {percent}%보다 소득이 높아요 — 내 정보를 입력하고 비교해보세요.",
     usCompareCardTitle: "당신 vs. 친구",
     usCompareCardYou: "당신",
@@ -161,11 +170,16 @@ export const translations: Record<LangCode, Translations> = {
     usCountyNoDataTitle: "이 지역 데이터는 아직 준비 중이에요",
     usCountyNoDataDesc: "scripts/fetchCensusData.ts를 Census API 키와 함께 실행하면 실제 수치로 채워집니다.",
     usCountyResultLabel: "내 소득·자산 위치는?",
+    usSeeFullBreakdown: "전체 내역 보기",
     usCountyMedianLabel: "이 카운티 가구 중위소득",
+    usByGenderMedianLabelTemplate: "{gender} 개인소득 중앙값 (이 카운티)",
+    usByMaritalMedianLabelTemplate: "{status} 가구소득 중앙값 (이 카운티)",
+    usRegionalDetailFallbackNote: "이 지역은 세부 데이터가 없어 전체 평균을 사용했어요.",
     usStateMedianLabel: "이 주 가구 중위소득",
     usAcs1YearLabel: "최신 연간 추정치 (1-Year, {year})",
     usAcs5YearLabel: "5개년 평균 (5-Year, {range})",
     usCountyPercentileHeroLabel: "이 카운티 기준 소득 상위",
+    usHeadlineCountyLabelTemplate: "{county} 기준 소득 상위",
     usNationalPercentileHeroLabel: "미국 전체 기준 소득 상위",
     usAgeIncomePercentileHeroLabel: "전국 동일 연령대({age}) 기준 소득 상위",
     usNetWorthSectionTitle: "순자산 순위",
@@ -201,6 +215,8 @@ export const translations: Record<LangCode, Translations> = {
     usDismiss: "Dismiss",
 
     usCompareButton: "Compare with a friend",
+    usCompareCopiedShort: "Copied!",
+    usCompareCopyFailedHelper: "Couldn't copy automatically — copy the link below:",
     usFriendBannerTemplate: "A friend out-earns {percent}% of people in {place} — enter your info to see how you compare.",
     usCompareCardTitle: "You vs. your friend",
     usCompareCardYou: "You",
@@ -239,11 +255,16 @@ export const translations: Record<LangCode, Translations> = {
     usCountyNoDataTitle: "Data for this area isn't loaded yet",
     usCountyNoDataDesc: "Run scripts/fetchCensusData.ts with a Census API key to populate real figures.",
     usCountyResultLabel: "Where do you rank?",
+    usSeeFullBreakdown: "See full breakdown",
     usCountyMedianLabel: "This county's median household income",
+    usByGenderMedianLabelTemplate: "{gender} median earnings (this county)",
+    usByMaritalMedianLabelTemplate: "{status} household median income (this county)",
+    usRegionalDetailFallbackNote: "This area has no detailed data — using the overall average.",
     usStateMedianLabel: "This state's median household income",
     usAcs1YearLabel: "Latest annual estimate (1-Year, {year})",
     usAcs5YearLabel: "5-Year average (5-Year, {range})",
     usCountyPercentileHeroLabel: "Top in this county",
+    usHeadlineCountyLabelTemplate: "Top in {county}",
     usNationalPercentileHeroLabel: "Top nationwide",
     usAgeIncomePercentileHeroLabel: "Top nationwide for your age ({age})",
     usNetWorthSectionTitle: "Net worth rank",

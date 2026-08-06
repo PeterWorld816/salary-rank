@@ -1,6 +1,7 @@
 import type { RefObject } from "react";
 import { translations, formatTemplate, type LangCode } from "@/lib/i18n";
 import { formatUsd as fmtUsd } from "@/lib/usFormat";
+import { getTier, type Tier } from "@/lib/tier";
 import DistributionChart from "@/components/DistributionChart";
 
 export const CARD_WIDTH = 360;
@@ -9,6 +10,31 @@ export const CARD_HEIGHT = 780;
 const ACCENT = "#34D399";
 // Gold, not mint — keeps the hero percent visually distinct from the map.
 const HERO_ACCENT = "#FBBF24";
+
+// Inline styles only (no Tailwind) — matches every other element in this
+// card, which html-to-image rasterizes straight from computed styles.
+function TierBadge({ tier }: { tier: Tier }) {
+  const color = tier.color === "gold" ? HERO_ACCENT : ACCENT;
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "4px",
+        borderRadius: "999px",
+        border: `1px solid ${color}66`,
+        background: `${color}26`,
+        color,
+        fontSize: "11px",
+        fontWeight: 800,
+        padding: "3px 10px",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {tier.emoji} {tier.label}
+    </span>
+  );
+}
 
 function Row({ label, sub, value }: { label: string; sub: string; value: string }) {
   return (
@@ -54,6 +80,8 @@ export default function UsResultCard({
   const t = translations[lang];
   const heroPercent = countyPercentile ?? nationalPercentile;
   const heroLabel = countyPercentile != null ? t.usCountyPercentileHeroLabel : t.usNationalPercentileHeroLabel;
+  const incomeTier = heroPercent != null ? getTier(heroPercent) : null;
+  const netWorthTier = getTier(netWorthPercentile);
 
   return (
     <div
@@ -90,8 +118,11 @@ export default function UsResultCard({
         {countyName}, {stateName}
       </div>
 
-      {heroPercent != null ? (
+      {heroPercent != null && incomeTier != null ? (
         <>
+          <div style={{ display: "flex", marginBottom: "6px" }}>
+            <TierBadge tier={incomeTier} />
+          </div>
           <div style={{ display: "flex", color: "rgba(255,255,255,0.6)", fontSize: "14px", marginBottom: "2px" }}>
             {heroLabel}
           </div>
@@ -134,6 +165,9 @@ export default function UsResultCard({
             value={formatTemplate(t.topPercentTemplate, { percent: ageIncomePercentile })}
           />
         )}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+          <TierBadge tier={netWorthTier} />
+        </div>
         <Row label={t.usNetWorthSectionTitle} sub={t.usNetWorthNationalBadge} value={formatTemplate(t.topPercentTemplate, { percent: netWorthPercentile })} />
         {ageNetWorthPercentile != null && (
           <Row
