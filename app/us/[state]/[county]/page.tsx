@@ -37,9 +37,10 @@ function resolve(params: Params) {
 }
 
 export function generateMetadata({ params }: { params: Params }): Metadata {
-  const locale = getAppLocale();
+  // EXPERIMENT: hardcoded, no headers() call
+  const locale: "us" | "kr" = "us";
   const resolved = resolve(params);
-  if (!resolved) return pageMetadata(locale, getOriginalPathname(), siteTitle(locale), siteDescription(locale));
+  if (!resolved) return pageMetadata(locale, `/us/${params.state}/${params.county}`, siteTitle(locale), siteDescription(locale));
 
   const { county } = resolved;
   const t = translations[getLangForLocale(locale)];
@@ -49,7 +50,7 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
       ? formatTemplate(t.usCountyMetaDescriptionTemplate, { county: county.name, median: formatUsd(county.medianHouseholdIncome) })
       : siteDescription(locale);
 
-  return pageMetadata(locale, getOriginalPathname(), title, description);
+  return pageMetadata(locale, `/us/${params.state}/${params.county}`, title, description);
 }
 
 export default function UsCountyPage({ params }: { params: Params }) {
@@ -57,10 +58,10 @@ export default function UsCountyPage({ params }: { params: Params }) {
   if (!resolved) notFound();
   const { state, county } = resolved;
 
-  const locale = getAppLocale();
-  const lang = getLangForLocale(locale);
+  // EXPERIMENT: hardcoded, no headers() call
+  const lang = getLangForLocale("us");
   const t = translations[lang];
-  const base = locale === "kr" ? "/kr" : "/us";
+  const base = "/us";
 
   const median = county.medianHouseholdIncome;
   const statePercentile = median != null ? getStateIncomePercentile(state.fips, median) : null;
@@ -121,7 +122,7 @@ export default function UsCountyPage({ params }: { params: Params }) {
               </div>
             )}
 
-            <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_GEO!} className="mb-8" />
+            {/* EXPERIMENT: AdSlot temporarily removed to isolate its effect */}
 
             <div className="mb-8 rounded-xl border border-[#34D399]/25 bg-[#34D399]/[0.06] px-5 py-5 text-center">
               <p className="mb-1.5 text-[15px] font-bold text-white">
