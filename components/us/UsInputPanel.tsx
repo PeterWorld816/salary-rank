@@ -7,6 +7,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, Home } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
+import { formatTemplate } from "@/lib/i18n";
 import { formatUsdCompact } from "@/lib/usFormat";
 import { US_AGE_BANDS, US_GENDERS, US_MARITAL_STATUSES, buildUsSearchParams, decodeUsInput, encodeUsInput, type UsInput } from "@/lib/usInput";
 
@@ -15,8 +16,11 @@ const DEFAULT_INPUT: UsInput = {
   maritalStatus: "single",
   ageBand: "25-34",
   annualIncome: 75000,
-  netWorth: 20000,
-  k401: 20000,
+  // Unset by default — these live behind the "more accurate result" section
+  // (collapsed by default) so the fast path to a first result is income
+  // alone, not all six fields.
+  netWorth: null,
+  k401: null,
 };
 
 export function readUsInputFromSearch(sp: URLSearchParams | { get(k: string): string | null }): UsInput {
@@ -69,9 +73,9 @@ function formatDigits(digits: string): string {
 }
 
 function CurrencyField({
-  label, helper, value, onCommit,
-}: { label: string; helper?: string; value: number; onCommit: (v: number) => void }) {
-  const [text, setText] = useState(() => formatDigits(String(Math.round(value))));
+  label, helper, placeholder, value, onCommit,
+}: { label: string; helper?: string; placeholder?: string; value: number | null; onCommit: (v: number | null) => void }) {
+  const [text, setText] = useState(() => (value == null ? "" : formatDigits(String(Math.round(value)))));
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const input = e.target;
@@ -101,8 +105,15 @@ function CurrencyField({
   }
 
   function handleBlur() {
-    const n = Number(digitsOf(text) || "0");
-    const committed = Number.isFinite(n) && n >= 0 ? n : value;
+    const digits = digitsOf(text);
+    if (digits === "") {
+      // Leaving it blank commits "not provided", not 0 — these fields are
+      // optional, and 0 would be a real (wrong) answer, not "unset".
+      onCommit(null);
+      return;
+    }
+    const n = Number(digits);
+    const committed = Number.isFinite(n) && n >= 0 ? n : (value ?? 0);
     onCommit(committed);
     setText(formatDigits(String(committed)));
   }
@@ -116,6 +127,7 @@ function CurrencyField({
           type="text"
           inputMode="numeric"
           value={text}
+          placeholder={placeholder}
           onChange={handleChange}
           onBlur={handleBlur}
           className={fieldClass}
@@ -138,6 +150,10 @@ export default function UsInputPanel({ collapsible = false }: { collapsible?: bo
   // `collapsible` (the result page) always starts collapsed regardless — the
   // summary chip is enough there, and the full form is one tap away.
   const [expanded, setExpanded] = useState(() => (collapsible ? false : !sp.get("d")));
+  // Net worth/401k live behind their own toggle, collapsed by default — see
+  // requirement: income is the only field standing between a visitor and
+  // their first result, net worth/401k are for a *more accurate* one.
+  const [moreExpanded, setMoreExpanded] = useState(false);
 
   // A pending "compare with a friend" challenge (see lib/usInput.ts) lives in
   // its own query param, independent of "d" — apply()/homeHref below rebuild
@@ -165,6 +181,10 @@ export default function UsInputPanel({ collapsible = false }: { collapsible?: bo
   // instead of the current pathname.
   const localeBase = pathname.startsWith("/kr") ? "/kr" : "/us";
   const homeHref = `${localeBase}?${buildUsSearchParams(form, lang, from).toString()}`;
+  // Skips the map entirely — a nationwide result only needs income (plus the
+  // gender/marital/age defaults), never a state/county pick. See
+  // OverallResultClient, which renders a full result even with no ?st=/?co=.
+  const nationalResultHref = `${localeBase}/result/overall?${buildUsSearchParams(form, lang, from).toString()}`;
 
   return (
     <div
@@ -234,22 +254,48 @@ export default function UsInputPanel({ collapsible = false }: { collapsible?: bo
               <CurrencyField
                 label={t.usFieldIncome}
                 value={form.annualIncome}
-                onCommit={(v) => apply({ ...form, annualIncome: v })}
-              />
-              <CurrencyField
-                label={t.usFieldNetWorth}
-                helper={t.usFieldNetWorthHelper}
-                value={form.netWorth}
-                onCommit={(v) => apply({ ...form, netWorth: v })}
-              />
-              <CurrencyField
-                label={t.usFieldK401}
-                helper={t.usFieldK401Helper}
-                value={form.k401}
-                onCommit={(v) => apply({ ...form, k401: v })}
+                onCommit={(v) => apply({ ...form, annualIncome: v ?? form.annualIncome })}
               />
             </div>
+
+            <button
+              type="button"
+              onClick={() => setMoreExpanded((v) => !v)}
+              aria-expanded={moreExpanded}
+              className="mt-3 flex items-center gap-1.5 text-[12px] font-semibold text-white/50 transition-colors hover:text-white/80"
+            >
+              <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition-transform ${moreExpanded ? "rotate-180" : ""}`} />
+              {t.usAdvancedSectionLabel}
+            </button>
+
+            {moreExpanded && (
+              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <CurrencyField
+                  label={t.usFieldNetWorth}
+                  helper={t.usFieldNetWorthHelper}
+                  placeholder={t.usFieldOptionalPlaceholder}
+                  value={form.netWorth}
+                  onCommit={(v) => apply({ ...form, netWorth: v })}
+                />
+                <CurrencyField
+                  label={t.usFieldK401}
+                  helper={t.usFieldK401Helper}
+                  placeholder={t.usFieldOptionalPlaceholder}
+                  value={form.k401}
+                  onCommit={(v) => apply({ ...form, k401: v })}
+                />
+              </div>
+            )}
           </div>
+
+          {!collapsible && (
+            <Link
+              href={nationalResultHref}
+              className="flex w-full items-center justify-center rounded-md bg-[#34D399] py-3 text-[14px] font-bold text-[#04120C] transition-all hover:brightness-110 active:scale-[0.99]"
+            >
+              {formatTemplate(t.usSeeNationalResultButtonTemplate, { income: formatUsdCompact(form.annualIncome) })}
+            </Link>
+          )}
         </div>
       </div>
     </div>

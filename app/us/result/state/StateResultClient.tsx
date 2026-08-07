@@ -18,7 +18,7 @@ import { useResultLocation } from "@/components/us/result/useResultLocation";
 import { StepHeader, NextStepButton, MissingLocationFallback } from "@/components/us/result/StepChrome";
 import { HeroStat, NoDataCard } from "@/components/us/result/ResultBits";
 
-function StateResultContent() {
+function StateResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
   const { t, lang } = useLanguage();
   const base = useLocaleBase();
   const loc = useResultLocation();
@@ -82,6 +82,8 @@ function StateResultContent() {
           </>
         )}
 
+        {adSlot}
+
         <div className="mt-8">
           <NextStepButton href={`${base}/result/demographic?${qs}`} />
         </div>
@@ -90,7 +92,7 @@ function StateResultContent() {
   );
 }
 
-export default function StateResultClient() {
+export default function StateResultClient({ adSlot }: { adSlot?: React.ReactNode }) {
   return (
     <Suspense
       fallback={
@@ -101,7 +103,7 @@ export default function StateResultClient() {
         </UsShell>
       }
     >
-      <StateResultContent />
+      <StateResultContent adSlot={adSlot} />
     </Suspense>
   );
 }

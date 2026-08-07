@@ -11,3 +11,11 @@ export function formatUsdCompact(value: number): string {
   if (value >= 1_000) return `$${Math.round(value / 1000)}K`;
   return `$${Math.round(value)}`;
 }
+
+// data/us/countyIncome.json names counties "X County, {State}" — drop the
+// redundant state suffix when listing counties on a page already scoped to
+// that state (the state's own page, or one of its counties' "nearby" list).
+export function stripStateSuffix(name: string, stateName: string): string {
+  const suffix = `, ${stateName}`;
+  return name.endsWith(suffix) ? name.slice(0, -suffix.length) : name;
+}

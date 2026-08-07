@@ -29,9 +29,9 @@ import Spinner from "@/components/Spinner";
 import Link from "next/link";
 import { useResultLocation } from "@/components/us/result/useResultLocation";
 import { StepHeader, MissingLocationFallback } from "@/components/us/result/StepChrome";
-import { HeroStat, StatRow } from "@/components/us/result/ResultBits";
+import { HeroStat, StatRow, NoDataCard } from "@/components/us/result/ResultBits";
 
-function DemographicResultContent() {
+function DemographicResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
   const { t, tr, lang } = useLanguage();
   const base = useLocaleBase();
   const loc = useResultLocation();
@@ -62,18 +62,24 @@ function DemographicResultContent() {
   const maritalLabel = tr(US_MARITAL_STATUSES.find((m) => m.id === input.maritalStatus)?.label ?? { ko: "", en: "" });
 
   const ageIncomePercentile = getNationalIncomePercentileForAgeBand(input.ageBand, input.annualIncome);
-  const netWorthPercentile = getUsNetWorthPercentile(input.netWorth);
-  const ageNetWorthPercentile = getUsNetWorthPercentileForAgeBand(input.ageBand, input.netWorth);
-  const netWorthTier = getTier(netWorthPercentile);
-  const k401 = getK401Comparison(input.ageBand, input.k401);
+  // Both optional now (see lib/usInput.ts) — null means "not entered", not
+  // "zero", so nothing downstream gets computed until the user fills them in
+  // via the input panel's "more accurate result" section.
+  const netWorthPercentile = input.netWorth != null ? getUsNetWorthPercentile(input.netWorth) : null;
+  const ageNetWorthPercentile =
+    input.netWorth != null ? getUsNetWorthPercentileForAgeBand(input.ageBand, input.netWorth) : null;
+  const netWorthTier = netWorthPercentile != null ? getTier(netWorthPercentile) : null;
+  const k401 = input.k401 != null ? getK401Comparison(input.ageBand, input.k401) : null;
 
   const genderIncomeRef = getCountyGenderIncomeReference(countyFips, input.gender);
   const maritalIncomeRef = getCountyMaritalIncomeReference(countyFips, input.maritalStatus);
 
   const shareTitle = `${t.usAppTitle} — ${county.name}, ${state.name}`;
+  // "US earners" — deliberately the nationwide figure, not the county-scoped
+  // `heroPercent`, per spec.
   const shareText =
-    heroPercent != null
-      ? `${county.name}, ${state.name} · ${formatTemplate(t.topPercentTemplate, { percent: heroPercent })}`
+    nationalPercentile != null
+      ? formatTemplate(t.usShareTextTemplate, { percent: nationalPercentile })
       : `${county.name}, ${state.name}`;
 
   // Points the shared link at step 1 (not this page) so whoever opens it
@@ -149,51 +155,63 @@ function DemographicResultContent() {
           </span>
         </div>
         <div className="mb-8">
-          <div className="mb-3 flex items-center justify-center gap-2">
-            <TierBadge tier={netWorthTier} />
-            <span className="font-extrabold text-[#34D399]" style={{ fontSize: "20px" }}>
-              {netWorthPercentile}%
-            </span>
-          </div>
-          <div className="flex items-start justify-around gap-2">
-            <HeroStat label={t.usNetWorthHeroLabel} percent={netWorthPercentile} />
-            {ageNetWorthPercentile != null && (
-              <HeroStat
-                label={formatTemplate(t.usAgeNetWorthPercentileHeroLabel, { age: ageBandLabel })}
-                percent={ageNetWorthPercentile}
-              />
-            )}
-          </div>
-          <div className="mt-4 flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.02] p-5">
-            <DistributionChart
-              monthlySalary={input.netWorth}
-              width={260}
-              lang={lang}
-              dark
-              min={1000}
-              max={15000000}
-              averageValue={overallUsNetWorth.median}
-            />
-          </div>
+          {netWorthPercentile == null || input.netWorth == null ? (
+            <NoDataCard title={t.usNetWorthMissingTitle} desc={t.usNetWorthMissingDesc} />
+          ) : (
+            <>
+              <div className="mb-3 flex items-center justify-center gap-2">
+                {netWorthTier && <TierBadge tier={netWorthTier} />}
+                <span className="font-extrabold text-[#34D399]" style={{ fontSize: "20px" }}>
+                  {netWorthPercentile}%
+                </span>
+              </div>
+              <div className="flex items-start justify-around gap-2">
+                <HeroStat label={t.usNetWorthHeroLabel} percent={netWorthPercentile} />
+                {ageNetWorthPercentile != null && (
+                  <HeroStat
+                    label={formatTemplate(t.usAgeNetWorthPercentileHeroLabel, { age: ageBandLabel })}
+                    percent={ageNetWorthPercentile}
+                  />
+                )}
+              </div>
+              <div className="mt-4 flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.02] p-5">
+                <DistributionChart
+                  monthlySalary={input.netWorth}
+                  width={260}
+                  lang={lang}
+                  dark
+                  min={1000}
+                  max={15000000}
+                  averageValue={overallUsNetWorth.median}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         {/* ── 401k comparison ── */}
         <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.02] p-5">
           <h2 className="text-[15px] font-bold text-white/90">{t.usK401SectionTitle}</h2>
-          <p className="mb-3 text-[12px] text-white/40">{t.usK401Helper}</p>
-          <div className="divide-y divide-white/[0.06]">
-            <StatRow label={t.usFieldAgeBand} sub={ageBandLabel} value={formatUsd(input.k401)} />
-            <StatRow
-              label={formatTemplate(t.usK401VsAverageTemplate, { percent: k401.vsAveragePercent })}
-              sub={`avg ${formatUsd(k401.average)}`}
-              value={`${k401.vsAveragePercent}%`}
-            />
-            <StatRow
-              label={formatTemplate(t.usK401VsMedianTemplate, { percent: k401.vsMedianPercent })}
-              sub={`median ${formatUsd(k401.median)}`}
-              value={`${k401.vsMedianPercent}%`}
-            />
-          </div>
+          {k401 == null || input.k401 == null ? (
+            <NoDataCard title={t.usK401MissingTitle} desc={t.usK401MissingDesc} />
+          ) : (
+            <>
+              <p className="mb-3 text-[12px] text-white/40">{t.usK401Helper}</p>
+              <div className="divide-y divide-white/[0.06]">
+                <StatRow label={t.usFieldAgeBand} sub={ageBandLabel} value={formatUsd(input.k401)} />
+                <StatRow
+                  label={formatTemplate(t.usK401VsAverageTemplate, { percent: k401.vsAveragePercent })}
+                  sub={`avg ${formatUsd(k401.average)}`}
+                  value={`${k401.vsAveragePercent}%`}
+                />
+                <StatRow
+                  label={formatTemplate(t.usK401VsMedianTemplate, { percent: k401.vsMedianPercent })}
+                  sub={`median ${formatUsd(k401.median)}`}
+                  value={`${k401.vsMedianPercent}%`}
+                />
+              </div>
+            </>
+          )}
         </div>
 
         {/* ── Place-level teaser (scaffolding only, see /us/[state]/[county]/[place]) ── */}
@@ -220,8 +238,8 @@ function DemographicResultContent() {
               nationalPercentile={nationalPercentile}
               annualIncome={input.annualIncome}
               netWorthPercentile={netWorthPercentile}
-              netWorth={input.netWorth}
-              k401VsMedianPercent={k401.vsMedianPercent}
+              k401Balance={input.k401}
+              k401VsMedianPercent={k401?.vsMedianPercent ?? null}
               ageBandLabel={ageBandLabel}
               ageIncomePercentile={ageIncomePercentile}
               ageNetWorthPercentile={ageNetWorthPercentile}
@@ -287,13 +305,18 @@ function DemographicResultContent() {
           </Link>
         </div>
 
+        {/* Kept well clear of the result card / share / compare buttons
+            above — an ad placed near those risks accidental taps, which
+            AdSense treats as invalid click activity, not just bad UX. */}
+        {adSlot}
+
         <Footer />
       </div>
     </UsShell>
   );
 }
 
-export default function DemographicResultClient() {
+export default function DemographicResultClient({ adSlot }: { adSlot?: React.ReactNode }) {
   return (
     <Suspense
       fallback={
@@ -304,7 +327,7 @@ export default function DemographicResultClient() {
         </UsShell>
       }
     >
-      <DemographicResultContent />
+      <DemographicResultContent adSlot={adSlot} />
     </Suspense>
   );
 }

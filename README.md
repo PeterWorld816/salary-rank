@@ -35,8 +35,9 @@ app/
   page.tsx                              # fallback redirect (middleware handles this first)
   us/
     page.tsx / UsHomeClient.tsx          # US map — pick a state
-    [state]/page.tsx / UsStateClient.tsx  # county map for that state; picking a county starts the result flow
-    [state]/[county]/page.tsx             # old single-page result URL — redirects into /us/result/overall
+    [state]/page.tsx / UsStateClient.tsx  # county map + SEO content (median income, thresholds, county directory); picking a county starts the result flow
+    [state]/[county]/page.tsx             # SEO landing page per county (ISR, revalidate=86400) — CTAs into /us/result/overall.
+                                           # Old single-page result links (?d=...) redirect there via middleware.ts instead.
     about/ · privacy/ · contact/          # static info pages
     result/
       overall/ state/ demographic/        # 3-step result flow (?st=&co=&d= carry state), see below
@@ -75,3 +76,11 @@ Open http://localhost:3000
 ```bash
 vercel
 ```
+
+## AdSense
+
+- `NEXT_PUBLIC_ADSENSE_CLIENT_ID` env var — the AdSense publisher ID ads actually load with
+  (see `lib/ads.ts`; ads only render on the exact host `NEXT_PUBLIC_SITE_URL` points at).
+- `public/ads.txt` — has a placeholder publisher ID (`pub-0000000000000000`). Replace it with
+  your real AdSense publisher ID (same value as `NEXT_PUBLIC_ADSENSE_CLIENT_ID` above) before
+  going live — AdSense won't serve ads on the domain without a matching `ads.txt` entry.

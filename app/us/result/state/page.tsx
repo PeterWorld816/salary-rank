@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getAppLocale, getOriginalPathname } from "@/lib/serverLocale";
 import { pageMetadata, resultOgImage } from "@/lib/seo";
+import AdSlot from "@/components/ads/AdSlot";
 import StateResultClient from "./StateResultClient";
 
 const META = {
@@ -21,5 +22,5 @@ export function generateMetadata({ searchParams }: { searchParams: Record<string
 }
 
 export default function StateResultPage() {
-  return <StateResultClient />;
+  return <StateResultClient adSlot={<AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_RESULT!} className="mb-8" />} />;
 }

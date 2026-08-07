@@ -7,6 +7,7 @@ import { pageMetadata } from "@/lib/seo";
 import { getAllInsights } from "@/lib/insights";
 import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
+import AdSlot from "@/components/ads/AdSlot";
 
 export function generateMetadata(): Metadata {
   const locale = getAppLocale();
@@ -60,6 +61,8 @@ export default function InsightsListPage() {
             ))}
           </ul>
         )}
+
+        <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_INSIGHTS_BOTTOM!} className="mt-10" />
 
         <Footer />
       </div>

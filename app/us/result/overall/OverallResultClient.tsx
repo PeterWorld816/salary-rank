@@ -11,27 +11,19 @@ import UsShell from "@/components/us/UsShell";
 import UsInputPanel from "@/components/us/UsInputPanel";
 import Spinner from "@/components/Spinner";
 import { useResultLocation } from "@/components/us/result/useResultLocation";
-import { StepHeader, NextStepButton, MissingLocationFallback } from "@/components/us/result/StepChrome";
+import { StepHeader, NextStepButton } from "@/components/us/result/StepChrome";
 import { NoDataCard, StatRow } from "@/components/us/result/ResultBits";
 
-function OverallResultContent() {
+function OverallResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
   const { t } = useLanguage();
   const base = useLocaleBase();
   const loc = useResultLocation();
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
-  if (!loc.ready) {
-    return (
-      <UsShell>
-        <UsInputPanel collapsible />
-        <div className="mx-auto max-w-md px-6 pb-16 pt-10">
-          <MissingLocationFallback />
-        </div>
-      </UsShell>
-    );
-  }
-
-  const { state, county, input, qs, from } = loc;
+  // This step only ever needs `input.annualIncome` — "your income vs. the
+  // entire US" doesn't depend on a state/county pick, so it renders with or
+  // without one (`loc.ready` only gates the title/back-link/next-step below).
+  const { input, qs, from } = loc;
   const nationalPercentile = getNationalIncomePercentile(input.annualIncome);
 
   const friendChallenge = decodeFriendChallenge(from ?? "");
@@ -61,10 +53,18 @@ function OverallResultContent() {
 
         <StepHeader
           step="overall"
-          title={`${county.name}, ${state.name}`}
+          title={loc.ready ? `${loc.county.name}, ${loc.state.name}` : t.usAppTitle}
           intro={t.usResultOverallIntro}
-          backHref={qs ? `${base}/${state.abbr}?${qs}` : `${base}/${state.abbr}`}
-          backLabel={t.usBackToStateMap}
+          backHref={
+            loc.ready
+              ? qs
+                ? `${base}/${loc.state.abbr}?${qs}`
+                : `${base}/${loc.state.abbr}`
+              : qs
+                ? `${base}?${qs}`
+                : base
+          }
+          backLabel={loc.ready ? t.usBackToStateMap : t.usBackToUsMap}
           qs={qs}
         />
 
@@ -91,13 +91,19 @@ function OverallResultContent() {
           )}
         </div>
 
-        <NextStepButton href={`${base}/result/state?${qs}`} />
+        {adSlot}
+
+        {loc.ready ? (
+          <NextStepButton href={`${base}/result/state?${qs}`} />
+        ) : (
+          <NextStepButton href={qs ? `${base}?${qs}` : base} label={t.usResultMissingLocationCta} />
+        )}
       </div>
     </UsShell>
   );
 }
 
-export default function OverallResultClient() {
+export default function OverallResultClient({ adSlot }: { adSlot?: React.ReactNode }) {
   return (
     <Suspense
       fallback={
@@ -108,7 +114,7 @@ export default function OverallResultClient() {
         </UsShell>
       }
     >
-      <OverallResultContent />
+      <OverallResultContent adSlot={adSlot} />
     </Suspense>
   );
 }

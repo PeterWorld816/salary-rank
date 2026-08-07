@@ -75,14 +75,14 @@ export function StepHeader({
   );
 }
 
-export function NextStepButton({ href }: { href: string }) {
+export function NextStepButton({ href, label }: { href: string; label?: string }) {
   const { t } = useLanguage();
   return (
     <Link
       href={href}
       className="mb-8 flex w-full items-center justify-center gap-1.5 rounded-md bg-[#34D399] py-3.5 text-[15px] font-bold text-[#04120C] transition-all hover:brightness-110 active:scale-[0.99]"
     >
-      {t.usResultNextButton}
+      {label ?? t.usResultNextButton}
       <ChevronRight className="h-4 w-4" />
     </Link>
   );

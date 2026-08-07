@@ -20,8 +20,12 @@ export type ResultLocation =
       qs: string;
       from: string | null;
     }
-  | { ready: false; qs: string };
+  | { ready: false; input: UsInput; qs: string; from: string | null };
 
+// `input`/`qs`/`from` are on both branches — a national result (income vs.
+// the whole US) only ever needs `input`, never a county, so callers like
+// OverallResultContent can read those without narrowing on `ready` first.
+// Only the county/state-specific fields require `ready: true`.
 export function useResultLocation(): ResultLocation {
   const sp = useSearchParams();
   const qs = sp.toString();
@@ -29,18 +33,12 @@ export function useResultLocation(): ResultLocation {
   const countyFips = sp.get("co");
   const state = stateAbbr ? getStateByAbbr(stateAbbr) : null;
   const county = countyFips ? getCountyIncome(countyFips) : null;
+  const input = readUsInputFromSearch(sp);
+  const from = sp.get("from");
 
-  if (!state || !county || !countyFips) return { ready: false, qs };
+  if (!state || !county || !countyFips) return { ready: false, input, qs, from };
 
-  return {
-    ready: true,
-    state,
-    county,
-    countyFips,
-    input: readUsInputFromSearch(sp),
-    qs,
-    from: sp.get("from"),
-  };
+  return { ready: true, state, county, countyFips, input, qs, from };
 }
 
 // Builds the ?st=&co=... query string a map click starts the result flow

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getAppLocale, getOriginalPathname } from "@/lib/serverLocale";
 import { pageMetadata, resultOgImage } from "@/lib/seo";
+import AdSlot from "@/components/ads/AdSlot";
 import OverallResultClient from "./OverallResultClient";
 
 const META = {
@@ -21,5 +22,8 @@ export function generateMetadata({ searchParams }: { searchParams: Record<string
 }
 
 export default function OverallResultPage() {
-  return <OverallResultClient />;
+  // AdSlot is a Server Component (headers()-based production-host check) —
+  // OverallResultClient is "use client", so it's rendered here and threaded
+  // down as a prop instead of imported there directly.
+  return <OverallResultClient adSlot={<AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_RESULT!} className="mb-8" />} />;
 }

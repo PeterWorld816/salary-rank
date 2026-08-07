@@ -2,6 +2,7 @@
 // Census Places API (B19013, for=place:*) once built. For now this just
 // confirms the route shape and points back to the county result page, which
 // already has the real numbers.
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getStateByAbbr } from "@/data/us/stateMeta";
@@ -10,6 +11,13 @@ import { getAppLocale, getLangForLocale } from "@/lib/serverLocale";
 import UsShell from "@/components/us/UsShell";
 
 type RawSP = Record<string, string | string[] | undefined>;
+
+// This page is an empty shell with no real content yet — keep it out of the
+// index until the Census Places data lands, so it doesn't get crawled/ranked
+// as a thin/duplicate page in the meantime.
+export function generateMetadata(): Metadata {
+  return { robots: { index: false, follow: false } };
+}
 
 export default function UsPlacePage({
   params,

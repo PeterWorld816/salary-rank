@@ -47,6 +47,39 @@ export function clampDisplayPercent(percent: number): number {
   return Math.min(99, Math.max(1, Math.round(percent)));
 }
 
+function interpolateValue(a: PercentileAnchor, b: PercentileAnchor, topPercent: number): number {
+  const logPercentA = Math.log(a.topPercent);
+  const logPercentB = Math.log(b.topPercent);
+  const t = (Math.log(topPercent) - logPercentA) / (logPercentB - logPercentA);
+  const logValueA = Math.log(a.value);
+  const logValueB = Math.log(b.value);
+  return Math.exp(logValueA + t * (logValueB - logValueA));
+}
+
+// Inverse of getPercentileRankFromTable: given "top X%", returns the income/net-worth
+// value at that boundary (e.g. "what do you need to earn to be in the top 10% here?").
+// Same log-log interpolation curve, just solved the other direction.
+export function getValueAtPercentile(table: PercentileAnchor[], topPercent: number): number | null {
+  if (table.length < 2) return null;
+  const clamped = Math.min(MAX_PERCENT, Math.max(MIN_PERCENT, topPercent));
+
+  const top = table[0];
+  const bottom = table[table.length - 1];
+
+  if (clamped <= top.topPercent) {
+    return interpolateValue(top, table[1], clamped);
+  }
+  if (clamped >= bottom.topPercent) {
+    return interpolateValue(table[table.length - 2], bottom, clamped);
+  }
+
+  const upperIndex = table.findIndex((anchor, i) => {
+    const next = table[i + 1];
+    return next && clamped >= anchor.topPercent && clamped <= next.topPercent;
+  });
+  return interpolateValue(table[upperIndex], table[upperIndex + 1], clamped);
+}
+
 // 같은 분포 모양(로그정규 형태)을 하고 평균만 다르다고 가정하고, 그룹 평균 대비로
 // value를 다시 스케일링한 뒤 같은 전체 백분위표에 대조한다 — "동일 연령대/직종/
 // 지역/결혼상태에서는 상위 몇 %?"를 구하는 근사 방법.

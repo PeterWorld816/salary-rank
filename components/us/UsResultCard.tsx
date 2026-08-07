@@ -55,7 +55,7 @@ export default function UsResultCard({
   nationalPercentile,
   annualIncome,
   netWorthPercentile,
-  netWorth,
+  k401Balance,
   k401VsMedianPercent,
   ageBandLabel,
   ageIncomePercentile,
@@ -68,9 +68,9 @@ export default function UsResultCard({
   countyPercentile: number | null;
   nationalPercentile: number | null;
   annualIncome: number;
-  netWorthPercentile: number;
-  netWorth: number;
-  k401VsMedianPercent: number;
+  netWorthPercentile: number | null;
+  k401Balance: number | null;
+  k401VsMedianPercent: number | null;
   ageBandLabel: string;
   ageIncomePercentile: number | null;
   ageNetWorthPercentile: number | null;
@@ -81,7 +81,7 @@ export default function UsResultCard({
   const heroPercent = countyPercentile ?? nationalPercentile;
   const heroLabel = countyPercentile != null ? t.usCountyPercentileHeroLabel : t.usNationalPercentileHeroLabel;
   const incomeTier = heroPercent != null ? getTier(heroPercent) : null;
-  const netWorthTier = getTier(netWorthPercentile);
+  const netWorthTier = netWorthPercentile != null ? getTier(netWorthPercentile) : null;
 
   return (
     <div
@@ -165,10 +165,18 @@ export default function UsResultCard({
             value={formatTemplate(t.topPercentTemplate, { percent: ageIncomePercentile })}
           />
         )}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-          <TierBadge tier={netWorthTier} />
-        </div>
-        <Row label={t.usNetWorthSectionTitle} sub={t.usNetWorthNationalBadge} value={formatTemplate(t.topPercentTemplate, { percent: netWorthPercentile })} />
+        {netWorthTier && netWorthPercentile != null && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+              <TierBadge tier={netWorthTier} />
+            </div>
+            <Row
+              label={t.usNetWorthSectionTitle}
+              sub={t.usNetWorthNationalBadge}
+              value={formatTemplate(t.topPercentTemplate, { percent: netWorthPercentile })}
+            />
+          </>
+        )}
         {ageNetWorthPercentile != null && (
           <Row
             label={formatTemplate(t.usAgeNetWorthPercentileHeroLabel, { age: ageBandLabel })}
@@ -176,7 +184,13 @@ export default function UsResultCard({
             value={formatTemplate(t.topPercentTemplate, { percent: ageNetWorthPercentile })}
           />
         )}
-        <Row label={t.usK401SectionTitle} sub={fmtUsd(netWorth)} value={formatTemplate(t.usK401VsMedianTemplate, { percent: k401VsMedianPercent })} />
+        {k401VsMedianPercent != null && (
+          <Row
+            label={t.usK401SectionTitle}
+            sub={k401Balance != null ? fmtUsd(k401Balance) : ""}
+            value={formatTemplate(t.usK401VsMedianTemplate, { percent: k401VsMedianPercent })}
+          />
+        )}
       </div>
 
       <div

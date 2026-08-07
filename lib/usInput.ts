@@ -29,17 +29,36 @@ export type UsInput = {
   gender: UsGenderId;
   maritalStatus: UsMaritalStatusId;
   ageBand: UsAgeBandId;
-  annualIncome: number; // USD, pre-tax
-  netWorth: number; // USD, excludes 401k
-  k401: number; // USD, 401k balance only
+  annualIncome: number; // USD, pre-tax — the one field required to see a result
+  netWorth: number | null; // USD, excludes 401k — optional, behind the "more accurate result" section
+  k401: number | null; // USD, 401k balance only — optional, same section
 };
 
 const GENDER_IDS: UsGenderId[] = ["male", "female"];
 const MARITAL_IDS: UsMaritalStatusId[] = ["single", "married"];
 const AGE_BAND_IDS = US_AGE_BANDS.map((b) => b.id);
 
+// netWorth/k401 encode as an empty segment when unset — "male.single.25-34.75000.."
+// still splits into exactly 6 parts, so the format doesn't need a version bump.
+function encodeOptional(value: number | null): string {
+  return value == null ? "" : String(value);
+}
+
+function decodeOptional(raw: string): { value: number | null; valid: boolean } {
+  if (raw === "") return { value: null, valid: true };
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 ? { value: n, valid: true } : { value: null, valid: false };
+}
+
 export function encodeUsInput(input: UsInput): string {
-  return [input.gender, input.maritalStatus, input.ageBand, input.annualIncome, input.netWorth, input.k401].join(".");
+  return [
+    input.gender,
+    input.maritalStatus,
+    input.ageBand,
+    input.annualIncome,
+    encodeOptional(input.netWorth),
+    encodeOptional(input.k401),
+  ].join(".");
 }
 
 export function decodeUsInput(raw: string): UsInput | null {
@@ -48,8 +67,8 @@ export function decodeUsInput(raw: string): UsInput | null {
   const [gender, maritalStatus, ageBand, incomeRaw, netWorthRaw, k401Raw] = parts;
 
   const annualIncome = Number(incomeRaw);
-  const netWorth = Number(netWorthRaw);
-  const k401 = Number(k401Raw);
+  const netWorth = decodeOptional(netWorthRaw);
+  const k401 = decodeOptional(k401Raw);
 
   if (
     !GENDER_IDS.includes(gender as UsGenderId) ||
@@ -57,10 +76,8 @@ export function decodeUsInput(raw: string): UsInput | null {
     !AGE_BAND_IDS.includes(ageBand as UsAgeBandId) ||
     !Number.isFinite(annualIncome) ||
     annualIncome <= 0 ||
-    !Number.isFinite(netWorth) ||
-    netWorth < 0 ||
-    !Number.isFinite(k401) ||
-    k401 < 0
+    !netWorth.valid ||
+    !k401.valid
   ) {
     return null;
   }
@@ -70,8 +87,8 @@ export function decodeUsInput(raw: string): UsInput | null {
     maritalStatus: maritalStatus as UsMaritalStatusId,
     ageBand: ageBand as UsAgeBandId,
     annualIncome,
-    netWorth,
-    k401,
+    netWorth: netWorth.value,
+    k401: k401.value,
   };
 }
 

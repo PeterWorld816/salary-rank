@@ -72,6 +72,9 @@ export interface Translations {
   usFieldNetWorthHelper: string;
   usFieldK401: string;
   usFieldK401Helper: string;
+  usFieldOptionalPlaceholder: string;
+  usAdvancedSectionLabel: string;
+  usSeeNationalResultButtonTemplate: string; // template: {income}
   usApply: string;
   usMapTitle: string;
   usMapHint: string;
@@ -106,16 +109,38 @@ export interface Translations {
   usNetWorthNationalBadge: string;
   usNetWorthHeroLabel: string;
   usAgeNetWorthPercentileHeroLabel: string; // template: {age}
+  usNetWorthMissingTitle: string;
+  usNetWorthMissingDesc: string;
   usK401SectionTitle: string;
   usK401Helper: string;
   usK401VsAverageTemplate: string; // template: {percent}
   usK401VsMedianTemplate: string; // template: {percent}
+  usK401MissingTitle: string;
+  usK401MissingDesc: string;
+  usShareTextTemplate: string; // template: {percent} — ShareButtons' shareText, national percentile
   usPlaceTitle: string;
   usPlaceComingSoon: string;
   usPlaceBackToCounty: string;
   usSourceCensus: string;
   usSourceScf: string;
   usSourceVanguard: string;
+
+  // ── State SEO landing content (app/us/[state]/UsStateClient.tsx)
+  usStateIncomeIntroTemplate: string; // template: {state}, {median}, {percent}
+  usStateThresholdsHeadingTemplate: string; // template: {state}
+  usStateCountyListHeadingTemplate: string; // template: {state}
+  usStateCountyListHint: string;
+
+  // ── County SEO landing page (app/us/[state]/[county]/page.tsx)
+  usCountyPageHeadingTemplate: string; // template: {county}
+  usCountyMetaDescriptionTemplate: string; // template: {county}, {median}
+  usCountyVsStateTemplate: string; // template: {percent}, {state}
+  usCountyVsNationalTemplate: string; // template: {percent}
+  usCountyThresholdsHeading: string;
+  usCountyNearbyHeading: string;
+  usCountyCtaHeadingTemplate: string; // template: {county}
+  usCountyCtaBody: string;
+  usCountyCtaButton: string;
 
   // ── Multi-step result flow (app/us/result/**)
   usStatePercentileHeroLabel: string;
@@ -190,6 +215,9 @@ export const translations: Record<LangCode, Translations> = {
     usFieldNetWorthHelper: "401k를 제외한 총자산에서 부채를 뺀 금액",
     usFieldK401: "401k 잔액 (USD)",
     usFieldK401Helper: "401k는 순자산과 별도로 입력해주세요",
+    usFieldOptionalPlaceholder: "선택 입력",
+    usAdvancedSectionLabel: "더 정확한 결과 보기",
+    usSeeNationalResultButtonTemplate: "{income}가 전국에서 상위 몇 %인지 보기",
     usApply: "적용하고 지도 보기",
     usMapTitle: "주(State)를 선택하세요",
     usMapHint: "지도 위에서 주를 클릭하면 카운티별 지도로 이동해요",
@@ -220,6 +248,11 @@ export const translations: Record<LangCode, Translations> = {
     usHeadlineCountyLabelTemplate: "{county} 기준 소득 상위",
     usNationalPercentileHeroLabel: "미국 전체 기준 소득 상위",
     usAgeIncomePercentileHeroLabel: "전국 동일 연령대({age}) 기준 소득 상위",
+    usNetWorthMissingTitle: "순자산을 입력하면 확인할 수 있어요",
+    usNetWorthMissingDesc: "위쪽 '더 정확한 결과 보기'를 열고 입력해주세요 — 10초면 돼요.",
+    usK401MissingTitle: "401(k) 잔액을 입력하면 확인할 수 있어요",
+    usK401MissingDesc: "위쪽 '더 정확한 결과 보기'를 열고 입력해주세요 — 10초면 돼요.",
+    usShareTextTemplate: "나는 미국 소득 상위 {percent}%. 당신은?",
     usNetWorthSectionTitle: "순자산 순위",
     usNetWorthNationalBadge: "🇺🇸 전국 기준",
     usNetWorthHeroLabel: "당신은 미국 전체 자산 상위",
@@ -234,6 +267,21 @@ export const translations: Record<LangCode, Translations> = {
     usSourceCensus: "US Census Bureau, ACS {range} 5-Year Estimates (B19013, B19001)",
     usSourceScf: "Federal Reserve, 2022 Survey of Consumer Finances",
     usSourceVanguard: "Vanguard, How America Saves 2026",
+
+    usStateIncomeIntroTemplate: "{state}의 가구 중위소득은 {median}으로, 전국 기준 상위 {percent}%에 해당해요.",
+    usStateThresholdsHeadingTemplate: "{state} 소득 상위 기준선",
+    usStateCountyListHeadingTemplate: "{state}의 카운티",
+    usStateCountyListHint: "카운티별 가구 중위소득이에요. 카운티를 누르면 자세한 내용을 볼 수 있어요.",
+
+    usCountyPageHeadingTemplate: "{county} 소득은 상위 몇 %?",
+    usCountyMetaDescriptionTemplate: "{county}의 가구 중위소득은 {median}이에요. 상위 1%·5%·10%·25% 소득 기준선과 함께 내 소득이 어디쯤인지 확인해보세요.",
+    usCountyVsStateTemplate: "{state} 기준으로는 상위 {percent}%에 해당해요.",
+    usCountyVsNationalTemplate: "전국 기준으로는 상위 {percent}%예요.",
+    usCountyThresholdsHeading: "이 카운티의 소득 기준선",
+    usCountyNearbyHeading: "인접 카운티",
+    usCountyCtaHeadingTemplate: "{county}에서 내 순위를 정확히 확인해보세요",
+    usCountyCtaBody: "소득·성별·결혼상태·연령대를 입력하면 30초 안에 확인할 수 있어요.",
+    usCountyCtaButton: "내 순위 계산하기",
 
     usStatePercentileHeroLabel: "이 주 기준 소득 상위",
     usResultStepOverallLabel: "전체 순위",
@@ -304,6 +352,9 @@ export const translations: Record<LangCode, Translations> = {
     usFieldNetWorthHelper: "Total assets minus debt, not counting your 401k",
     usFieldK401: "401k balance (USD)",
     usFieldK401Helper: "Enter this separately from net worth",
+    usFieldOptionalPlaceholder: "Optional",
+    usAdvancedSectionLabel: "Get a more accurate result",
+    usSeeNationalResultButtonTemplate: "See where {income} ranks nationwide",
     usApply: "Apply & view map",
     usMapTitle: "Select a state",
     usMapHint: "Click a state on the map to see its county-level map",
@@ -334,6 +385,11 @@ export const translations: Record<LangCode, Translations> = {
     usHeadlineCountyLabelTemplate: "Top in {county}",
     usNationalPercentileHeroLabel: "Top nationwide",
     usAgeIncomePercentileHeroLabel: "Top nationwide for your age ({age})",
+    usNetWorthMissingTitle: "Add your net worth to see this",
+    usNetWorthMissingDesc: "Open \"Get a more accurate result\" above and add it — takes 10 seconds.",
+    usK401MissingTitle: "Add your 401(k) balance to see this",
+    usK401MissingDesc: "Open \"Get a more accurate result\" above and add it — takes 10 seconds.",
+    usShareTextTemplate: "I'm in the top {percent}% of US earners. Where do you rank?",
     usNetWorthSectionTitle: "Net worth rank",
     usNetWorthNationalBadge: "🇺🇸 Nationwide only",
     usNetWorthHeroLabel: "You're in the nationwide top",
@@ -348,6 +404,21 @@ export const translations: Record<LangCode, Translations> = {
     usSourceCensus: "US Census Bureau, ACS {range} 5-Year Estimates (B19013, B19001)",
     usSourceScf: "Federal Reserve, 2022 Survey of Consumer Finances",
     usSourceVanguard: "Vanguard, How America Saves 2026",
+
+    usStateIncomeIntroTemplate: "The median household income in {state} is {median}, which ranks in the top {percent}% nationally.",
+    usStateThresholdsHeadingTemplate: "Top income thresholds in {state}",
+    usStateCountyListHeadingTemplate: "Counties in {state}",
+    usStateCountyListHint: "Median household income by county. Tap a county to see the full breakdown.",
+
+    usCountyPageHeadingTemplate: "What's your income percentile in {county}?",
+    usCountyMetaDescriptionTemplate: "The median household income in {county} is {median}. See how your salary compares — plus top 1%, 5%, 10%, and 25% income thresholds.",
+    usCountyVsStateTemplate: "That ranks in the top {percent}% of {state}.",
+    usCountyVsNationalTemplate: "Nationally, it ranks in the top {percent}%.",
+    usCountyThresholdsHeading: "Income thresholds in this county",
+    usCountyNearbyHeading: "Nearby counties",
+    usCountyCtaHeadingTemplate: "See exactly where you rank in {county}",
+    usCountyCtaBody: "Enter your income, gender, marital status, and age — takes about 30 seconds.",
+    usCountyCtaButton: "Calculate my percentile",
 
     usStatePercentileHeroLabel: "Top in this state",
     usResultStepOverallLabel: "Overall",

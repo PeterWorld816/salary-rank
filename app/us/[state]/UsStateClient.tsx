@@ -15,14 +15,23 @@ import IncomeLegend from "@/components/us/IncomeLegend";
 import Footer from "@/components/us/Footer";
 import Spinner from "@/components/Spinner";
 import type { StateMeta } from "@/data/us/stateMeta";
-import { getCountyIncome, getCountiesForState, getStateIncome, acs5YearRange, acs1Vintage } from "@/lib/usIncomeCalc";
+import {
+  getCountyIncome,
+  getCountiesForState,
+  getStateIncome,
+  getNationalIncomePercentile,
+  acs5YearRange,
+  acs1Vintage,
+} from "@/lib/usIncomeCalc";
+import { getValueAtPercentile } from "@/lib/percentileTable";
 import { buildResultQuery } from "@/components/us/result/useResultLocation";
 import { incomeFill } from "@/components/us/colorScale";
-import { formatUsd } from "@/lib/usFormat";
+import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
+import { PercentileThresholds } from "@/components/us/PercentileThresholds";
 
 function UsStateContent({
-  state, geo,
-}: { state: StateMeta; geo: FeatureCollection<Geometry, UsMapFeatureProps> }) {
+  state, geo, countyListAdSlot,
+}: { state: StateMeta; geo: FeatureCollection<Geometry, UsMapFeatureProps>; countyListAdSlot?: React.ReactNode }) {
   const { t } = useLanguage();
   const router = useRouter();
   const sp = useSearchParams();
@@ -37,6 +46,22 @@ function UsStateContent({
   const max = values.length ? Math.max(...values) : 1;
 
   const stateIncome = getStateIncome(state.fips);
+
+  const nationalPercentile =
+    stateIncome?.medianHouseholdIncome != null ? getNationalIncomePercentile(stateIncome.medianHouseholdIncome) : null;
+
+  const thresholdRows = stateIncome
+    ? [10, 25, 50]
+        .map((percent) => {
+          const amount = getValueAtPercentile(stateIncome.percentileAnchors, percent);
+          return amount != null ? { percent, amount } : null;
+        })
+        .filter((row): row is { percent: number; amount: number } => row != null)
+    : [];
+
+  const countyDirectory = getCountiesForState(state.fips)
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   // Picking a county starts the 3-step result flow at its first step, not
   // the old single-page result — see app/us/result/**.
@@ -88,6 +113,32 @@ function UsStateContent({
           {formatTemplate(t.usStateMapTitleTemplate, { state: state.name })}
         </h1>
         <p className="mb-6 max-w-xl text-[15px] text-white/55">{t.usStateMapHint}</p>
+
+        {/* This SEO copy doesn't touch searchParams itself — confirmed via
+            `next build` + curl that it's present in the prerendered HTML for
+            every state (data/us/*, unlike ?st=/?co=/?d=, is known at build
+            time either way). Keep it that way: reading `sp`/`qs` here would
+            risk it silently degrading to a client-only render for crawlers
+            that don't execute JS. */}
+        {stateIncome?.medianHouseholdIncome != null && (
+          <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
+            <p className="text-[14px] leading-relaxed text-white/70">
+              {formatTemplate(t.usStateIncomeIntroTemplate, {
+                state: state.name,
+                median: formatUsd(stateIncome.medianHouseholdIncome),
+                percent: nationalPercentile ?? "—",
+              })}
+            </p>
+            {thresholdRows.length > 0 && (
+              <>
+                <p className="mb-2 mt-5 text-[12px] font-semibold uppercase tracking-wide text-white/45">
+                  {formatTemplate(t.usStateThresholdsHeadingTemplate, { state: state.name })}
+                </p>
+                <PercentileThresholds rows={thresholdRows} topPercentTemplate={t.topPercentTemplate} />
+              </>
+            )}
+          </div>
+        )}
 
         {stateIncome && (
           <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
@@ -164,6 +215,34 @@ function UsStateContent({
           </>
         )}
 
+        {/* Crawlable directory of every county in the state — plain internal
+            links to each /us/[state]/[county] content page, independent of
+            the map/search widget above. */}
+        {countyDirectory.length > 0 && (
+          <div className="mt-10">
+            {countyListAdSlot}
+            <h2 className="mb-1 text-[18px] font-bold text-white/90">
+              {formatTemplate(t.usStateCountyListHeadingTemplate, { state: state.name })}
+            </h2>
+            <p className="mb-4 text-[13px] text-white/45">{t.usStateCountyListHint}</p>
+            <ul className="grid grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-3">
+              {countyDirectory.map((c) => (
+                <li key={c.fips}>
+                  <Link
+                    href={`${base}/${state.abbr}/${c.fips}`}
+                    className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-[13px] text-white/70 transition-colors hover:bg-white/[0.04] hover:text-white"
+                  >
+                    <span className="truncate">{stripStateSuffix(c.name, state.name)}</span>
+                    {c.medianHouseholdIncome != null && (
+                      <span className="shrink-0 tabular-nums text-white/40">{formatUsd(c.medianHouseholdIncome)}</span>
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div className="mt-10 rounded-lg bg-white/[0.03] px-4 py-3 text-center">
           <p className="text-[12px] text-white/40">{formatTemplate(t.usSourceCensus, { range: acs5YearRange })}</p>
           <p className="mt-1 text-[12px] text-white/30">{t.usDisclaimer}</p>
@@ -178,6 +257,7 @@ function UsStateContent({
 export default function UsStateClient(props: {
   state: StateMeta;
   geo: FeatureCollection<Geometry, UsMapFeatureProps>;
+  countyListAdSlot?: React.ReactNode;
 }) {
   return (
     <Suspense
