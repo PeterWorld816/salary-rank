@@ -21,13 +21,14 @@ import {
   acs5YearRange,
 } from "@/lib/usIncomeCalc";
 import { getValueAtPercentile } from "@/lib/percentileTable";
-import { getAdjacentCountyFips } from "@/lib/usGeo";
+import { getAdjacentCountyFips, getUsCountiesGeoForState } from "@/lib/usGeo";
 import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serverLocale";
 import { pageMetadata, siteTitle, siteDescription } from "@/lib/seo";
 import { translations, formatTemplate } from "@/lib/i18n";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
 import { PercentileThresholds } from "@/components/us/PercentileThresholds";
 import PlaceSearchList from "@/components/us/PlaceSearchList";
+import CountyPlaceMap from "@/components/us/CountyPlaceMap";
 import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
 import AdSlot from "@/components/ads/AdSlot";
@@ -96,6 +97,12 @@ export default function UsCountyPage({ params }: { params: Params }) {
     sub: p.medianHouseholdIncome != null ? formatUsd(p.medianHouseholdIncome) : undefined,
   }));
 
+  // Single-feature FeatureCollection for CountyPlaceMap's `fit` projection —
+  // undefined on the rare county whose FIPS isn't in us-atlas's topology,
+  // in which case the plain PlaceSearchList below is used as a fallback.
+  const countyFeature = getUsCountiesGeoForState(state.fips).features.find((f) => String(f.id) === county.fips);
+  const countyGeo = countyFeature ? { type: "FeatureCollection" as const, features: [countyFeature] } : null;
+
   return (
     <UsShell>
       <div className="mx-auto max-w-2xl px-4 pb-16 pt-8 sm:px-6">
@@ -161,12 +168,22 @@ export default function UsCountyPage({ params }: { params: Params }) {
               {formatTemplate(t.usCountyPlaceListHeadingTemplate, { county: stripStateSuffix(county.name, state.name) })}
             </h2>
             <p className="mb-4 text-[13px] text-white/45">{t.usCountyPlaceListHint}</p>
-            <PlaceSearchList
-              items={placeItems}
-              resultHrefBase={calculatorHref}
-              searchPlaceholder={t.usSearchPlacePlaceholder}
-              emptyText={t.usListNoResults}
-            />
+            {countyGeo ? (
+              <CountyPlaceMap
+                stateName={state.name}
+                countyName={stripStateSuffix(county.name, state.name)}
+                countyGeo={countyGeo}
+                places={places}
+                calculatorHref={calculatorHref}
+              />
+            ) : (
+              <PlaceSearchList
+                items={placeItems}
+                resultHrefBase={calculatorHref}
+                searchPlaceholder={t.usSearchPlacePlaceholder}
+                emptyText={t.usListNoResults}
+              />
+            )}
 
             {/* Crawlable directory, independent of the search widget above —
                 same reasoning as UsStateClient's county directory: plain

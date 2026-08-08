@@ -17,6 +17,7 @@ export default function UsGeoList({
   emptyText,
   className,
   maxHeight = 420,
+  selectedId,
 }: {
   items: UsGeoListItem[];
   onSelect: (id: string) => void;
@@ -24,6 +25,9 @@ export default function UsGeoList({
   emptyText: string;
   className?: string;
   maxHeight?: number;
+  // Highlights this row, if present in `items` — e.g. the city currently
+  // pinned on a map shown alongside this list.
+  selectedId?: string;
 }) {
   const [query, setQuery] = useState("");
 
@@ -53,7 +57,9 @@ export default function UsGeoList({
               key={item.id}
               type="button"
               onClick={() => onSelect(item.id)}
-              className="flex w-full items-center justify-between gap-3 border-b border-white/[0.05] px-3 py-2.5 text-left text-[13px] text-white/80 transition-colors last:border-0 hover:bg-white/[0.06] hover:text-white"
+              className={`flex w-full items-center justify-between gap-3 border-b border-white/[0.05] px-3 py-2.5 text-left text-[13px] transition-colors last:border-0 hover:bg-white/[0.06] hover:text-white ${
+                item.id === selectedId ? "bg-[#34D399]/[0.10] text-white" : "text-white/80"
+              }`}
             >
               <span className="truncate">{item.name}</span>
               {item.sub && <span className="flex-shrink-0 tabular-nums text-white/40">{item.sub}</span>}

@@ -2,12 +2,17 @@
 // Single-page result dashboard — replaces the old three-step overall/state/
 // demographic flow (see git history for OverallResultClient/StateResultClient/
 // DemographicResultClient). Every percentile those three steps used to
-// compute one-at-a-time is computed here up front and shown together:
-// scrolling replaces "next step" as the way to see more.
-import { Suspense, useMemo, useRef, useState } from "react";
+// compute one-at-a-time is computed here up front and shown together.
+//
+// Layout is a "one glance" card stack: headline -> mini stat grid -> share
+// card -> compare chart, with the city picker collapsed into a header chip
+// and the distribution charts tucked behind a "show details" toggle, so the
+// common path (see your rank, share it) needs far less scrolling than the
+// old always-expanded section-per-metric layout.
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Link2, X, ChevronLeft } from "lucide-react";
+import { ChevronDown, Link2, X, ChevronLeft } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { useLocaleBase } from "@/lib/useLocaleBase";
 import { formatTemplate } from "@/lib/i18n";
@@ -35,16 +40,17 @@ import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
 import UsInputPanel from "@/components/us/UsInputPanel";
 import TierBadge from "@/components/us/TierBadge";
-import PlaceSearchList from "@/components/us/PlaceSearchList";
 import UsResultCard, { CARD_WIDTH, CARD_HEIGHT, STORY_WIDTH, STORY_HEIGHT } from "@/components/us/UsResultCard";
 import DistributionChart from "@/components/DistributionChart";
 import ShareButtons from "@/components/ShareButtons";
 import Spinner from "@/components/Spinner";
 import { useResultLocation, buildPlaceResultQuery } from "@/components/us/result/useResultLocation";
-import { HeroStat, NoDataCard, StatRow } from "@/components/us/result/ResultBits";
+import { NoDataCard, StatRow, MiniStatCard } from "@/components/us/result/ResultBits";
 import { CompareBarChart, type CompareBarItem } from "@/components/us/result/CompareBarChart";
+import CityPickerChip from "@/components/us/result/CityPickerChip";
 
 type Metric = { key: string; percent: number };
+type GridCard = { key: string; label: string; displayValue: string; fillPercent: number; sub?: string; highlight: boolean };
 
 function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
   const { t, tr, lang } = useLanguage();
@@ -53,10 +59,14 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
   const loc = useResultLocation();
   const cardRef = useRef<HTMLDivElement>(null);
   const storyCardRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLDivElement>(null);
+  const mountedRef = useRef(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [compareToast, setCompareToast] = useState<string | null>(null);
   const [compareCopied, setCompareCopied] = useState(false);
   const [compareFallbackUrl, setCompareFallbackUrl] = useState<string | null>(null);
+  const [headlineFlash, setHeadlineFlash] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const { input, qs, from } = loc;
   const ready = loc.ready;
@@ -95,7 +105,6 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
   const netWorthPercentile = input.netWorth != null ? getUsNetWorthPercentile(input.netWorth) : null;
   const ageNetWorthPercentile =
     input.netWorth != null ? getUsNetWorthPercentileForAgeBand(input.ageBand, input.netWorth) : null;
-  const netWorthTier = netWorthPercentile != null ? getTier(netWorthPercentile) : null;
   const k401 = input.k401 != null ? getK401Comparison(input.ageBand, input.k401) : null;
   const genderIncomeRef = countyFips ? getCountyGenderIncomeReference(countyFips, input.gender) : null;
   const maritalIncomeRef = countyFips ? getCountyMaritalIncomeReference(countyFips, input.maritalStatus) : null;
@@ -164,8 +173,81 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
   }
   const headlineTier = headlineTierPercent != null ? getTier(headlineTierPercent) : null;
 
+  // ── Mini stat grid — every metric above, as one compact card each
+  // (label + percent + ring gauge) instead of a section per metric. Fill
+  // direction is always "how full = how good": percentile cards fill by
+  // (100 - percent) since a lower top-X% is better; the 401k cards fill by
+  // the ratio itself, where a higher number is better. ──
+  const gridCards: GridCard[] = [
+    placePercentile != null && {
+      key: "place",
+      label: t.usPlacePercentileHeroLabel,
+      displayValue: formatTemplate(t.topPercentTemplate, { percent: placePercentile }),
+      fillPercent: 100 - placePercentile,
+      sub: place?.medianHouseholdIncome != null ? formatUsd(place.medianHouseholdIncome) : undefined,
+      highlight: best?.key === "place",
+    },
+    countyPercentile != null && {
+      key: "county",
+      label: t.usCountyPercentileHeroLabel,
+      displayValue: formatTemplate(t.topPercentTemplate, { percent: countyPercentile }),
+      fillPercent: 100 - countyPercentile,
+      sub: county?.medianHouseholdIncome != null ? formatUsd(county.medianHouseholdIncome) : undefined,
+      highlight: best?.key === "county",
+    },
+    statePercentile != null && {
+      key: "state",
+      label: t.usStatePercentileHeroLabel,
+      displayValue: formatTemplate(t.topPercentTemplate, { percent: statePercentile }),
+      fillPercent: 100 - statePercentile,
+      highlight: best?.key === "state",
+    },
+    // "Top nationwide" (national-only percentile) is deliberately left out of
+    // this grid — UsResultCard's share card already surfaces the nationwide
+    // percent, so a mini box here would just repeat it. It stays in
+    // `metrics`/`compareItems` below for the headline pick and compare chart.
+    ageIncomePercentile != null && {
+      key: "ageIncome",
+      label: formatTemplate(t.usAgeIncomePercentileHeroLabel, { age: ageBandLabel }),
+      displayValue: formatTemplate(t.topPercentTemplate, { percent: ageIncomePercentile }),
+      fillPercent: 100 - ageIncomePercentile,
+      highlight: best?.key === "ageIncome",
+    },
+    netWorthPercentile != null && {
+      key: "netWorth",
+      label: t.usNetWorthHeroLabel,
+      displayValue: formatTemplate(t.topPercentTemplate, { percent: netWorthPercentile }),
+      fillPercent: 100 - netWorthPercentile,
+      sub: overallUsNetWorth.median != null ? formatUsd(overallUsNetWorth.median) : undefined,
+      highlight: best?.key === "netWorth",
+    },
+    ageNetWorthPercentile != null && {
+      key: "ageNetWorth",
+      label: formatTemplate(t.usAgeNetWorthPercentileHeroLabel, { age: ageBandLabel }),
+      displayValue: formatTemplate(t.topPercentTemplate, { percent: ageNetWorthPercentile }),
+      fillPercent: 100 - ageNetWorthPercentile,
+      highlight: best?.key === "ageNetWorth",
+    },
+    k401 != null && {
+      key: "k401Average",
+      label: formatTemplate(t.usK401VsAverageTemplate, { percent: k401.vsAveragePercent }),
+      displayValue: `${k401.vsAveragePercent}%`,
+      fillPercent: k401.vsAveragePercent,
+      sub: `avg ${formatUsd(k401.average)}`,
+      highlight: false,
+    },
+    k401 != null && {
+      key: "k401Median",
+      label: formatTemplate(t.usK401VsMedianTemplate, { percent: k401.vsMedianPercent }),
+      displayValue: `${k401.vsMedianPercent}%`,
+      fillPercent: k401.vsMedianPercent,
+      sub: `median ${formatUsd(k401.median)}`,
+      highlight: false,
+    },
+  ].filter((c): c is GridCard => Boolean(c));
+
   // ── Compare chart rows (percentile metrics only — 401k is a ratio, not a
-  // percentile, so it gets its own card instead) ──
+  // percentile, so it gets its own cards instead) ──
   const compareItems: CompareBarItem[] = [
     placePercentile != null && { key: "place", label: t.usPlacePercentileHeroLabel, percent: placePercentile, valueLabel: formatTemplate(t.topPercentTemplate, { percent: placePercentile }) },
     countyPercentile != null && { key: "county", label: t.usCountyPercentileHeroLabel, percent: countyPercentile, valueLabel: formatTemplate(t.topPercentTemplate, { percent: countyPercentile }) },
@@ -204,6 +286,23 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
         ? `${county.name}, ${state.name}`
         : t.usAppTitle;
 
+  // ── Picking a city updates ?pl= (via handleSelectPlace) which flows back
+  // through useResultLocation as a new `place`. That's easy to miss with no
+  // page navigation, so flash the headline and scroll it into view the
+  // moment the selection actually changes — skipped on first mount so
+  // landing directly on a ?pl= URL doesn't flash immediately. ──
+  const placeKey = place?.fips ?? null;
+  useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
+    setHeadlineFlash(true);
+    headlineRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const timer = setTimeout(() => setHeadlineFlash(false), 900);
+    return () => clearTimeout(timer);
+  }, [placeKey]);
+
   async function handleCompare() {
     if (!ready || !state || !countyFips || heroPercent == null) return;
     const challenge = encodeFriendChallenge({ percentile: heroPercent, stateAbbr: state.abbr, countyFips });
@@ -226,6 +325,8 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
     }
   }
 
+  const hasNetWorthOrK401 = input.netWorth != null || input.k401 != null;
+
   return (
     <UsShell>
       <UsInputPanel collapsible />
@@ -246,15 +347,36 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
           </div>
         )}
 
-        <Link href={backHref} className="mb-6 inline-flex items-center gap-1 text-[13px] text-white/50 transition-colors hover:text-white/80">
-          <ChevronLeft className="h-4 w-4" />
-          {backLabel}
-        </Link>
+        {/* ── Header row: back link + compact city picker chip ── */}
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <Link href={backHref} className="inline-flex items-center gap-1 text-[13px] text-white/50 transition-colors hover:text-white/80">
+            <ChevronLeft className="h-4 w-4" />
+            {backLabel}
+          </Link>
+          {ready && state && county && placeItems.length > 0 && (
+            <CityPickerChip
+              label={place ? stripStateSuffix(place.name, state.name) : county.name}
+              items={placeItems}
+              onSelect={handleSelectPlace}
+              searchPlaceholder={t.usSearchPlacePlaceholder}
+              emptyText={t.usListNoResults}
+              ariaLabel={t.usCityPickerAriaLabel}
+            />
+          )}
+        </div>
+
         <h1 className="mb-2 text-[22px] font-extrabold tracking-tight text-balance">{title}</h1>
         <p className="mb-8 text-[13px] leading-relaxed text-white/50">{t.usResultDashboardIntro}</p>
 
-        {/* ── Headline ── */}
-        <div className="mb-8 rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
+        {/* ── Headline — flashes + scrolls into view when the city picker
+            above changes the selection, so the update is felt without a
+            page navigation to anchor it ── */}
+        <div
+          ref={headlineRef}
+          className={`mb-8 rounded-2xl border p-6 text-center transition-shadow duration-700 ${
+            headlineFlash ? "border-[#FBBF24]/50 shadow-[0_0_0_3px_rgba(251,191,36,0.35)]" : "border-white/10"
+          } bg-white/[0.03]`}
+        >
           {headline == null ? (
             <NoDataCard title={t.usCountyNoDataTitle} desc={t.usCountyNoDataDesc} />
           ) : (
@@ -269,29 +391,11 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
           )}
         </div>
 
-        {/* ── Inline city picker — optional, county-level percentiles above
-            already work without it ── */}
-        {ready && state && county && placeItems.length > 0 && (
-          <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.03] p-5">
-            <h2 className="mb-1 text-[15px] font-bold text-white/90">{t.usDashboardPlaceSectionHeading}</h2>
-            <p className="mb-4 text-[12px] text-white/45">{t.usDashboardPlaceSectionHint}</p>
-            {place && (
-              <p className="mb-3 text-[13px] text-white/70">
-                {t.usDashboardPlaceSelectedLabel}: <span className="font-semibold text-white">{stripStateSuffix(place.name, state.name)}</span>
-              </p>
-            )}
-            <PlaceSearchList
-              items={placeItems}
-              onSelect={handleSelectPlace}
-              searchPlaceholder={t.usSearchPlacePlaceholder}
-              emptyText={t.usListNoResults}
-            />
-          </div>
-        )}
-
-        {/* ── Share card + compare, moved up top ── */}
+        {/* ── Share card — moved above the mini stat grid so the shareable
+            visual is the first thing seen after the headline. Share/Save +
+            Compare stay below the grid, in their original position. ── */}
         {ready && state && county ? (
-          <div className="mb-10">
+          <div className="mb-8">
             <div className="mb-6 flex justify-center">
               <div className="overflow-hidden rounded-3xl shadow-[0_12px_48px_rgba(0,0,0,0.5)]">
                 <UsResultCard
@@ -333,7 +437,40 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
                 variant="story"
               />
             </div>
+          </div>
+        ) : (
+          <div className="mb-8">
+            <NoDataCard title={t.usDashboardSharePromptTitle} desc={t.usDashboardSharePromptDesc} />
+          </div>
+        )}
 
+        {/* ── Mini stat grid — every percentile/ratio metric as one compact
+            card, 2 cols on mobile / 3 on wider screens ── */}
+        {gridCards.length > 0 ? (
+          <div className="mb-3 grid grid-cols-3 gap-2">
+            {gridCards.map((card) => (
+              <MiniStatCard
+                key={card.key}
+                label={card.label}
+                displayValue={card.displayValue}
+                fillPercent={card.fillPercent}
+                sub={card.sub}
+                highlight={card.highlight}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="mb-3">
+            <NoDataCard title={t.usCountyNoDataTitle} desc={t.usCountyNoDataDesc} />
+          </div>
+        )}
+        <div className="mb-8">
+          {!hasNetWorthOrK401 && <p className="mt-2 text-[11px] text-white/30">{t.usDashboardAddMoreHint}</p>}
+        </div>
+
+        {/* ── Share/Save buttons + compare-with-a-friend ── */}
+        {ready && state && county && (
+          <div className="mb-10">
             <div className="mb-3">
               <ShareButtons
                 cardRef={cardRef}
@@ -379,60 +516,37 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
               )}
             </div>
           </div>
-        ) : (
-          <div className="mb-10">
-            <NoDataCard title={t.usDashboardSharePromptTitle} desc={t.usDashboardSharePromptDesc} />
-          </div>
         )}
 
-        {/* ── Compare-at-a-glance bar chart ── */}
+        {/* ── Compare-at-a-glance bar chart — the one big chart kept in this
+            consolidated view ── */}
         {compareItems.length > 0 && (
-          <div className="mb-10 rounded-xl border border-white/10 bg-white/[0.02] p-5">
+          <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.02] p-5">
             <h2 className="mb-4 text-[15px] font-bold text-white/90">{t.usDashboardCompareChartTitle}</h2>
             <CompareBarChart items={compareItems} />
           </div>
         )}
 
-        {/* ── Income breakdown ── */}
-        <div className="mb-10">
-          <h2 className="mb-3 text-[15px] font-bold text-white/90">{t.usDashboardIncomeSectionTitle}</h2>
+        {/* ── Details toggle — distribution curves + gender/marital
+            reference rows, collapsed by default. These are supplementary,
+            not part of the "one glance" summary above, and DistributionChart
+            recomputes an SVG path on every render, so keeping it unmounted
+            until asked for also avoids doing that work on every city pick. ── */}
+        <div className="mb-8">
+          <button
+            type="button"
+            onClick={() => setDetailsOpen((v) => !v)}
+            aria-expanded={detailsOpen}
+            className="flex w-full items-center justify-center gap-1.5 rounded-md border border-white/10 py-2.5 text-[13px] font-semibold text-white/60 transition-colors hover:border-[#34D399] hover:text-white"
+          >
+            {detailsOpen ? t.usDetailsToggleHide : t.usDetailsToggleShow}
+            <ChevronDown className={`h-4 w-4 transition-transform ${detailsOpen ? "rotate-180" : ""}`} />
+          </button>
 
-          {place && (
-            <div className="mb-4 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
-              <p className="text-[12px] text-white/45">{t.usPlaceMedianLabel}</p>
-              <p className="text-[20px] font-bold tabular-nums text-white">
-                {place.medianHouseholdIncome ? formatUsd(place.medianHouseholdIncome) : "—"}
-              </p>
-              <p className="mt-1 text-[11px] text-white/30">{formatTemplate(t.usAcs5YearLabel, { range: acs5YearRange })}</p>
-            </div>
-          )}
-
-          {ready && county && (
-            <div className="mb-4 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
-              <p className="text-[12px] text-white/45">{t.usCountyMedianLabel}</p>
-              <p className="text-[20px] font-bold tabular-nums text-white">
-                {county.medianHouseholdIncome ? formatUsd(county.medianHouseholdIncome) : "—"}
-              </p>
-              <p className="mt-1 text-[11px] text-white/30">{formatTemplate(t.usAcs5YearLabel, { range: acs5YearRange })}</p>
-            </div>
-          )}
-
-          {placePercentile == null && countyPercentile == null && statePercentile == null && nationalPercentile == null ? (
-            <NoDataCard title={t.usCountyNoDataTitle} desc={t.usCountyNoDataDesc} />
-          ) : (
-            <>
-              <div className="flex flex-wrap items-start justify-around gap-4">
-                {placePercentile != null && <HeroStat label={t.usPlacePercentileHeroLabel} percent={placePercentile} />}
-                {countyPercentile != null && <HeroStat label={t.usCountyPercentileHeroLabel} percent={countyPercentile} />}
-                {statePercentile != null && <HeroStat label={t.usStatePercentileHeroLabel} percent={statePercentile} />}
-                {nationalPercentile != null && <HeroStat label={t.usNationalPercentileHeroLabel} percent={nationalPercentile} />}
-                {ageIncomePercentile != null && (
-                  <HeroStat label={formatTemplate(t.usAgeIncomePercentileHeroLabel, { age: ageBandLabel })} percent={ageIncomePercentile} />
-                )}
-              </div>
-
+          {detailsOpen && (
+            <div className="mt-4 flex flex-col gap-4">
               {(genderIncomeRef?.value != null || maritalIncomeRef?.value != null) && (
-                <div className="mt-4 divide-y divide-white/[0.06] rounded-xl border border-white/10 bg-white/[0.02] px-5 py-1">
+                <div className="divide-y divide-white/[0.06] rounded-xl border border-white/10 bg-white/[0.02] px-5 py-1">
                   {genderIncomeRef?.value != null && (
                     <StatRow
                       label={formatTemplate(t.usByGenderMedianLabelTemplate, { gender: genderLabel })}
@@ -450,85 +564,37 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
                 </div>
               )}
 
-              <div className="mt-4 flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.02] p-5">
-                <DistributionChart
-                  monthlySalary={input.annualIncome}
-                  width={280}
-                  lang={lang}
-                  dark
-                  min={15000}
-                  max={500000}
-                  averageValue={county?.medianHouseholdIncome ?? nationalMedianHouseholdIncome ?? 75000}
-                />
-              </div>
-            </>
-          )}
-        </div>
-
-        {/* ── Net worth (nationwide only) ── */}
-        <div className="mb-10">
-          <div className="mb-3 flex items-center gap-2">
-            <h2 className="text-[15px] font-bold text-white/90">{t.usNetWorthSectionTitle}</h2>
-            <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[11px] font-semibold text-white/50">
-              {t.usNetWorthNationalBadge}
-            </span>
-          </div>
-          {netWorthPercentile == null || input.netWorth == null ? (
-            <NoDataCard title={t.usNetWorthMissingTitle} desc={t.usNetWorthMissingDesc} />
-          ) : (
-            <>
-              <div className="mb-3 flex items-center justify-center gap-2">
-                {netWorthTier && <TierBadge tier={netWorthTier} />}
-                <span className="font-extrabold text-[#34D399]" style={{ fontSize: "20px" }}>
-                  {netWorthPercentile}%
-                </span>
-              </div>
-              <div className="flex items-start justify-around gap-2">
-                <HeroStat label={t.usNetWorthHeroLabel} percent={netWorthPercentile} />
-                {ageNetWorthPercentile != null && (
-                  <HeroStat
-                    label={formatTemplate(t.usAgeNetWorthPercentileHeroLabel, { age: ageBandLabel })}
-                    percent={ageNetWorthPercentile}
+              {(placePercentile != null || countyPercentile != null || statePercentile != null || nationalPercentile != null) && (
+                <div className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.02] p-5">
+                  <p className="mb-3 self-start text-[12px] font-semibold text-white/50">{t.usDashboardIncomeSectionTitle}</p>
+                  <DistributionChart
+                    monthlySalary={input.annualIncome}
+                    width={280}
+                    lang={lang}
+                    dark
+                    min={15000}
+                    max={500000}
+                    averageValue={county?.medianHouseholdIncome ?? nationalMedianHouseholdIncome ?? 75000}
                   />
-                )}
-              </div>
-              <div className="mt-4 flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.02] p-5">
-                <DistributionChart
-                  monthlySalary={input.netWorth}
-                  width={280}
-                  lang={lang}
-                  dark
-                  min={1000}
-                  max={15000000}
-                  averageValue={overallUsNetWorth.median}
-                />
-              </div>
-            </>
-          )}
-        </div>
+                  <p className="mt-2 text-[11px] text-white/30">{formatTemplate(t.usAcs5YearLabel, { range: acs5YearRange })}</p>
+                </div>
+              )}
 
-        {/* ── 401k comparison ── */}
-        <div className="mb-10 rounded-xl border border-white/10 bg-white/[0.02] p-5">
-          <h2 className="text-[15px] font-bold text-white/90">{t.usK401SectionTitle}</h2>
-          {k401 == null || input.k401 == null ? (
-            <NoDataCard title={t.usK401MissingTitle} desc={t.usK401MissingDesc} />
-          ) : (
-            <>
-              <p className="mb-3 text-[12px] text-white/40">{t.usK401Helper}</p>
-              <div className="divide-y divide-white/[0.06]">
-                <StatRow label={t.usFieldAgeBand} sub={ageBandLabel} value={formatUsd(input.k401)} />
-                <StatRow
-                  label={formatTemplate(t.usK401VsAverageTemplate, { percent: k401.vsAveragePercent })}
-                  sub={`avg ${formatUsd(k401.average)}`}
-                  value={`${k401.vsAveragePercent}%`}
-                />
-                <StatRow
-                  label={formatTemplate(t.usK401VsMedianTemplate, { percent: k401.vsMedianPercent })}
-                  sub={`median ${formatUsd(k401.median)}`}
-                  value={`${k401.vsMedianPercent}%`}
-                />
-              </div>
-            </>
+              {netWorthPercentile != null && input.netWorth != null && (
+                <div className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.02] p-5">
+                  <p className="mb-3 self-start text-[12px] font-semibold text-white/50">{t.usNetWorthSectionTitle}</p>
+                  <DistributionChart
+                    monthlySalary={input.netWorth}
+                    width={280}
+                    lang={lang}
+                    dark
+                    min={1000}
+                    max={15000000}
+                    averageValue={overallUsNetWorth.median}
+                  />
+                </div>
+              )}
+            </div>
           )}
         </div>
 

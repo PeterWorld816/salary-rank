@@ -3,7 +3,7 @@
 // one state). Dark/neon styling lives entirely here — deliberately separate
 // from the light-theme tokens in app/globals.css used by /quiz and /result.
 import { useMemo, useRef, useState } from "react";
-import { ComposableMap, Geographies, Geography, ZoomableGroup } from "react-simple-maps";
+import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from "react-simple-maps";
 import type { ProjectionFunction } from "react-simple-maps";
 import { geoMercator, geoArea } from "d3-geo";
 import type { Feature, FeatureCollection, Geometry } from "geojson";
@@ -40,6 +40,50 @@ const SMALL_STATE_LABEL_OFFSET: Partial<Record<string, [number, number]>> = {
 
 export type UsMapFeatureProps = { name: string };
 
+// A single point overlaid on top of the geography layer — e.g. the city a
+// visitor picked inside the selected county. Positioned via react-simple-
+// maps' own <Marker>, which reads the same active projection (Albers or the
+// `fit`-computed Mercator below) from ComposableMap's context, so it always
+// lands in the right spot without this component doing its own lng/lat ->
+// screen-space math.
+export type UsMapMarker = { id: string; lng: number; lat: number; label?: string };
+
+// Gold, not mint — mint is already the hover/selection color for county
+// fills, so a marker needs a color that never blends into the map itself.
+const MARKER_ACCENT = "#FBBF24";
+
+function MapPinMarker({ label }: { label?: string }) {
+  return (
+    <g style={{ pointerEvents: "none" }}>
+      <path
+        d="M0,0 C0,0 -8,-14 -8,-20 A8,8 0 1 1 8,-20 C8,-14 0,0 0,0 Z"
+        fill={MARKER_ACCENT}
+        stroke="#050607"
+        strokeWidth={1.5}
+        style={{ filter: `drop-shadow(0 0 6px ${MARKER_ACCENT}) drop-shadow(0 2px 5px rgba(0,0,0,0.6))` }}
+      />
+      <circle cx={0} cy={-20} r={3} fill="#050607" />
+      {label && (
+        <text
+          x={0}
+          y={-28}
+          textAnchor="middle"
+          style={{
+            fontSize: 11,
+            fontWeight: 800,
+            fill: "#fff",
+            stroke: "rgba(5,6,7,0.75)",
+            strokeWidth: 3,
+            paintOrder: "stroke",
+          }}
+        >
+          {label}
+        </text>
+      )}
+    </g>
+  );
+}
+
 export default function UsMap({
   geo,
   fit = false,
@@ -50,6 +94,7 @@ export default function UsMap({
   onSelect,
   getFill,
   getLabel,
+  markers = [],
 }: {
   geo: FeatureCollection<Geometry, UsMapFeatureProps>;
   // false (default) = whole-US Albers projection (for the 50-state map).
@@ -69,6 +114,8 @@ export default function UsMap({
   onSelect: (id: string) => void;
   getFill: (id: string) => string;
   getLabel: (id: string) => string;
+  // Optional pins drawn on top of the geography layer — see UsMapMarker.
+  markers?: UsMapMarker[];
 }) {
   const [hovered, setHovered] = useState<{ label: string; x: number; y: number } | null>(null);
   const [zoom, setZoom] = useState(1);
@@ -115,8 +162,11 @@ export default function UsMap({
 
   // County map (fit=true): only the top N largest-by-area counties get a
   // persistent label — everything else stays tooltip-only (see `hovered`).
+  // A single-feature map (CountyPlaceMap's one-county-polygon view) skips
+  // this entirely — the page heading already names the county, and the
+  // label would otherwise sit right on top of any city marker.
   const countyLabelIds = useMemo(() => {
-    if (!fit) return null;
+    if (!fit || geo.features.length <= 1) return null;
     return new Set(
       geo.features
         .map((f) => ({ id: String(f.id), area: geoArea(f as Feature) }))
@@ -248,6 +298,12 @@ export default function UsMap({
     </Geographies>
   );
 
+  const markerEls = markers.map((m) => (
+    <Marker key={m.id} coordinates={[m.lng, m.lat]}>
+      <MapPinMarker label={m.label} />
+    </Marker>
+  ));
+
   return (
     <div className="relative w-full select-none" style={{ height, touchAction: zoomable ? "none" : undefined }} data-us-map>
       <ComposableMap
@@ -269,9 +325,13 @@ export default function UsMap({
             }}
           >
             {geographies}
+            {markerEls}
           </ZoomableGroup>
         ) : (
-          geographies
+          <>
+            {geographies}
+            {markerEls}
+          </>
         )}
       </ComposableMap>
 

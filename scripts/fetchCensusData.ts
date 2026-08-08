@@ -399,6 +399,8 @@ async function main() {
     countyFips: string;
     name: string;
     medianHouseholdIncome: number | null;
+    lat: number;
+    lng: number;
   }[] = [];
   let droppedNoCentroid = 0;
   for (const state of states) {
@@ -410,8 +412,12 @@ async function main() {
       for (const p of statePlaces) {
         const centroid = centroids.get(p.fips);
         const countyFips = centroid ? resolveCountyFips(candidates, centroid.lon, centroid.lat) : null;
-        if (countyFips) {
-          places.push({ ...p, countyFips });
+        if (countyFips && centroid) {
+          // Same Gazetteer centroid already used for the point-in-polygon
+          // county assignment above — kept on the record instead of
+          // discarded, so the map UI can drop a marker at this place without
+          // a second data source (see components/us/UsMap.tsx `markers`).
+          places.push({ ...p, countyFips, lat: centroid.lat, lng: centroid.lon });
           assigned++;
         } else {
           droppedNoCentroid++;
@@ -429,7 +435,7 @@ async function main() {
       ...commonMeta,
       source: `US Census Bureau, ACS ${ACS5_YEAR_RANGE} 5-Year Estimates, table B19013; county assigned via ${ACS5_YEAR} Gazetteer centroid + county boundary point-in-polygon`,
       note:
-        "countyFips is this app's own point-in-polygon assignment (Gazetteer population centroid vs. us-atlas county boundaries), not an official Census place-county relationship — large multi-county places (e.g. New York city) land in whichever county contains their centroid, not necessarily the county with the largest population share. No percentileAnchors here (unlike state/county) — see getPlaceIncomePercentile in lib/usIncomeCalc.ts, which rescales against the parent county's curve instead of storing a 16-point curve per place (32k+ places worth of those would have bloated this file into the client bundle).",
+        "countyFips is this app's own point-in-polygon assignment (Gazetteer population centroid vs. us-atlas county boundaries), not an official Census place-county relationship — large multi-county places (e.g. New York city) land in whichever county contains their centroid, not necessarily the county with the largest population share. lat/lng are that same Gazetteer population centroid, kept on the record for map markers (see components/us/UsMap.tsx). No percentileAnchors here (unlike state/county) — see getPlaceIncomePercentile in lib/usIncomeCalc.ts, which rescales against the parent county's curve instead of storing a 16-point curve per place (32k+ places worth of those would have bloated this file into the client bundle).",
     },
     places,
   });

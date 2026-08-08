@@ -143,6 +143,8 @@ export interface Translations {
   usCountyCtaButton: string;
   usCountyPlaceListHeadingTemplate: string; // template: {county}
   usCountyPlaceListHint: string;
+  usCountyMapPickHint: string;
+  usCountyViewResultsForPlaceTemplate: string; // template: {place}
 
   // ── Place SEO landing page (app/us/[state]/[county]/[place]/page.tsx)
   usPlacePageHeadingTemplate: string; // template: {place}
@@ -178,6 +180,10 @@ export interface Translations {
   usDashboardPlaceSectionHeading: string;
   usDashboardPlaceSectionHint: string;
   usDashboardPlaceSelectedLabel: string;
+  usCityPickerAriaLabel: string;
+  usDetailsToggleShow: string;
+  usDetailsToggleHide: string;
+  usDashboardAddMoreHint: string;
 
   // ── Insights (app/us/insights/**)
   footerInsights: string;
@@ -306,6 +312,8 @@ export const translations: Record<LangCode, Translations> = {
     usCountyCtaButton: "내 순위 계산하기",
     usCountyPlaceListHeadingTemplate: "{county}의 도시",
     usCountyPlaceListHint: "도시별 가구 중위소득이에요. 도시를 누르면 대시보드에 도시 기준 순위까지 함께 나와요.",
+    usCountyMapPickHint: "목록에서 도시를 고르면 지도에 위치가 표시돼요.",
+    usCountyViewResultsForPlaceTemplate: "{place} 결과 보기",
 
     usPlacePageHeadingTemplate: "{place} 소득은 상위 몇 %?",
     usPlaceMetaDescriptionTemplate: "{place}의 가구 중위소득은 {median}이에요. 카운티·주·전국 기준으로 내 소득이 어디쯤인지 확인해보세요.",
@@ -339,6 +347,10 @@ export const translations: Record<LangCode, Translations> = {
     usDashboardPlaceSectionHeading: "도시 선택 (선택사항)",
     usDashboardPlaceSectionHint: "카운티 안의 도시를 고르면 도시 기준 순위도 대시보드에 추가돼요.",
     usDashboardPlaceSelectedLabel: "선택한 도시",
+    usCityPickerAriaLabel: "도시 선택",
+    usDetailsToggleShow: "분포도 자세히 보기",
+    usDetailsToggleHide: "분포도 접기",
+    usDashboardAddMoreHint: "순자산·401(k)을 입력하면 더 많은 순위가 추가돼요.",
 
     footerInsights: "인사이트",
     usInsightsTitle: "인사이트",
@@ -464,6 +476,8 @@ export const translations: Record<LangCode, Translations> = {
     usCountyCtaButton: "Calculate my percentile",
     usCountyPlaceListHeadingTemplate: "Cities in {county}",
     usCountyPlaceListHint: "Median household income by city. Tap a city to see its rank added to your dashboard.",
+    usCountyMapPickHint: "Pick a city from the list to see it marked on the map.",
+    usCountyViewResultsForPlaceTemplate: "View results for {place}",
 
     usPlacePageHeadingTemplate: "What's your income percentile in {place}?",
     usPlaceMetaDescriptionTemplate: "The median household income in {place} is {median}. See how your salary compares against the county, state, and national medians.",
@@ -497,6 +511,10 @@ export const translations: Record<LangCode, Translations> = {
     usDashboardPlaceSectionHeading: "Choose a city (optional)",
     usDashboardPlaceSectionHint: "Pick a city in this county to add its rank to your dashboard.",
     usDashboardPlaceSelectedLabel: "Selected city",
+    usCityPickerAriaLabel: "Choose a city",
+    usDetailsToggleShow: "Show distribution charts",
+    usDetailsToggleHide: "Hide distribution charts",
+    usDashboardAddMoreHint: "Add your net worth and 401(k) to unlock more rankings.",
 
     footerInsights: "Insights",
     usInsightsTitle: "Insights",

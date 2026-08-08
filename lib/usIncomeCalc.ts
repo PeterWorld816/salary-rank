@@ -92,6 +92,8 @@ export type UsPlaceIncome = {
   countyFips: string;
   name: string;
   medianHouseholdIncome: number | null;
+  lat: number;
+  lng: number;
 };
 
 const placeByFips = new Map<string, UsPlaceIncome>((placeIncomeData.places as UsPlaceIncome[]).map((p) => [p.fips, p]));
