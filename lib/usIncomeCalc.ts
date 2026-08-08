@@ -4,6 +4,7 @@
 // anchor tables (USD) instead of the Korean statistics ones.
 import stateIncomeData from "@/data/us/stateIncome.json";
 import countyIncomeData from "@/data/us/countyIncome.json";
+import placeIncomeData from "@/data/us/placeIncome.json";
 import nationalIncomeData from "@/data/us/nationalIncome.json";
 import netWorthPercentilesUS from "@/data/us/netWorthPercentilesUS.json";
 import k401Data from "@/data/us/401kByAge.json";
@@ -79,6 +80,30 @@ export function getCountiesForState(stateFips: string): UsCountyIncome[] {
   return (countyIncomeData.counties as UsCountyIncome[]).filter((c) => c.stateFips === stateFips);
 }
 
+// Places (cities/towns/CDPs) — unlike state/county, no percentileAnchors here:
+// see scripts/fetchCensusData.ts's meta.note on placeIncome.json for why (a
+// 16-point curve per place, times 32,000+ places, would have bloated this
+// client-bundled file to ~45MB). getPlaceIncomePercentile below rescales
+// against the parent county's curve instead, same technique as
+// getNationalIncomePercentileForAgeBand further down.
+export type UsPlaceIncome = {
+  fips: string;
+  stateFips: string;
+  countyFips: string;
+  name: string;
+  medianHouseholdIncome: number | null;
+};
+
+const placeByFips = new Map<string, UsPlaceIncome>((placeIncomeData.places as UsPlaceIncome[]).map((p) => [p.fips, p]));
+
+export function getPlaceIncome(placeFips: string): UsPlaceIncome | null {
+  return placeByFips.get(placeFips) ?? null;
+}
+
+export function getPlacesForCounty(countyFips: string): UsPlaceIncome[] {
+  return (placeIncomeData.places as UsPlaceIncome[]).filter((p) => p.countyFips === countyFips);
+}
+
 // The "reference value" shown alongside a county's overall median — prefers
 // the gender/marital-status-specific figure, and falls back to the overall
 // household median (with usedFallback: true) when this county never
@@ -109,6 +134,22 @@ export function getCountyIncomePercentile(countyFips: string, annualIncome: numb
   const county = getCountyIncome(countyFips);
   if (!county || county.percentileAnchors.length < 2) return null;
   return clampDisplayPercent(getPercentileRankFromTable(county.percentileAnchors, annualIncome));
+}
+
+// "Top X% in this specific city" — the county's real B19001-derived curve,
+// re-centered on the place's own median (place / county median ratio) rather
+// than a distribution unique to the place itself, since we don't store one
+// (see getPlacesForCounty above). Falls back to null wherever either median
+// is missing/unreliable, same as every other percentile function here — no
+// guessing when the underlying Census estimate wasn't trustworthy.
+export function getPlaceIncomePercentile(placeFips: string, annualIncome: number): number | null {
+  const place = getPlaceIncome(placeFips);
+  if (!place || place.medianHouseholdIncome == null) return null;
+  const county = getCountyIncome(place.countyFips);
+  if (!county || county.medianHouseholdIncome == null || county.percentileAnchors.length < 2) return null;
+  return clampDisplayPercent(
+    getPercentileRankRelativeTo(county.percentileAnchors, county.medianHouseholdIncome, place.medianHouseholdIncome, annualIncome)
+  );
 }
 
 export function getStateIncomePercentile(stateFips: string, annualIncome: number): number | null {

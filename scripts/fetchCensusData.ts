@@ -33,6 +33,25 @@
 // rather than a guess. A large margin of error (>= the estimate itself) is
 // treated the same way: too unreliable to show as someone's "reference".
 //
+// Places (cities/towns/CDPs) add one real wrinkle: the Census API's ACS5
+// geography hierarchy does NOT support "place (or part) nested in county" —
+// `in=state:X+county:Y` on `for=place:*` fails with "unknown/unsupported
+// geography hierarchy" (confirmed against the live API), unlike county-under-
+// state which works fine. Places can only be fetched per-state. But every
+// place needs a parent county for this app's /us/[state]/[county]/[place]
+// routes, and a handful of places genuinely span more than one county — so
+// there's no single "correct" county for those anyway. This script resolves
+// county via point-in-polygon: each place's population centroid (from the
+// Census Gazetteer file, fetched per state alongside the ACS data) tested
+// against county boundaries already bundled in this repo (us-atlas's
+// counties-10m.json, via topojson-client + d3-geo's geoContains) — falling
+// back to nearest-county-by-centroid-distance on the rare miss (a coastal
+// place whose centroid lands in open water, or simplification error at the
+// 10m boundary resolution). For a multi-county place (e.g. New York city)
+// this assigns it to whichever county contains its centroid, not necessarily
+// the county holding the largest population share — an accepted
+// approximation, noted in placeIncome.json's meta.note.
+//
 // Vintages: county geographies are too small a population to appear in the
 // 1-year release, so counties only ever get the 5-year (multi-year average)
 // numbers. States (and the nation) are big enough for both, so they get the
@@ -52,6 +71,9 @@ const ACS5_YEAR_RANGE = `${ACS5_YEAR - 4}-${ACS5_YEAR}`;
 import { config } from "dotenv";
 import { existsSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { feature } from "topojson-client";
+import { geoContains, geoCentroid, geoDistance } from "d3-geo";
+import countiesTopology from "us-atlas/counties-10m.json";
 
 for (const file of [".env.local", ".env"]) {
   const p = path.resolve(process.cwd(), file);
@@ -193,6 +215,94 @@ async function fetchCountiesForState(stateFips: string) {
   }));
 }
 
+// Places only fetch NAME + B19013 (+ its margin of error, unlike counties/
+// states above) — no B19001 bracket distribution, no gender/marital
+// breakdown. 32,000+ places each carrying their own 16-point percentile-anchor
+// curve made placeIncome.json ~45MB (vs. ~5MB for 3,144 counties), which would
+// have shipped straight into the client bundle (lib/usIncomeCalc.ts's callers
+// compute everything in-browser, per the site's "no server round trip"
+// design). Instead, getPlaceIncomePercentile (lib/usIncomeCalc.ts) rescales
+// the user's income by (countyMedian / placeMedian) and re-checks it against
+// the *county's* existing percentile curve — the same technique already used
+// for age-band percentiles (getPercentileRankRelativeTo) — so a place only
+// ever needs to store its own median, nothing else.
+const PLACE_GET_VARS = ["NAME", "B19013_001E", "B19013_001M"].join(",");
+
+async function fetchPlacesForState(stateFips: string) {
+  const rows = await censusGet(ACS5_BASE, { get: PLACE_GET_VARS, for: "place:*", in: `state:${stateFips}` });
+  return rowsToRecords(rows).map((record) => ({
+    fips: `${record.state}${record.place}`,
+    stateFips: record.state,
+    name: record.NAME,
+    // Reliability-checked, unlike county/state medians above — small places
+    // routinely fail to publish a trustworthy B19013 estimate at all.
+    medianHouseholdIncome: parseReliableMedian(record.B19013_001E, record.B19013_001M),
+  }));
+}
+
+// Census Gazetteer Files (https://www.census.gov/geographies/reference-files/time-series/geo/gazetteer-files.html)
+// publish a plain tab-delimited per-state place file with a population
+// centroid (INTPTLAT/INTPTLONG) per place GEOID — no API key, no county
+// column, just the coordinate this script needs for the point-in-polygon
+// county lookup below. GEOID here (state+place, 7 digits) matches
+// `${record.state}${record.place}` from fetchPlacesForState exactly.
+async function fetchPlaceGazetteer(stateFips: string): Promise<Map<string, { lat: number; lon: number }>> {
+  const url = `https://www2.census.gov/geo/docs/maps-data/data/gazetteer/${ACS5_YEAR}_Gazetteer/${ACS5_YEAR}_gaz_place_${stateFips}.txt`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Gazetteer fetch ${res.status} for ${url}`);
+  const text = await res.text();
+
+  const lines = text.split("\n").filter((l) => l.trim().length > 0);
+  const header = lines[0].split("\t").map((h) => h.trim());
+  const geoidIdx = header.indexOf("GEOID");
+  const latIdx = header.indexOf("INTPTLAT");
+  const lonIdx = header.indexOf("INTPTLONG");
+
+  const centroids = new Map<string, { lat: number; lon: number }>();
+  for (const line of lines.slice(1)) {
+    const cols = line.split("\t");
+    const geoid = cols[geoidIdx]?.trim();
+    const lat = Number(cols[latIdx]);
+    const lon = Number(cols[lonIdx]);
+    if (geoid && Number.isFinite(lat) && Number.isFinite(lon)) centroids.set(geoid, { lat, lon });
+  }
+  return centroids;
+}
+
+// Groups the nation's county polygons (already bundled via us-atlas, same
+// package lib/usGeo.ts uses at runtime) by state FIPS, so the point-in-
+// polygon test below only ever checks a place's centroid against the ~handful
+// to ~254 (Texas) counties in its own state, never the full 3,144.
+function buildCountyFeaturesByState(): Map<string, GeoJSON.Feature[]> {
+  const geo = feature(countiesTopology as any, (countiesTopology as any).objects.counties) as unknown as {
+    features: GeoJSON.Feature[];
+  };
+  const byState = new Map<string, GeoJSON.Feature[]>();
+  for (const f of geo.features) {
+    const stateFips = String(f.id).slice(0, 2);
+    if (!byState.has(stateFips)) byState.set(stateFips, []);
+    byState.get(stateFips)!.push(f);
+  }
+  return byState;
+}
+
+function resolveCountyFips(candidates: GeoJSON.Feature[], lon: number, lat: number): string | null {
+  const point: [number, number] = [lon, lat];
+  const contained = candidates.find((f) => geoContains(f as any, point));
+  if (contained) return String(contained.id);
+
+  // Fallback: nearest county by centroid distance. Covers a coastal/island
+  // place whose population centroid falls in open water, or a miss at the
+  // 10m-resolution boundary's simplification error — better than silently
+  // dropping the place.
+  let best: { fips: string; dist: number } | null = null;
+  for (const f of candidates) {
+    const dist = geoDistance(point, geoCentroid(f as any));
+    if (!best || dist < best.dist) best = { fips: String(f.id), dist };
+  }
+  return best?.fips ?? null;
+}
+
 function writeJson(relPath: string, data: unknown) {
   const abs = path.resolve(process.cwd(), relPath);
   writeFileSync(abs, JSON.stringify(data, null, 2) + "\n", "utf8");
@@ -281,7 +391,55 @@ async function main() {
   console.log(`  byMaritalStatus.single: ${withSingle} (${pct(withSingle)})`);
   console.log(`  byMaritalStatus (both): ${withBothMarital} (${pct(withBothMarital)})`);
 
-  console.log(`\nDone. ${states.length} states, ${counties.length} counties.`);
+  console.log(`\nFetching place-level income (ACS5 ${ACS5_YEAR_RANGE}) for ${states.length} states (place + Gazetteer request per state)...`);
+  const countyFeaturesByState = buildCountyFeaturesByState();
+  const places: {
+    fips: string;
+    stateFips: string;
+    countyFips: string;
+    name: string;
+    medianHouseholdIncome: number | null;
+  }[] = [];
+  let droppedNoCentroid = 0;
+  for (const state of states) {
+    if (state.fips === "72" /* Puerto Rico, not in our 50+DC map */) continue;
+    try {
+      const [statePlaces, centroids] = await Promise.all([fetchPlacesForState(state.fips), fetchPlaceGazetteer(state.fips)]);
+      const candidates = countyFeaturesByState.get(state.fips) ?? [];
+      let assigned = 0;
+      for (const p of statePlaces) {
+        const centroid = centroids.get(p.fips);
+        const countyFips = centroid ? resolveCountyFips(candidates, centroid.lon, centroid.lat) : null;
+        if (countyFips) {
+          places.push({ ...p, countyFips });
+          assigned++;
+        } else {
+          droppedNoCentroid++;
+        }
+      }
+      console.log(`  ${state.name}: ${assigned}/${statePlaces.length} places assigned to a county`);
+    } catch (err) {
+      console.error(`  ${state.name}: failed — ${(err as Error).message}`);
+    }
+    await new Promise((r) => setTimeout(r, 150));
+  }
+
+  writeJson("data/us/placeIncome.json", {
+    meta: {
+      ...commonMeta,
+      source: `US Census Bureau, ACS ${ACS5_YEAR_RANGE} 5-Year Estimates, table B19013; county assigned via ${ACS5_YEAR} Gazetteer centroid + county boundary point-in-polygon`,
+      note:
+        "countyFips is this app's own point-in-polygon assignment (Gazetteer population centroid vs. us-atlas county boundaries), not an official Census place-county relationship — large multi-county places (e.g. New York city) land in whichever county contains their centroid, not necessarily the county with the largest population share. No percentileAnchors here (unlike state/county) — see getPlaceIncomePercentile in lib/usIncomeCalc.ts, which rescales against the parent county's curve instead of storing a 16-point curve per place (32k+ places worth of those would have bloated this file into the client bundle).",
+    },
+    places,
+  });
+
+  const withMedian = places.filter((p) => p.medianHouseholdIncome != null).length;
+  console.log(
+    `\nPlace-level: ${places.length} places written (${withMedian} with a reliable median income, ${((withMedian / places.length) * 100).toFixed(1)}%), ${droppedNoCentroid} dropped (no Gazetteer centroid).`
+  );
+
+  console.log(`\nDone. ${states.length} states, ${counties.length} counties, ${places.length} places.`);
 }
 
 main().catch((err) => {

@@ -16,6 +16,7 @@ import { getTier } from "@/lib/tier";
 import {
   getCountyIncome,
   getCountyIncomePercentile,
+  getPlaceIncomePercentile,
   getStateIncomePercentile,
   getNationalIncomePercentile,
   getNationalIncomePercentileForAgeBand,
@@ -58,11 +59,13 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
   const state = ready ? loc.state : null;
   const county = ready ? loc.county : null;
   const countyFips = ready ? loc.countyFips : null;
+  const place = ready ? loc.place : null;
 
   // ── Every percentile the old 3-step flow computed, all at once ──
   const nationalPercentile = getNationalIncomePercentile(input.annualIncome);
   const statePercentile = state ? getStateIncomePercentile(state.fips, input.annualIncome) : null;
   const countyPercentile = countyFips ? getCountyIncomePercentile(countyFips, input.annualIncome) : null;
+  const placePercentile = place ? getPlaceIncomePercentile(place.fips, input.annualIncome) : null;
   const ageIncomePercentile = getNationalIncomePercentileForAgeBand(input.ageBand, input.annualIncome);
   const netWorthPercentile = input.netWorth != null ? getUsNetWorthPercentile(input.netWorth) : null;
   const ageNetWorthPercentile =
@@ -72,7 +75,7 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
   const genderIncomeRef = countyFips ? getCountyGenderIncomeReference(countyFips, input.gender) : null;
   const maritalIncomeRef = countyFips ? getCountyMaritalIncomeReference(countyFips, input.maritalStatus) : null;
 
-  const heroPercent = countyPercentile ?? statePercentile ?? nationalPercentile;
+  const heroPercent = placePercentile ?? countyPercentile ?? statePercentile ?? nationalPercentile;
 
   const ageBand = US_AGE_BANDS.find((b) => b.id === input.ageBand);
   const ageBandLabel = ageBand ? tr(ageBand.label) : input.ageBand;
@@ -83,6 +86,7 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
   // X%") standing and, if it beats the income baseline by 10+ points,
   // contrast the two; otherwise just call out the single best one. ──
   const shortLabels: Record<string, string> = {
+    place: t.usDashboardPlaceIncomeLabel,
     county: t.usDashboardCountyIncomeLabel,
     state: t.usDashboardStateIncomeLabel,
     national: t.usDashboardNationalIncomeLabel,
@@ -91,6 +95,7 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
     ageNetWorth: formatTemplate(t.usDashboardAgeNetWorthLabelTemplate, { age: ageBandLabel }),
   };
   const metrics: Metric[] = [
+    placePercentile != null && { key: "place", percent: placePercentile },
     countyPercentile != null && { key: "county", percent: countyPercentile },
     statePercentile != null && { key: "state", percent: statePercentile },
     nationalPercentile != null && { key: "national", percent: nationalPercentile },
@@ -99,14 +104,18 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
     ageNetWorthPercentile != null && { key: "ageNetWorth", percent: ageNetWorthPercentile },
   ].filter((m): m is Metric => Boolean(m));
 
+  // Place outranks county as the "income basis" reference when selected —
+  // it's the most specific geography we have a number for.
   const incomeBaseline: Metric | null =
-    countyPercentile != null
-      ? { key: "county", percent: countyPercentile }
-      : statePercentile != null
-        ? { key: "state", percent: statePercentile }
-        : nationalPercentile != null
-          ? { key: "national", percent: nationalPercentile }
-          : null;
+    placePercentile != null
+      ? { key: "place", percent: placePercentile }
+      : countyPercentile != null
+        ? { key: "county", percent: countyPercentile }
+        : statePercentile != null
+          ? { key: "state", percent: statePercentile }
+          : nationalPercentile != null
+            ? { key: "national", percent: nationalPercentile }
+            : null;
 
   const best = metrics.length > 0 ? metrics.reduce((a, b) => (b.percent < a.percent ? b : a)) : null;
 
@@ -133,6 +142,7 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
   // ── Compare chart rows (percentile metrics only — 401k is a ratio, not a
   // percentile, so it gets its own card instead) ──
   const compareItems: CompareBarItem[] = [
+    placePercentile != null && { key: "place", label: t.usPlacePercentileHeroLabel, percent: placePercentile, valueLabel: formatTemplate(t.topPercentTemplate, { percent: placePercentile }) },
     countyPercentile != null && { key: "county", label: t.usCountyPercentileHeroLabel, percent: countyPercentile, valueLabel: formatTemplate(t.topPercentTemplate, { percent: countyPercentile }) },
     statePercentile != null && { key: "state", label: t.usStatePercentileHeroLabel, percent: statePercentile, valueLabel: formatTemplate(t.topPercentTemplate, { percent: statePercentile }) },
     nationalPercentile != null && { key: "national", label: t.usNationalPercentileHeroLabel, percent: nationalPercentile, valueLabel: formatTemplate(t.topPercentTemplate, { percent: nationalPercentile }) },
@@ -157,7 +167,7 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
   const friendPlaceName = friendChallenge ? friendCounty?.name ?? friendChallenge.stateAbbr.toUpperCase() : null;
   const friendOutEarnsPercent = friendChallenge ? Math.max(1, Math.min(99, 100 - friendChallenge.percentile)) : null;
 
-  const title = ready && state && county ? `${county.name}, ${state.name}` : t.usAppTitle;
+  const title = ready && state && county ? (place ? place.name : `${county.name}, ${state.name}`) : t.usAppTitle;
   const backHref = ready && state ? (qs ? `${base}/${state.abbr}?${qs}` : `${base}/${state.abbr}`) : qs ? `${base}?${qs}` : base;
   const backLabel = ready ? t.usBackToStateMap : t.usBackToUsMap;
 
@@ -342,6 +352,16 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
         <div className="mb-10">
           <h2 className="mb-3 text-[15px] font-bold text-white/90">{t.usDashboardIncomeSectionTitle}</h2>
 
+          {place && (
+            <div className="mb-4 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
+              <p className="text-[12px] text-white/45">{t.usPlaceMedianLabel}</p>
+              <p className="text-[20px] font-bold tabular-nums text-white">
+                {place.medianHouseholdIncome ? formatUsd(place.medianHouseholdIncome) : "—"}
+              </p>
+              <p className="mt-1 text-[11px] text-white/30">{formatTemplate(t.usAcs5YearLabel, { range: acs5YearRange })}</p>
+            </div>
+          )}
+
           {ready && county && (
             <div className="mb-4 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
               <p className="text-[12px] text-white/45">{t.usCountyMedianLabel}</p>
@@ -352,11 +372,12 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
             </div>
           )}
 
-          {countyPercentile == null && statePercentile == null && nationalPercentile == null ? (
+          {placePercentile == null && countyPercentile == null && statePercentile == null && nationalPercentile == null ? (
             <NoDataCard title={t.usCountyNoDataTitle} desc={t.usCountyNoDataDesc} />
           ) : (
             <>
               <div className="flex flex-wrap items-start justify-around gap-4">
+                {placePercentile != null && <HeroStat label={t.usPlacePercentileHeroLabel} percent={placePercentile} />}
                 {countyPercentile != null && <HeroStat label={t.usCountyPercentileHeroLabel} percent={countyPercentile} />}
                 {statePercentile != null && <HeroStat label={t.usStatePercentileHeroLabel} percent={statePercentile} />}
                 {nationalPercentile != null && <HeroStat label={t.usNationalPercentileHeroLabel} percent={nationalPercentile} />}

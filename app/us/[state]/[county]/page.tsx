@@ -13,7 +13,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { getStateByAbbr } from "@/data/us/stateMeta";
-import { getCountyIncome, getStateIncomePercentile, getNationalIncomePercentile, acs5YearRange } from "@/lib/usIncomeCalc";
+import {
+  getCountyIncome,
+  getStateIncomePercentile,
+  getNationalIncomePercentile,
+  getPlacesForCounty,
+  acs5YearRange,
+} from "@/lib/usIncomeCalc";
 import { getValueAtPercentile } from "@/lib/percentileTable";
 import { getAdjacentCountyFips } from "@/lib/usGeo";
 import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serverLocale";
@@ -21,6 +27,7 @@ import { pageMetadata, siteTitle, siteDescription } from "@/lib/seo";
 import { translations, formatTemplate } from "@/lib/i18n";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
 import { PercentileThresholds } from "@/components/us/PercentileThresholds";
+import PlaceSearchList from "@/components/us/PlaceSearchList";
 import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
 import AdSlot from "@/components/ads/AdSlot";
@@ -80,6 +87,15 @@ export default function UsCountyPage({ params }: { params: Params }) {
 
   const calculatorHref = `${base}/result?st=${state.abbr}&co=${county.fips}`;
 
+  const places = getPlacesForCounty(county.fips)
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const placeItems = places.map((p) => ({
+    id: p.fips,
+    name: stripStateSuffix(p.name, state.name),
+    sub: p.medianHouseholdIncome != null ? formatUsd(p.medianHouseholdIncome) : undefined,
+  }));
+
   return (
     <UsShell>
       <div className="mx-auto max-w-2xl px-4 pb-16 pt-8 sm:px-6">
@@ -137,6 +153,40 @@ export default function UsCountyPage({ params }: { params: Params }) {
               </Link>
             </div>
           </>
+        )}
+
+        {places.length > 0 && (
+          <div className="mb-8">
+            <h2 className="mb-1 text-[16px] font-bold text-white/90">
+              {formatTemplate(t.usCountyPlaceListHeadingTemplate, { county: stripStateSuffix(county.name, state.name) })}
+            </h2>
+            <p className="mb-4 text-[13px] text-white/45">{t.usCountyPlaceListHint}</p>
+            <PlaceSearchList
+              items={placeItems}
+              resultHrefBase={calculatorHref}
+              searchPlaceholder={t.usSearchPlacePlaceholder}
+              emptyText={t.usListNoResults}
+            />
+
+            {/* Crawlable directory, independent of the search widget above —
+                same reasoning as UsStateClient's county directory: plain
+                internal links a crawler follows without executing JS. */}
+            <ul className="mt-4 grid grid-cols-1 gap-x-6 sm:grid-cols-2">
+              {places.map((p) => (
+                <li key={p.fips}>
+                  <Link
+                    href={`${base}/${state.abbr}/${county.fips}/${p.fips}`}
+                    className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-[13px] text-white/70 transition-colors hover:bg-white/[0.04] hover:text-white"
+                  >
+                    <span className="truncate">{stripStateSuffix(p.name, state.name)}</span>
+                    {p.medianHouseholdIncome != null && (
+                      <span className="shrink-0 tabular-nums text-white/40">{formatUsd(p.medianHouseholdIncome)}</span>
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
 
         {nearbyCounties.length > 0 && (

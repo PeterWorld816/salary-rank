@@ -84,6 +84,7 @@ export interface Translations {
   usStateMapHint: string;
   usSearchStatePlaceholder: string;
   usSearchCountyPlaceholder: string;
+  usSearchPlacePlaceholder: string;
   usListNoResults: string;
   usViewMap: string;
   usViewList: string;
@@ -119,8 +120,6 @@ export interface Translations {
   usK401MissingTitle: string;
   usK401MissingDesc: string;
   usShareTextTemplate: string; // template: {percent} — ShareButtons' shareText, national percentile
-  usPlaceTitle: string;
-  usPlaceComingSoon: string;
   usPlaceBackToCounty: string;
   usSourceCensus: string;
   usSourceScf: string;
@@ -142,9 +141,22 @@ export interface Translations {
   usCountyCtaHeadingTemplate: string; // template: {county}
   usCountyCtaBody: string;
   usCountyCtaButton: string;
+  usCountyPlaceListHeadingTemplate: string; // template: {county}
+  usCountyPlaceListHint: string;
+
+  // ── Place SEO landing page (app/us/[state]/[county]/[place]/page.tsx)
+  usPlacePageHeadingTemplate: string; // template: {place}
+  usPlaceMetaDescriptionTemplate: string; // template: {place}, {median}
+  usPlaceVsCountyTemplate: string; // template: {percent}, {county}
+  usPlaceVsStateTemplate: string; // template: {percent}, {state}
+  usPlaceVsNationalTemplate: string; // template: {percent}
+  usPlaceMedianLabel: string;
+  usPlaceCtaHeadingTemplate: string; // template: {place}
+  usPlaceOtherCitiesHeading: string;
 
   // ── Unified result dashboard (app/us/result/DashboardResultClient.tsx)
   usStatePercentileHeroLabel: string;
+  usPlacePercentileHeroLabel: string;
   usResultDashboardIntro: string;
   usResultMissingLocationTitle: string;
   usResultMissingLocationDesc: string;
@@ -152,6 +164,7 @@ export interface Translations {
   usDashboardIncomeSectionTitle: string;
   usDashboardCompareChartTitle: string;
   usDashboardIncomeLabel: string;
+  usDashboardPlaceIncomeLabel: string;
   usDashboardStateIncomeLabel: string;
   usDashboardCountyIncomeLabel: string;
   usDashboardNationalIncomeLabel: string;
@@ -233,6 +246,7 @@ export const translations: Record<LangCode, Translations> = {
     usStateMapHint: "카운티를 클릭하면 그 카운티 기준 결과를 볼 수 있어요",
     usSearchStatePlaceholder: "주 이름 검색...",
     usSearchCountyPlaceholder: "카운티 이름 검색...",
+    usSearchPlacePlaceholder: "도시 이름 검색...",
     usListNoResults: "검색 결과가 없어요",
     usViewMap: "🗺️ 지도로 보기",
     usViewList: "📋 목록으로 보기",
@@ -268,9 +282,7 @@ export const translations: Record<LangCode, Translations> = {
     usK401Helper: "지역별 데이터가 없어 같은 연령대 전국 평균·중앙값과만 비교해요",
     usK401VsAverageTemplate: "같은 연령대 평균 대비 {percent}%",
     usK401VsMedianTemplate: "같은 연령대 중앙값 대비 {percent}%",
-    usPlaceTitle: "동네(Place) 상세",
-    usPlaceComingSoon: "동네별 상세는 곧 추가돼요. 지금은 카운티 단위 결과를 참고해주세요.",
-    usPlaceBackToCounty: "카운티 결과로 돌아가기",
+    usPlaceBackToCounty: "카운티 페이지로",
     usSourceCensus: "US Census Bureau, ACS {range} 5-Year Estimates (B19013, B19001)",
     usSourceScf: "Federal Reserve, 2022 Survey of Consumer Finances",
     usSourceVanguard: "Vanguard, How America Saves 2026",
@@ -289,8 +301,20 @@ export const translations: Record<LangCode, Translations> = {
     usCountyCtaHeadingTemplate: "{county}에서 내 순위를 정확히 확인해보세요",
     usCountyCtaBody: "소득·성별·결혼상태·연령대를 입력하면 30초 안에 확인할 수 있어요.",
     usCountyCtaButton: "내 순위 계산하기",
+    usCountyPlaceListHeadingTemplate: "{county}의 도시",
+    usCountyPlaceListHint: "도시별 가구 중위소득이에요. 도시를 누르면 대시보드에 도시 기준 순위까지 함께 나와요.",
+
+    usPlacePageHeadingTemplate: "{place} 소득은 상위 몇 %?",
+    usPlaceMetaDescriptionTemplate: "{place}의 가구 중위소득은 {median}이에요. 카운티·주·전국 기준으로 내 소득이 어디쯤인지 확인해보세요.",
+    usPlaceVsCountyTemplate: "{county} 기준으로는 상위 {percent}%에 해당해요.",
+    usPlaceVsStateTemplate: "{state} 기준으로는 상위 {percent}%에 해당해요.",
+    usPlaceVsNationalTemplate: "전국 기준으로는 상위 {percent}%예요.",
+    usPlaceMedianLabel: "이 도시 가구 중위소득",
+    usPlaceCtaHeadingTemplate: "{place}에서 내 순위를 정확히 확인해보세요",
+    usPlaceOtherCitiesHeading: "이 카운티의 다른 도시",
 
     usStatePercentileHeroLabel: "이 주 기준 소득 상위",
+    usPlacePercentileHeroLabel: "이 도시 기준 소득 상위",
     usResultDashboardIntro: "미국 전체, 내가 사는 주·카운티, 동일 연령대, 그리고 순자산·401(k)까지 — 모든 순위를 한 화면에서 확인하세요.",
     usResultMissingLocationTitle: "먼저 지도에서 지역을 선택해주세요",
     usResultMissingLocationDesc: "결과를 보려면 주(State)와 카운티(County)를 먼저 선택해야 해요.",
@@ -298,6 +322,7 @@ export const translations: Record<LangCode, Translations> = {
     usDashboardIncomeSectionTitle: "소득 순위",
     usDashboardCompareChartTitle: "한눈에 비교하기",
     usDashboardIncomeLabel: "소득",
+    usDashboardPlaceIncomeLabel: "도시 소득",
     usDashboardStateIncomeLabel: "주 소득",
     usDashboardCountyIncomeLabel: "카운티 소득",
     usDashboardNationalIncomeLabel: "전국 소득",
@@ -376,6 +401,7 @@ export const translations: Record<LangCode, Translations> = {
     usStateMapHint: "Click a county to see your result for that county",
     usSearchStatePlaceholder: "Search states...",
     usSearchCountyPlaceholder: "Search counties...",
+    usSearchPlacePlaceholder: "Search cities...",
     usListNoResults: "No results found",
     usViewMap: "🗺️ View map",
     usViewList: "📋 View list",
@@ -411,9 +437,7 @@ export const translations: Record<LangCode, Translations> = {
     usK401Helper: "No regional data exists, so this only compares against the nationwide average/median for your age band",
     usK401VsAverageTemplate: "{percent}% of same-age average",
     usK401VsMedianTemplate: "{percent}% of same-age median",
-    usPlaceTitle: "Place detail",
-    usPlaceComingSoon: "Place (town/city)-level detail is coming soon. For now, use the county-level result.",
-    usPlaceBackToCounty: "Back to county result",
+    usPlaceBackToCounty: "Back to county page",
     usSourceCensus: "US Census Bureau, ACS {range} 5-Year Estimates (B19013, B19001)",
     usSourceScf: "Federal Reserve, 2022 Survey of Consumer Finances",
     usSourceVanguard: "Vanguard, How America Saves 2026",
@@ -432,8 +456,20 @@ export const translations: Record<LangCode, Translations> = {
     usCountyCtaHeadingTemplate: "See exactly where you rank in {county}",
     usCountyCtaBody: "Enter your income, gender, marital status, and age — takes about 30 seconds.",
     usCountyCtaButton: "Calculate my percentile",
+    usCountyPlaceListHeadingTemplate: "Cities in {county}",
+    usCountyPlaceListHint: "Median household income by city. Tap a city to see its rank added to your dashboard.",
+
+    usPlacePageHeadingTemplate: "What's your income percentile in {place}?",
+    usPlaceMetaDescriptionTemplate: "The median household income in {place} is {median}. See how your salary compares against the county, state, and national medians.",
+    usPlaceVsCountyTemplate: "That ranks in the top {percent}% of {county}.",
+    usPlaceVsStateTemplate: "That ranks in the top {percent}% of {state}.",
+    usPlaceVsNationalTemplate: "Nationally, it ranks in the top {percent}%.",
+    usPlaceMedianLabel: "This city's median household income",
+    usPlaceCtaHeadingTemplate: "See exactly where you rank in {place}",
+    usPlaceOtherCitiesHeading: "Other cities in this county",
 
     usStatePercentileHeroLabel: "Top in this state",
+    usPlacePercentileHeroLabel: "Top in this city",
     usResultDashboardIntro: "See how you rank nationwide, in your state and county, against your age group, and by net worth and 401(k) — all in one place.",
     usResultMissingLocationTitle: "Pick a location on the map first",
     usResultMissingLocationDesc: "You'll need to select a state and county before we can show your result.",
@@ -441,6 +477,7 @@ export const translations: Record<LangCode, Translations> = {
     usDashboardIncomeSectionTitle: "Income rank",
     usDashboardCompareChartTitle: "Compare at a glance",
     usDashboardIncomeLabel: "income",
+    usDashboardPlaceIncomeLabel: "city income",
     usDashboardStateIncomeLabel: "state income",
     usDashboardCountyIncomeLabel: "county income",
     usDashboardNationalIncomeLabel: "nationwide income",
