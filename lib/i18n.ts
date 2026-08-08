@@ -175,6 +175,9 @@ export interface Translations {
   usDashboardHeadlineSingleTemplate: string; // template: {bestLabel}, {bestPercent}
   usDashboardSharePromptTitle: string;
   usDashboardSharePromptDesc: string;
+  usDashboardPlaceSectionHeading: string;
+  usDashboardPlaceSectionHint: string;
+  usDashboardPlaceSelectedLabel: string;
 
   // ── Insights (app/us/insights/**)
   footerInsights: string;
@@ -333,6 +336,9 @@ export const translations: Record<LangCode, Translations> = {
     usDashboardHeadlineSingleTemplate: "{bestLabel} 기준으로 상위 {bestPercent}%예요!",
     usDashboardSharePromptTitle: "공유 카드는 지역을 선택하면 만들어져요",
     usDashboardSharePromptDesc: "지도에서 주(State)와 카운티(County)를 선택하면 공유용 카드와 친구 비교 기능을 쓸 수 있어요.",
+    usDashboardPlaceSectionHeading: "도시 선택 (선택사항)",
+    usDashboardPlaceSectionHint: "카운티 안의 도시를 고르면 도시 기준 순위도 대시보드에 추가돼요.",
+    usDashboardPlaceSelectedLabel: "선택한 도시",
 
     footerInsights: "인사이트",
     usInsightsTitle: "인사이트",
@@ -488,6 +494,9 @@ export const translations: Record<LangCode, Translations> = {
     usDashboardHeadlineSingleTemplate: "You're in the top {bestPercent}% by {bestLabel}!",
     usDashboardSharePromptTitle: "Pick a location to unlock your share card",
     usDashboardSharePromptDesc: "Choose a state and county on the map to get a shareable card and compare with a friend.",
+    usDashboardPlaceSectionHeading: "Choose a city (optional)",
+    usDashboardPlaceSectionHint: "Pick a city in this county to add its rank to your dashboard.",
+    usDashboardPlaceSelectedLabel: "Selected city",
 
     footerInsights: "Insights",
     usInsightsTitle: "Insights",

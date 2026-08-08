@@ -4,19 +4,21 @@
 // DemographicResultClient). Every percentile those three steps used to
 // compute one-at-a-time is computed here up front and shown together:
 // scrolling replaces "next step" as the way to see more.
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Link2, X, ChevronLeft } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { useLocaleBase } from "@/lib/useLocaleBase";
 import { formatTemplate } from "@/lib/i18n";
-import { formatUsd } from "@/lib/usFormat";
+import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
 import { US_AGE_BANDS, US_GENDERS, US_MARITAL_STATUSES, decodeFriendChallenge, encodeFriendChallenge } from "@/lib/usInput";
 import { getTier } from "@/lib/tier";
 import {
   getCountyIncome,
   getCountyIncomePercentile,
   getPlaceIncomePercentile,
+  getPlacesForCounty,
   getStateIncomePercentile,
   getNationalIncomePercentile,
   getNationalIncomePercentileForAgeBand,
@@ -33,11 +35,12 @@ import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
 import UsInputPanel from "@/components/us/UsInputPanel";
 import TierBadge from "@/components/us/TierBadge";
+import PlaceSearchList from "@/components/us/PlaceSearchList";
 import UsResultCard, { CARD_WIDTH, CARD_HEIGHT, STORY_WIDTH, STORY_HEIGHT } from "@/components/us/UsResultCard";
 import DistributionChart from "@/components/DistributionChart";
 import ShareButtons from "@/components/ShareButtons";
 import Spinner from "@/components/Spinner";
-import { useResultLocation } from "@/components/us/result/useResultLocation";
+import { useResultLocation, buildPlaceResultQuery } from "@/components/us/result/useResultLocation";
 import { HeroStat, NoDataCard, StatRow } from "@/components/us/result/ResultBits";
 import { CompareBarChart, type CompareBarItem } from "@/components/us/result/CompareBarChart";
 
@@ -46,6 +49,7 @@ type Metric = { key: string; percent: number };
 function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
   const { t, tr, lang } = useLanguage();
   const base = useLocaleBase();
+  const router = useRouter();
   const loc = useResultLocation();
   const cardRef = useRef<HTMLDivElement>(null);
   const storyCardRef = useRef<HTMLDivElement>(null);
@@ -60,6 +64,27 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
   const county = ready ? loc.county : null;
   const countyFips = ready ? loc.countyFips : null;
   const place = ready ? loc.place : null;
+
+  // ── Inline city picker — lets a visitor add a place-level percentile to
+  // this dashboard without leaving it (the county SEO page's PlaceSearchList
+  // does the same lookup, but navigates instead since it's server-rendered). ──
+  const placeItems = useMemo(() => {
+    if (!countyFips || !state) return [];
+    return getPlacesForCounty(countyFips)
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((p) => ({
+        id: p.fips,
+        name: stripStateSuffix(p.name, state.name),
+        sub: p.medianHouseholdIncome != null ? formatUsd(p.medianHouseholdIncome) : undefined,
+      }));
+  }, [countyFips, state]);
+
+  function handleSelectPlace(placeFips: string) {
+    if (!state || !countyFips) return;
+    const query = buildPlaceResultQuery(new URLSearchParams(qs), state.abbr, countyFips, placeFips);
+    router.replace(`${base}/result?${query}`, { scroll: false });
+  }
 
   // ── Every percentile the old 3-step flow computed, all at once ──
   const nationalPercentile = getNationalIncomePercentile(input.annualIncome);
@@ -243,6 +268,26 @@ function DashboardResultContent({ adSlot }: { adSlot?: React.ReactNode }) {
             </>
           )}
         </div>
+
+        {/* ── Inline city picker — optional, county-level percentiles above
+            already work without it ── */}
+        {ready && state && county && placeItems.length > 0 && (
+          <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.03] p-5">
+            <h2 className="mb-1 text-[15px] font-bold text-white/90">{t.usDashboardPlaceSectionHeading}</h2>
+            <p className="mb-4 text-[12px] text-white/45">{t.usDashboardPlaceSectionHint}</p>
+            {place && (
+              <p className="mb-3 text-[13px] text-white/70">
+                {t.usDashboardPlaceSelectedLabel}: <span className="font-semibold text-white">{stripStateSuffix(place.name, state.name)}</span>
+              </p>
+            )}
+            <PlaceSearchList
+              items={placeItems}
+              onSelect={handleSelectPlace}
+              searchPlaceholder={t.usSearchPlacePlaceholder}
+              emptyText={t.usListNoResults}
+            />
+          </div>
+        )}
 
         {/* ── Share card + compare, moved up top ── */}
         {ready && state && county ? (

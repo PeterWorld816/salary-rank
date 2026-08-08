@@ -276,11 +276,16 @@ export default function UsInputPanel({ collapsible = false }: { collapsible?: bo
           </div>
 
           {!collapsible && (
+            // Deliberately a lighter-weight outline style, not a solid fill —
+            // this only jumps to the income-only nationwide result, skipping
+            // the map below. Styling it like a final "submit" button would
+            // wrongly suggest it's the main/complete action.
             <Link
               href={nationalResultHref}
-              className="flex w-full items-center justify-center rounded-md bg-[#34D399] py-3 text-[14px] font-bold text-[#04120C] transition-all hover:brightness-110 active:scale-[0.99]"
+              className="flex w-full items-center justify-center gap-1.5 rounded-md border border-[#34D399]/40 bg-[#34D399]/[0.08] py-2.5 text-[13px] font-semibold text-[#34D399] transition-colors hover:border-[#34D399]/70 hover:bg-[#34D399]/[0.14] active:scale-[0.99]"
             >
               {formatTemplate(t.usSeeNationalResultButtonTemplate, { income: formatUsdCompact(form.annualIncome) })}
+              <span aria-hidden="true">→</span>
             </Link>
           )}
         </div>
