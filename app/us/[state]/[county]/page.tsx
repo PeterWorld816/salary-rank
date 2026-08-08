@@ -78,7 +78,7 @@ export default function UsCountyPage({ params }: { params: Params }) {
     .map((fips) => getCountyIncome(fips))
     .filter((c): c is NonNullable<typeof c> => c != null);
 
-  const calculatorHref = `${base}/result/overall?st=${state.abbr}&co=${county.fips}`;
+  const calculatorHref = `${base}/result?st=${state.abbr}&co=${county.fips}`;
 
   return (
     <UsShell>

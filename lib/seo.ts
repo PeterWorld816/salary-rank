@@ -79,7 +79,7 @@ export function homeMetadata(locale: AppLocale, pathname: string): Metadata {
 // card (app/us/og/route.tsx) instead of the static OG_IMAGE fallback, carrying
 // over just the two params that image needs (d, st) plus the locale it should
 // render text in. Falls back to the static image when there's no "d" yet
-// (e.g. a bare /us/result/overall hit with no answers) so the route never
+// (e.g. a bare /us/result hit with no answers) so the route never
 // renders its own "no data" fallback where the static one already works.
 export function resultOgImage(locale: AppLocale, searchParams: Record<string, string | string[] | undefined>): string | undefined {
   const d = searchParams.d;

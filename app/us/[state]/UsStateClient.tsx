@@ -63,10 +63,10 @@ function UsStateContent({
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  // Picking a county starts the 3-step result flow at its first step, not
-  // the old single-page result — see app/us/result/**.
+  // Picking a county opens the unified result dashboard — see
+  // app/us/result/DashboardResultClient.tsx.
   function getHref(fips: string) {
-    return `${base}/result/overall?${buildResultQuery(sp, state.abbr, fips)}`;
+    return `${base}/result?${buildResultQuery(sp, state.abbr, fips)}`;
   }
 
   function getLabel(fips: string) {

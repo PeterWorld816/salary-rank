@@ -16,9 +16,9 @@ const DEFAULT_INPUT: UsInput = {
   maritalStatus: "single",
   ageBand: "25-34",
   annualIncome: 75000,
-  // Unset by default — these live behind the "more accurate result" section
-  // (collapsed by default) so the fast path to a first result is income
-  // alone, not all six fields.
+  // Unset by default — net worth/401k are shown alongside income (see the
+  // "Your Assets" section below) but stay optional until the visitor fills
+  // them in.
   netWorth: null,
   k401: null,
 };
@@ -150,10 +150,6 @@ export default function UsInputPanel({ collapsible = false }: { collapsible?: bo
   // `collapsible` (the result page) always starts collapsed regardless — the
   // summary chip is enough there, and the full form is one tap away.
   const [expanded, setExpanded] = useState(() => (collapsible ? false : !sp.get("d")));
-  // Net worth/401k live behind their own toggle, collapsed by default — see
-  // requirement: income is the only field standing between a visitor and
-  // their first result, net worth/401k are for a *more accurate* one.
-  const [moreExpanded, setMoreExpanded] = useState(false);
 
   // A pending "compare with a friend" challenge (see lib/usInput.ts) lives in
   // its own query param, independent of "d" — apply()/homeHref below rebuild
@@ -183,8 +179,8 @@ export default function UsInputPanel({ collapsible = false }: { collapsible?: bo
   const homeHref = `${localeBase}?${buildUsSearchParams(form, lang, from).toString()}`;
   // Skips the map entirely — a nationwide result only needs income (plus the
   // gender/marital/age defaults), never a state/county pick. See
-  // OverallResultClient, which renders a full result even with no ?st=/?co=.
-  const nationalResultHref = `${localeBase}/result/overall?${buildUsSearchParams(form, lang, from).toString()}`;
+  // DashboardResultClient, which renders a full result even with no ?st=/?co=.
+  const nationalResultHref = `${localeBase}/result?${buildUsSearchParams(form, lang, from).toString()}`;
 
   return (
     <div
@@ -257,35 +253,26 @@ export default function UsInputPanel({ collapsible = false }: { collapsible?: bo
                 onCommit={(v) => apply({ ...form, annualIncome: v ?? form.annualIncome })}
               />
             </div>
+          </div>
 
-            <button
-              type="button"
-              onClick={() => setMoreExpanded((v) => !v)}
-              aria-expanded={moreExpanded}
-              className="mt-3 flex items-center gap-1.5 text-[12px] font-semibold text-white/50 transition-colors hover:text-white/80"
-            >
-              <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition-transform ${moreExpanded ? "rotate-180" : ""}`} />
-              {t.usAdvancedSectionLabel}
-            </button>
-
-            {moreExpanded && (
-              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <CurrencyField
-                  label={t.usFieldNetWorth}
-                  helper={t.usFieldNetWorthHelper}
-                  placeholder={t.usFieldOptionalPlaceholder}
-                  value={form.netWorth}
-                  onCommit={(v) => apply({ ...form, netWorth: v })}
-                />
-                <CurrencyField
-                  label={t.usFieldK401}
-                  helper={t.usFieldK401Helper}
-                  placeholder={t.usFieldOptionalPlaceholder}
-                  value={form.k401}
-                  onCommit={(v) => apply({ ...form, k401: v })}
-                />
-              </div>
-            )}
+          <div>
+            <h3 className="mb-2.5 text-[12px] font-semibold text-white/50">{t.usFieldAssetsSectionTitle}</h3>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <CurrencyField
+                label={t.usFieldNetWorth}
+                helper={t.usFieldNetWorthHelper}
+                placeholder={t.usFieldOptionalPlaceholder}
+                value={form.netWorth}
+                onCommit={(v) => apply({ ...form, netWorth: v })}
+              />
+              <CurrencyField
+                label={t.usFieldK401}
+                helper={t.usFieldK401Helper}
+                placeholder={t.usFieldOptionalPlaceholder}
+                value={form.k401}
+                onCommit={(v) => apply({ ...form, k401: v })}
+              />
+            </div>
           </div>
 
           {!collapsible && (

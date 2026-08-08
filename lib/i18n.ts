@@ -34,6 +34,7 @@ export interface Translations {
   home: string;
   share: string;
   save: string;
+  saveStory: string;
   copied: string;
   shareFailed: string;
   saveFailed: string;
@@ -73,7 +74,7 @@ export interface Translations {
   usFieldK401: string;
   usFieldK401Helper: string;
   usFieldOptionalPlaceholder: string;
-  usAdvancedSectionLabel: string;
+  usFieldAssetsSectionTitle: string;
   usSeeNationalResultButtonTemplate: string; // template: {income}
   usApply: string;
   usMapTitle: string;
@@ -142,20 +143,25 @@ export interface Translations {
   usCountyCtaBody: string;
   usCountyCtaButton: string;
 
-  // ── Multi-step result flow (app/us/result/**)
+  // ── Unified result dashboard (app/us/result/DashboardResultClient.tsx)
   usStatePercentileHeroLabel: string;
-  usResultStepOverallLabel: string;
-  usResultStepStateLabel: string;
-  usResultStepDemographicLabel: string;
-  usResultStepOfTemplate: string; // template: {step}, {total}
-  usResultOverallIntro: string;
-  usResultStateIntro: string;
-  usResultDemographicIntro: string;
-  usResultNextButton: string;
-  usResultPrevButton: string;
+  usResultDashboardIntro: string;
   usResultMissingLocationTitle: string;
   usResultMissingLocationDesc: string;
   usResultMissingLocationCta: string;
+  usDashboardIncomeSectionTitle: string;
+  usDashboardCompareChartTitle: string;
+  usDashboardIncomeLabel: string;
+  usDashboardStateIncomeLabel: string;
+  usDashboardCountyIncomeLabel: string;
+  usDashboardNationalIncomeLabel: string;
+  usDashboardAgeIncomeLabelTemplate: string; // template: {age}
+  usDashboardNetWorthLabel: string;
+  usDashboardAgeNetWorthLabelTemplate: string; // template: {age}
+  usDashboardHeadlineComboTemplate: string; // template: {baseLabel}, {basePercent}, {bestLabel}, {bestPercent}
+  usDashboardHeadlineSingleTemplate: string; // template: {bestLabel}, {bestPercent}
+  usDashboardSharePromptTitle: string;
+  usDashboardSharePromptDesc: string;
 
   // ── Insights (app/us/insights/**)
   footerInsights: string;
@@ -181,6 +187,7 @@ export const translations: Record<LangCode, Translations> = {
     home: "홈",
     share: "공유하기",
     save: "이미지 저장",
+    saveStory: "스토리 저장",
     copied: "링크 복사됨!",
     shareFailed: "공유 실패",
     saveFailed: "저장 실패. 다시 시도해주세요.",
@@ -216,7 +223,7 @@ export const translations: Record<LangCode, Translations> = {
     usFieldK401: "401k 잔액 (USD)",
     usFieldK401Helper: "401k는 순자산과 별도로 입력해주세요",
     usFieldOptionalPlaceholder: "선택 입력",
-    usAdvancedSectionLabel: "더 정확한 결과 보기",
+    usFieldAssetsSectionTitle: "당신의 자산",
     usSeeNationalResultButtonTemplate: "{income}가 전국에서 상위 몇 %인지 보기",
     usApply: "적용하고 지도 보기",
     usMapTitle: "주(State)를 선택하세요",
@@ -249,9 +256,9 @@ export const translations: Record<LangCode, Translations> = {
     usNationalPercentileHeroLabel: "미국 전체 기준 소득 상위",
     usAgeIncomePercentileHeroLabel: "전국 동일 연령대({age}) 기준 소득 상위",
     usNetWorthMissingTitle: "순자산을 입력하면 확인할 수 있어요",
-    usNetWorthMissingDesc: "위쪽 '더 정확한 결과 보기'를 열고 입력해주세요 — 10초면 돼요.",
+    usNetWorthMissingDesc: "위쪽 '당신의 자산'에 입력해주세요 — 10초면 돼요.",
     usK401MissingTitle: "401(k) 잔액을 입력하면 확인할 수 있어요",
-    usK401MissingDesc: "위쪽 '더 정확한 결과 보기'를 열고 입력해주세요 — 10초면 돼요.",
+    usK401MissingDesc: "위쪽 '당신의 자산'에 입력해주세요 — 10초면 돼요.",
     usShareTextTemplate: "나는 미국 소득 상위 {percent}%. 당신은?",
     usNetWorthSectionTitle: "순자산 순위",
     usNetWorthNationalBadge: "🇺🇸 전국 기준",
@@ -284,18 +291,23 @@ export const translations: Record<LangCode, Translations> = {
     usCountyCtaButton: "내 순위 계산하기",
 
     usStatePercentileHeroLabel: "이 주 기준 소득 상위",
-    usResultStepOverallLabel: "전체 순위",
-    usResultStepStateLabel: "주 내 순위",
-    usResultStepDemographicLabel: "연령·성별 순위",
-    usResultStepOfTemplate: "{step} / {total} 단계",
-    usResultOverallIntro: "먼저 미국 전체 인구와 비교했을 때 당신의 소득이 어느 위치인지 확인해보세요.",
-    usResultStateIntro: "이제 범위를 좁혀 같은 카운티·주 주민들과 비교해보세요.",
-    usResultDemographicIntro: "마지막으로 같은 연령대·성별 기준으로 비교하고, 순자산·401(k)까지 함께 확인해보세요.",
-    usResultNextButton: "다음 보기",
-    usResultPrevButton: "이전",
+    usResultDashboardIntro: "미국 전체, 내가 사는 주·카운티, 동일 연령대, 그리고 순자산·401(k)까지 — 모든 순위를 한 화면에서 확인하세요.",
     usResultMissingLocationTitle: "먼저 지도에서 지역을 선택해주세요",
     usResultMissingLocationDesc: "결과를 보려면 주(State)와 카운티(County)를 먼저 선택해야 해요.",
     usResultMissingLocationCta: "지도에서 선택하기",
+    usDashboardIncomeSectionTitle: "소득 순위",
+    usDashboardCompareChartTitle: "한눈에 비교하기",
+    usDashboardIncomeLabel: "소득",
+    usDashboardStateIncomeLabel: "주 소득",
+    usDashboardCountyIncomeLabel: "카운티 소득",
+    usDashboardNationalIncomeLabel: "전국 소득",
+    usDashboardAgeIncomeLabelTemplate: "{age} 소득",
+    usDashboardNetWorthLabel: "순자산",
+    usDashboardAgeNetWorthLabelTemplate: "{age} 순자산",
+    usDashboardHeadlineComboTemplate: "{baseLabel} 기준으로는 상위 {basePercent}%지만, {bestLabel} 기준으로는 상위 {bestPercent}%까지 올라가요!",
+    usDashboardHeadlineSingleTemplate: "{bestLabel} 기준으로 상위 {bestPercent}%예요!",
+    usDashboardSharePromptTitle: "공유 카드는 지역을 선택하면 만들어져요",
+    usDashboardSharePromptDesc: "지도에서 주(State)와 카운티(County)를 선택하면 공유용 카드와 친구 비교 기능을 쓸 수 있어요.",
 
     footerInsights: "인사이트",
     usInsightsTitle: "인사이트",
@@ -318,6 +330,7 @@ export const translations: Record<LangCode, Translations> = {
     home: "Home",
     share: "Share",
     save: "Save Image",
+    saveStory: "Save Story",
     copied: "Link copied!",
     shareFailed: "Share failed",
     saveFailed: "Save failed. Please try again.",
@@ -353,7 +366,7 @@ export const translations: Record<LangCode, Translations> = {
     usFieldK401: "401k balance (USD)",
     usFieldK401Helper: "Enter this separately from net worth",
     usFieldOptionalPlaceholder: "Optional",
-    usAdvancedSectionLabel: "Get a more accurate result",
+    usFieldAssetsSectionTitle: "Your Assets",
     usSeeNationalResultButtonTemplate: "See where {income} ranks nationwide",
     usApply: "Apply & view map",
     usMapTitle: "Select a state",
@@ -386,9 +399,9 @@ export const translations: Record<LangCode, Translations> = {
     usNationalPercentileHeroLabel: "Top nationwide",
     usAgeIncomePercentileHeroLabel: "Top nationwide for your age ({age})",
     usNetWorthMissingTitle: "Add your net worth to see this",
-    usNetWorthMissingDesc: "Open \"Get a more accurate result\" above and add it — takes 10 seconds.",
+    usNetWorthMissingDesc: "Fill it in under \"Your Assets\" above — takes 10 seconds.",
     usK401MissingTitle: "Add your 401(k) balance to see this",
-    usK401MissingDesc: "Open \"Get a more accurate result\" above and add it — takes 10 seconds.",
+    usK401MissingDesc: "Fill it in under \"Your Assets\" above — takes 10 seconds.",
     usShareTextTemplate: "I'm in the top {percent}% of US earners. Where do you rank?",
     usNetWorthSectionTitle: "Net worth rank",
     usNetWorthNationalBadge: "🇺🇸 Nationwide only",
@@ -421,18 +434,23 @@ export const translations: Record<LangCode, Translations> = {
     usCountyCtaButton: "Calculate my percentile",
 
     usStatePercentileHeroLabel: "Top in this state",
-    usResultStepOverallLabel: "Overall",
-    usResultStepStateLabel: "In your state",
-    usResultStepDemographicLabel: "Age & gender",
-    usResultStepOfTemplate: "Step {step} of {total}",
-    usResultOverallIntro: "First, see where your income stands against the entire US population.",
-    usResultStateIntro: "Now let's narrow it down — how you compare to people in your county and state.",
-    usResultDemographicIntro: "Finally, compare against your age band and gender, plus your net worth and 401(k).",
-    usResultNextButton: "See next",
-    usResultPrevButton: "Back",
+    usResultDashboardIntro: "See how you rank nationwide, in your state and county, against your age group, and by net worth and 401(k) — all in one place.",
     usResultMissingLocationTitle: "Pick a location on the map first",
     usResultMissingLocationDesc: "You'll need to select a state and county before we can show your result.",
     usResultMissingLocationCta: "Choose on the map",
+    usDashboardIncomeSectionTitle: "Income rank",
+    usDashboardCompareChartTitle: "Compare at a glance",
+    usDashboardIncomeLabel: "income",
+    usDashboardStateIncomeLabel: "state income",
+    usDashboardCountyIncomeLabel: "county income",
+    usDashboardNationalIncomeLabel: "nationwide income",
+    usDashboardAgeIncomeLabelTemplate: "{age} income",
+    usDashboardNetWorthLabel: "net worth",
+    usDashboardAgeNetWorthLabelTemplate: "{age} net worth",
+    usDashboardHeadlineComboTemplate: "By {baseLabel} you're in the top {basePercent}%, but by {bestLabel} you climb to the top {bestPercent}%!",
+    usDashboardHeadlineSingleTemplate: "You're in the top {bestPercent}% by {bestLabel}!",
+    usDashboardSharePromptTitle: "Pick a location to unlock your share card",
+    usDashboardSharePromptDesc: "Choose a state and county on the map to get a shareable card and compare with a friend.",
 
     footerInsights: "Insights",
     usInsightsTitle: "Insights",

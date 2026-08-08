@@ -39,7 +39,7 @@ export default function UsPlacePage({
   qs.set("st", params.state);
   qs.set("co", params.county);
   const base = getAppLocale() === "kr" ? "/kr" : "/us";
-  const countyHref = `${base}/result/overall?${qs.toString()}`;
+  const countyHref = `${base}/result?${qs.toString()}`;
 
   return (
     <UsShell>

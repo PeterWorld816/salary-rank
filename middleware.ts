@@ -18,7 +18,10 @@ function acceptsKorean(acceptLanguage: string | null): boolean {
 // — which only works if the page itself never reads searchParams (Next.js
 // forces full per-request dynamic rendering for any page that does). So the
 // "old shared link still works" redirect lives here instead, at the edge,
-// before it ever reaches that page.
+// before it ever reaches that page. It points straight at /result (the
+// unified dashboard, see app/us/result/DashboardResultClient.tsx) rather
+// than the old /result/overall first step, which no longer exists as a real
+// page — just a redirect stub (lib/legacyResultRedirect.ts).
 const LEGACY_COUNTY_RESULT_PATH = /^\/(us|kr)\/([a-z]{2})\/(\d{5})$/i;
 
 export function middleware(request: NextRequest) {
@@ -35,7 +38,7 @@ export function middleware(request: NextRequest) {
   if (legacyMatch && request.nextUrl.searchParams.has("d")) {
     const [, prefix, stateAbbr, countyFips] = legacyMatch;
     const url = request.nextUrl.clone();
-    url.pathname = `/${prefix}/result/overall`;
+    url.pathname = `/${prefix}/result`;
     url.searchParams.set("st", stateAbbr);
     url.searchParams.set("co", countyFips);
     return NextResponse.redirect(url);

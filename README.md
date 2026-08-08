@@ -36,11 +36,12 @@ app/
   us/
     page.tsx / UsHomeClient.tsx          # US map — pick a state
     [state]/page.tsx / UsStateClient.tsx  # county map + SEO content (median income, thresholds, county directory); picking a county starts the result flow
-    [state]/[county]/page.tsx             # SEO landing page per county (ISR, revalidate=86400) — CTAs into /us/result/overall.
+    [state]/[county]/page.tsx             # SEO landing page per county (ISR, revalidate=86400) — CTAs into /us/result.
                                            # Old single-page result links (?d=...) redirect there via middleware.ts instead.
     about/ · privacy/ · contact/          # static info pages
     result/
-      overall/ state/ demographic/        # 3-step result flow (?st=&co=&d= carry state), see below
+      page.tsx / DashboardResultClient.tsx  # unified result dashboard (?st=&co=&d= carry state), see below
+      overall/ state/ demographic/          # redirect stubs -> /result, kept so old shared links don't 404
 data/us/
   stateIncome.json / countyIncome.json / nationalIncome.json
   netWorthPercentilesUS.json / 401kByAge.json / stateMeta.ts
@@ -49,18 +50,22 @@ lib/
   usIncomeCalc.ts / usInput.ts / usFormat.ts / usGeo.ts / percentileTable.ts
   i18n.ts                                # ko/en copy
   serverLocale.ts / seo.ts / useLocaleBase.ts  # /us vs /kr locale plumbing
+  legacyResultRedirect.ts                # shared redirect for the retired /result/overall|state|demographic routes
 components/us/
   UsMap.tsx / UsGeoList.tsx / UsInputPanel.tsx / UsResultCard.tsx / UsShell.tsx / Footer.tsx
-  result/                                 # shared pieces for the 3-step result flow
+  result/                                 # shared pieces for the result dashboard
 ```
 
 ### Result flow
 
-Picking a county navigates to `/us/result/overall?st=<state>&co=<county>&d=<answers>`, then
-`/us/result/state` and `/us/result/demographic` (final step — share/save/compare-with-a-friend
-live here). Each step is a real page (own URL, works with browser back) that re-derives
-everything from the query string — nothing is kept in memory between steps. `/kr/result/**`
-serves the same pages in Korean via the middleware rewrite.
+Picking a county navigates to `/us/result?st=<state>&co=<county>&d=<answers>` — one scrolling
+dashboard with every percentile (national/state/county/age/net worth/401k) computed up front,
+plus the share card and "compare with a friend" link near the top. It's a real page (own URL,
+works with browser back) that re-derives everything from the query string on each render, same
+as before. `/kr/result` serves the same page in Korean via the middleware rewrite. The old
+three-step routes (`/result/overall`, `/result/state`, `/result/demographic`) still exist as
+redirect stubs so old shared links keep working, but they're disallowed in robots.txt and
+non-canonical — new links should point at `/result` directly.
 
 ## Local dev
 
