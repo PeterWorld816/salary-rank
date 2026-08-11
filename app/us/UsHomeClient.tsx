@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { FeatureCollection, Geometry } from "geojson";
 import { useLanguage } from "@/lib/LanguageProvider";
@@ -8,14 +8,12 @@ import { formatTemplate } from "@/lib/i18n";
 import UsShell from "@/components/us/UsShell";
 import UsInputPanel from "@/components/us/UsInputPanel";
 import UsMap, { type UsMapFeatureProps } from "@/components/us/UsMap";
-import UsGeoList from "@/components/us/UsGeoList";
 import IncomeLegend from "@/components/us/IncomeLegend";
 import Footer from "@/components/us/Footer";
 import Spinner from "@/components/Spinner";
-import { US_STATES, getStateByFips } from "@/data/us/stateMeta";
+import { getStateByFips } from "@/data/us/stateMeta";
 import { getStateIncome, getAllStateIncomes, acs5YearRange } from "@/lib/usIncomeCalc";
 import { incomeFill } from "@/components/us/colorScale";
-import { formatUsd } from "@/lib/usFormat";
 
 function UsHomeContent({ geo }: { geo: FeatureCollection<Geometry, UsMapFeatureProps> }) {
   const { t } = useLanguage();
@@ -23,7 +21,6 @@ function UsHomeContent({ geo }: { geo: FeatureCollection<Geometry, UsMapFeatureP
   const sp = useSearchParams();
   const qs = sp.toString();
   const base = useLocaleBase();
-  const [mobileView, setMobileView] = useState<"list" | "map">("list");
 
   const values = getAllStateIncomes()
     .map((s) => s.medianHouseholdIncome)
@@ -50,20 +47,9 @@ function UsHomeContent({ geo }: { geo: FeatureCollection<Geometry, UsMapFeatureP
     return incomeFill(getStateIncome(fips)?.medianHouseholdIncome ?? null, min, max);
   }
 
-  // Single navigation entry point shared by both the map (Geography onClick)
-  // and the search list (row onClick) — see step 4 of the mobile UX rework.
   function handleSelect(fips: string) {
     router.push(getHref(fips));
   }
-
-  const stateItems = useMemo(
-    () =>
-      US_STATES.map((s) => {
-        const income = getStateIncome(s.fips)?.medianHouseholdIncome;
-        return { id: s.fips, name: s.name, sub: income ? formatUsd(income) : undefined };
-      }),
-    []
-  );
 
   return (
     <UsShell>
@@ -75,53 +61,13 @@ function UsHomeContent({ geo }: { geo: FeatureCollection<Geometry, UsMapFeatureP
 
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-[15px] font-bold text-white/90">{t.usMapTitle}</h2>
-          <span className="hidden text-[12px] text-white/40 md:inline">{t.usMapHint}</span>
+          <span className="text-[12px] text-white/40">{t.usMapHint}</span>
         </div>
 
-        {/* Desktop (md+): map stays put, search + full state list sits beside it. */}
-        <div className="hidden gap-6 md:flex md:items-start">
-          <div className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-white/[0.02] p-2 sm:p-4">
-            <UsMap geo={geo} onSelect={handleSelect} getFill={getFill} getLabel={getLabel} height={480} />
-            <IncomeLegend min={min} max={max} />
-          </div>
-          <div className="w-72 flex-shrink-0">
-            <UsGeoList
-              items={stateItems}
-              onSelect={handleSelect}
-              searchPlaceholder={t.usSearchStatePlaceholder}
-              emptyText={t.usListNoResults}
-              maxHeight={480}
-            />
-          </div>
-        </div>
-
-        {/* Mobile (<md): list-first, map is an opt-in zoomable toggle view — see
-            requirement 3, small NE states are unreachable by touch otherwise. */}
-        <div className="md:hidden">
-          <div className="mb-3 flex justify-end">
-            <button
-              type="button"
-              onClick={() => setMobileView((v) => (v === "map" ? "list" : "map"))}
-              className="rounded-md border border-white/15 px-3 py-1.5 text-[13px] font-semibold text-white/80 transition-colors hover:border-[#34D399] hover:text-white"
-            >
-              {mobileView === "map" ? t.usViewList : t.usViewMap}
-            </button>
-          </div>
-          {mobileView === "map" ? (
-            <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-2">
-              <UsMap geo={geo} onSelect={handleSelect} getFill={getFill} getLabel={getLabel} height={420} zoomable />
-              <p className="mt-2 text-center text-[11px] text-white/35">{t.usZoomHint}</p>
-              <IncomeLegend min={min} max={max} />
-            </div>
-          ) : (
-            <UsGeoList
-              items={stateItems}
-              onSelect={handleSelect}
-              searchPlaceholder={t.usSearchStatePlaceholder}
-              emptyText={t.usListNoResults}
-              maxHeight={420}
-            />
-          )}
+        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-2 sm:p-4">
+          <UsMap geo={geo} onSelect={handleSelect} getFill={getFill} getLabel={getLabel} height={480} zoomable />
+          <p className="mt-2 text-center text-[11px] text-white/35 sm:hidden">{t.usZoomHint}</p>
+          <IncomeLegend min={min} max={max} />
         </div>
 
         <div className="mt-10 rounded-lg bg-white/[0.03] px-4 py-3 text-center">

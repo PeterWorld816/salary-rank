@@ -348,8 +348,8 @@ export const translations: Record<LangCode, Translations> = {
     usDashboardPlaceSectionHint: "카운티 안의 도시를 고르면 도시 기준 순위도 대시보드에 추가돼요.",
     usDashboardPlaceSelectedLabel: "선택한 도시",
     usCityPickerAriaLabel: "도시 선택",
-    usDetailsToggleShow: "분포도 자세히 보기",
-    usDetailsToggleHide: "분포도 접기",
+    usDetailsToggleShow: "전체 내역 보기",
+    usDetailsToggleHide: "전체 내역 접기",
     usDashboardAddMoreHint: "순자산·401(k)을 입력하면 더 많은 순위가 추가돼요.",
 
     footerInsights: "인사이트",
@@ -512,8 +512,8 @@ export const translations: Record<LangCode, Translations> = {
     usDashboardPlaceSectionHint: "Pick a city in this county to add its rank to your dashboard.",
     usDashboardPlaceSelectedLabel: "Selected city",
     usCityPickerAriaLabel: "Choose a city",
-    usDetailsToggleShow: "Show distribution charts",
-    usDetailsToggleHide: "Hide distribution charts",
+    usDetailsToggleShow: "See full breakdown",
+    usDetailsToggleHide: "Hide full breakdown",
     usDashboardAddMoreHint: "Add your net worth and 401(k) to unlock more rankings.",
 
     footerInsights: "Insights",

@@ -7,7 +7,6 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
-import { formatTemplate } from "@/lib/i18n";
 import { formatUsdCompact } from "@/lib/usFormat";
 import { US_AGE_BANDS, US_GENDERS, US_MARITAL_STATUSES, buildUsSearchParams, decodeUsInput, encodeUsInput, type UsInput } from "@/lib/usInput";
 
@@ -177,10 +176,6 @@ export default function UsInputPanel({ collapsible = false }: { collapsible?: bo
   // instead of the current pathname.
   const localeBase = pathname.startsWith("/kr") ? "/kr" : "/us";
   const homeHref = `${localeBase}?${buildUsSearchParams(form, lang, from).toString()}`;
-  // Skips the map entirely — a nationwide result only needs income (plus the
-  // gender/marital/age defaults), never a state/county pick. See
-  // PersonalizedResult, which renders a full result even with no ?st=/?co=.
-  const nationalResultHref = `${localeBase}/result?${buildUsSearchParams(form, lang, from).toString()}`;
 
   return (
     <div
@@ -278,20 +273,6 @@ export default function UsInputPanel({ collapsible = false }: { collapsible?: bo
               />
             </div>
           </div>
-
-          {!collapsible && (
-            // Deliberately a lighter-weight outline style, not a solid fill —
-            // this only jumps to the income-only nationwide result, skipping
-            // the map below. Styling it like a final "submit" button would
-            // wrongly suggest it's the main/complete action.
-            <Link
-              href={nationalResultHref}
-              className="flex w-full items-center justify-center gap-1.5 rounded-md border border-[#34D399]/40 bg-[#34D399]/[0.08] py-2.5 text-[13px] font-semibold text-[#34D399] transition-colors hover:border-[#34D399]/70 hover:bg-[#34D399]/[0.14] active:scale-[0.99]"
-            >
-              {formatTemplate(t.usSeeNationalResultButtonTemplate, { income: formatUsdCompact(form.annualIncome) })}
-              <span aria-hidden="true">→</span>
-            </Link>
-          )}
         </div>
       </div>
     </div>

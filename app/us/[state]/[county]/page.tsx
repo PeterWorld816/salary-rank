@@ -27,13 +27,12 @@ import {
   acs5YearRange,
 } from "@/lib/usIncomeCalc";
 import { getValueAtPercentile } from "@/lib/percentileTable";
-import { getAdjacentCountyFips, getUsCountiesGeoForState } from "@/lib/usGeo";
+import { getUsCountiesGeoForState } from "@/lib/usGeo";
 import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serverLocale";
 import { pageMetadata, siteTitle, siteDescription } from "@/lib/seo";
 import { translations, formatTemplate } from "@/lib/i18n";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
 import { PercentileThresholds } from "@/components/us/PercentileThresholds";
-import PlaceSearchList from "@/components/us/PlaceSearchList";
 import TownPickerMap from "@/components/us/TownPickerMap";
 import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
@@ -88,24 +87,15 @@ export default function UsCountyPage({ params }: { params: Params }) {
     })
     .filter((row): row is { percent: number; amount: number } => row != null);
 
-  const nearbyCounties = getAdjacentCountyFips(county.fips, 5)
-    .map((fips) => getCountyIncome(fips))
-    .filter((c): c is NonNullable<typeof c> => c != null);
-
   const placeHrefBase = `${base}/${state.abbr}/${county.fips}`;
 
   const places = getPlacesForCounty(county.fips)
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name));
-  const placeItems = places.map((p) => ({
-    id: p.fips,
-    name: stripStateSuffix(p.name, state.name),
-    sub: p.medianHouseholdIncome != null ? formatUsd(p.medianHouseholdIncome) : undefined,
-  }));
 
   // Single-feature FeatureCollection for TownPickerMap's `fit` projection —
-  // undefined on the rare county whose FIPS isn't in us-atlas's topology,
-  // in which case the plain PlaceSearchList below is used as a fallback.
+  // undefined on the rare county whose FIPS isn't in us-atlas's topology, in
+  // which case a "no map data" message below is shown instead of the map.
   const countyFeature = getUsCountiesGeoForState(state.fips).features.find((f) => String(f.id) === county.fips);
   const countyGeo = countyFeature ? { type: "FeatureCollection" as const, features: [countyFeature] } : null;
 
@@ -175,37 +165,14 @@ export default function UsCountyPage({ params }: { params: Params }) {
                   placeHrefBase={placeHrefBase}
                 />
               ) : (
-                <PlaceSearchList
-                  items={placeItems}
-                  resultHrefBase={placeHrefBase}
-                  searchPlaceholder={t.usSearchPlacePlaceholder}
-                  emptyText={t.usListNoResults}
-                />
+                <div className="rounded-xl border border-white/10 bg-white/[0.02] px-5 py-8 text-center">
+                  <p className="mb-1 text-[14px] font-semibold text-white/70">{t.usCountyNoPlaceDataTitle}</p>
+                  <p className="text-[12px] text-white/40">{t.usCountyNoPlaceDataDesc}</p>
+                </div>
               )}
             </>
           )}
         </div>
-
-        {nearbyCounties.length > 0 && (
-          <div className="mb-8">
-            <h2 className="mb-3 text-[16px] font-bold text-white/90">{t.usCountyNearbyHeading}</h2>
-            <ul className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
-              {nearbyCounties.map((c) => (
-                <li key={c.fips}>
-                  <Link
-                    href={`${base}/${state.abbr}/${c.fips}`}
-                    className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-[13px] text-white/70 transition-colors hover:bg-white/[0.04] hover:text-white"
-                  >
-                    <span className="truncate">{stripStateSuffix(c.name, state.name)}</span>
-                    {c.medianHouseholdIncome != null && (
-                      <span className="shrink-0 tabular-nums text-white/40">{formatUsd(c.medianHouseholdIncome)}</span>
-                    )}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
 
         <div className="rounded-lg bg-white/[0.03] px-4 py-3 text-center">
           <p className="text-[12px] text-white/40">{formatTemplate(t.usSourceCensus, { range: acs5YearRange })}</p>

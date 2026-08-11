@@ -25,7 +25,7 @@ import {
 import { getValueAtPercentile } from "@/lib/percentileTable";
 import { buildCountyHref } from "@/components/us/result/useResultLocation";
 import { incomeFill } from "@/components/us/colorScale";
-import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
+import { formatUsd } from "@/lib/usFormat";
 import { PercentileThresholds } from "@/components/us/PercentileThresholds";
 
 function UsStateContent({
@@ -56,10 +56,6 @@ function UsStateContent({
         })
         .filter((row): row is { percent: number; amount: number } => row != null)
     : [];
-
-  const countyDirectory = getCountiesForState(state.fips)
-    .slice()
-    .sort((a, b) => a.name.localeCompare(b.name));
 
   // Picking a county opens its merged SEO+result page — see
   // app/us/[state]/[county]/page.tsx.
@@ -162,35 +158,9 @@ function UsStateContent({
           </div>
         )}
 
-        {/* Crawlable directory of every county in the state — plain internal
-            links to each /us/[state]/[county] content page, independent of
-            the map/search widget above. */}
-        {countyDirectory.length > 0 && (
-          <div className="mt-10">
-            {countyListAdSlot}
-            <h2 className="mb-1 text-[18px] font-bold text-white/90">
-              {formatTemplate(t.usStateCountyListHeadingTemplate, { state: state.name })}
-            </h2>
-            <p className="mb-4 text-[13px] text-white/45">{t.usStateCountyListHint}</p>
-            <ul className="grid grid-cols-1 gap-x-6 sm:grid-cols-2 lg:grid-cols-3">
-              {countyDirectory.map((c) => (
-                <li key={c.fips}>
-                  <Link
-                    href={`${base}/${state.abbr}/${c.fips}`}
-                    className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-[13px] text-white/70 transition-colors hover:bg-white/[0.04] hover:text-white"
-                  >
-                    <span className="truncate">{stripStateSuffix(c.name, state.name)}</span>
-                    {c.medianHouseholdIncome != null && (
-                      <span className="shrink-0 tabular-nums text-white/40">{formatUsd(c.medianHouseholdIncome)}</span>
-                    )}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <div className="mt-8">{countyListAdSlot}</div>
 
-        <div className="mt-10 rounded-lg bg-white/[0.03] px-4 py-3 text-center">
+        <div className="mt-2 rounded-lg bg-white/[0.03] px-4 py-3 text-center">
           <p className="text-[12px] text-white/40">{formatTemplate(t.usSourceCensus, { range: acs5YearRange })}</p>
           <p className="mt-1 text-[12px] text-white/30">{t.usDisclaimer}</p>
         </div>

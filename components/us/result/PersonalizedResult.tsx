@@ -1,24 +1,22 @@
 "use client";
-// The personalized percentile dashboard — every income/net-worth/401k
-// percentile the old 3-step flow (see git history for OverallResultClient/
-// StateResultClient/DemographicResultClient) used to compute one-at-a-time,
-// shown together as one "glance" card stack: headline -> share card -> mini
-// stat grid -> compare chart, with the city picker collapsed into a header
-// chip and the distribution charts tucked behind a "show details" toggle.
+// The personalized percentile dashboard — bell-curve-first: headline (top-X%
+// + the percent as one big number) then the income DistributionChart with
+// its "you're here" marker, always visible. Everything else (share card,
+// mini stat grid, compare chart, gender/marital reference rows, net-worth
+// curve) is supplementary and lives behind the "See full breakdown" toggle
+// or, for the share card, behind actually clicking Share/Save.
 //
 // Rendered in three variants, one per step of the state -> county -> town
 // drill-down:
 //  - "standalone" (default) at /us/result — the nationwide-only fallback for
-//    visitors who skip the map entirely (see UsInputPanel's "See national
-//    result" CTA). Owns its own UsShell/back-link/h1/sources footer/bottom
-//    nav/Footer.
+//    visitors who skip the map entirely. Owns its own UsShell/back-link/h1/
+//    sources footer/bottom nav/Footer.
 //  - "compact" at the top of /us/[state] and /us/[state]/[county] — just the
 //    input panel plus 1-2 stat tiles (income/net-worth top-%), since neither
 //    page is the end of the drill-down: the state page still points at a
 //    county-picker map below, and the county page at a town-picker map.
-//  - "full" at the top of /us/[state]/[county]/[place] — the whole card
-//    stack (headline, share card, mini stat grid, compare chart, details
-//    toggle), since the town is where the drill-down ends.
+//  - "full" at the top of /us/[state]/[county]/[place] — the whole bell-curve
+//    dashboard, since the town is where the drill-down ends.
 // "compact"/"full" resolve state/county/place from route params server-side
 // (see each route's `resolve()`) and pass them in as presets so this
 // component never needs its own ?st=/?co=/?pl=; the parent page already
@@ -99,6 +97,10 @@ function PersonalizedResultContent({
   const [compareCopied, setCompareCopied] = useState(false);
   const [compareFallbackUrl, setCompareFallbackUrl] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  // The share card preview stays off-screen (not display:none, so
+  // html-to-image can still capture it) until Share/Save is actually
+  // clicked — see the "Share card" block below.
+  const [shareCardVisible, setShareCardVisible] = useState(false);
 
   const { input, qs, from } = loc;
   const ready = loc.ready;
@@ -454,9 +456,9 @@ function PersonalizedResultContent({
         </>
       )}
 
-      {/* ── Headline ── */}
+      {/* ── Headline: "top X%" + the percent as one big number ── */}
       <div className="mb-8 rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
-        {headline == null ? (
+        {headline == null || headlineTierPercent == null ? (
           <NoDataCard title={t.usCountyNoDataTitle} desc={t.usCountyNoDataDesc} />
         ) : (
           <>
@@ -465,39 +467,46 @@ function PersonalizedResultContent({
                 <TierBadge tier={headlineTier} />
               </div>
             )}
-            <p className="text-[20px] font-extrabold leading-snug text-balance text-white">{headline}</p>
+            <div className="text-[56px] font-extrabold leading-none tracking-tight text-[#FBBF24]">
+              {formatTemplate(t.topPercentTemplate, { percent: headlineTierPercent })}
+            </div>
+            <p className="mt-3 text-[15px] font-semibold leading-snug text-balance text-white/80">{headline}</p>
           </>
         )}
       </div>
 
-      {/* ── Share card — sits above the mini stat grid so the shareable
-          visual is the first thing seen after the headline. ── */}
-      {ready && state && locationName ? (
-        <div className="mb-8">
-          <div className="mb-6 flex justify-center">
-            <div className="overflow-hidden rounded-3xl shadow-[0_12px_48px_rgba(0,0,0,0.5)]">
-              <UsResultCard
-                stateName={state.name}
-                locationName={locationName}
-                countyPercentile={countyPercentile}
-                nationalPercentile={nationalPercentile}
-                annualIncome={input.annualIncome}
-                netWorthPercentile={netWorthPercentile}
-                k401Balance={input.k401}
-                k401VsMedianPercent={k401?.vsMedianPercent ?? null}
-                ageBandLabel={ageBandLabel}
-                ageIncomePercentile={ageIncomePercentile}
-                ageNetWorthPercentile={ageNetWorthPercentile}
-                cardRef={cardRef}
-                lang={lang}
-              />
-            </div>
-          </div>
+      {/* ── Bell curve — the one chart always on screen. Everything else
+          (mini stat grid, compare chart, gender/marital reference rows,
+          net-worth curve) lives behind "See full breakdown" below. ── */}
+      {(placePercentile != null || countyPercentile != null || statePercentile != null || nationalPercentile != null) && (
+        <div className="mb-8 flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.02] p-5">
+          <DistributionChart
+            monthlySalary={input.annualIncome}
+            width={280}
+            lang={lang}
+            dark
+            min={15000}
+            max={500000}
+            averageValue={county?.medianHouseholdIncome ?? nationalMedianHouseholdIncome ?? 75000}
+          />
+          <p className="mt-2 text-[11px] text-white/30">{formatTemplate(t.usAcs5YearLabel, { range: acs5YearRange })}</p>
+        </div>
+      )}
 
-          {/* Instagram/Snapchat Story-ratio (9:16) card — rasterized by
-              "Save Story" below. Off-screen, not display:none, so
-              html-to-image still lays it out. */}
-          <div className="pointer-events-none absolute left-[-9999px] top-0 overflow-hidden" aria-hidden>
+      {/* ── Share card — off-screen (not display:none, so html-to-image can
+          still capture it) until Share/Save/Save Story is actually clicked,
+          at which point it swaps into view as a preview of what was just
+          shared/saved. ── */}
+      {ready && state && locationName && (
+        <div
+          className={
+            shareCardVisible
+              ? "mb-6 flex justify-center"
+              : "pointer-events-none absolute left-[-9999px] top-0 overflow-hidden"
+          }
+          aria-hidden={!shareCardVisible}
+        >
+          <div className={shareCardVisible ? "overflow-hidden rounded-3xl shadow-[0_12px_48px_rgba(0,0,0,0.5)]" : ""}>
             <UsResultCard
               stateName={state.name}
               locationName={locationName}
@@ -510,45 +519,41 @@ function PersonalizedResultContent({
               ageBandLabel={ageBandLabel}
               ageIncomePercentile={ageIncomePercentile}
               ageNetWorthPercentile={ageNetWorthPercentile}
-              cardRef={storyCardRef}
+              cardRef={cardRef}
               lang={lang}
-              variant="story"
             />
           </div>
         </div>
-      ) : (
-        <div className="mb-8">
-          <NoDataCard title={t.usDashboardSharePromptTitle} desc={t.usDashboardSharePromptDesc} />
-        </div>
       )}
 
-      {/* ── Mini stat grid — every percentile/ratio metric as one compact
-          card, 2 cols on mobile / 3 on wider screens ── */}
-      {gridCards.length > 0 ? (
-        <div className="mb-3 grid grid-cols-3 gap-2">
-          {gridCards.map((card) => (
-            <MiniStatCard
-              key={card.key}
-              label={card.label}
-              displayValue={card.displayValue}
-              fillPercent={card.fillPercent}
-              sub={card.sub}
-              highlight={card.highlight}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="mb-3">
-          <NoDataCard title={t.usCountyNoDataTitle} desc={t.usCountyNoDataDesc} />
+      {/* Instagram/Snapchat Story-ratio (9:16) card — rasterized by "Save
+          Story" only, never shown on-screen itself (the card above is the
+          user-facing preview). Off-screen, not display:none, so
+          html-to-image still lays it out. */}
+      {ready && state && locationName && (
+        <div className="pointer-events-none absolute left-[-9999px] top-0 overflow-hidden" aria-hidden>
+          <UsResultCard
+            stateName={state.name}
+            locationName={locationName}
+            countyPercentile={countyPercentile}
+            nationalPercentile={nationalPercentile}
+            annualIncome={input.annualIncome}
+            netWorthPercentile={netWorthPercentile}
+            k401Balance={input.k401}
+            k401VsMedianPercent={k401?.vsMedianPercent ?? null}
+            ageBandLabel={ageBandLabel}
+            ageIncomePercentile={ageIncomePercentile}
+            ageNetWorthPercentile={ageNetWorthPercentile}
+            cardRef={storyCardRef}
+            lang={lang}
+            variant="story"
+          />
         </div>
       )}
-      <div className="mb-8">
-        {!hasNetWorthOrK401 && <p className="mt-2 text-[11px] text-white/30">{t.usDashboardAddMoreHint}</p>}
-      </div>
 
       {/* ── Share/Save buttons + compare-with-a-friend ── */}
-      {ready && state && county && (
-        <div className="mb-10">
+      {ready && state && county ? (
+        <div className="mb-10" onClickCapture={() => setShareCardVisible(true)}>
           <div className="mb-3">
             <ShareButtons
               cardRef={cardRef}
@@ -594,22 +599,17 @@ function PersonalizedResultContent({
             )}
           </div>
         </div>
-      )}
-
-      {/* ── Compare-at-a-glance bar chart — the one big chart kept in this
-          consolidated view ── */}
-      {compareItems.length > 0 && (
-        <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.02] p-5">
-          <h2 className="mb-4 text-[15px] font-bold text-white/90">{t.usDashboardCompareChartTitle}</h2>
-          <CompareBarChart items={compareItems} />
+      ) : (
+        <div className="mb-10">
+          <NoDataCard title={t.usDashboardSharePromptTitle} desc={t.usDashboardSharePromptDesc} />
         </div>
       )}
 
-      {/* ── Details toggle — distribution curves + gender/marital
-          reference rows, collapsed by default. These are supplementary,
-          not part of the "one glance" summary above, and DistributionChart
-          recomputes an SVG path on every render, so keeping it unmounted
-          until asked for also avoids doing that work on every city pick. ── */}
+      {/* ── See full breakdown — mini stat grid, compare chart,
+          gender/marital reference rows, net-worth curve. Everything that
+          made the default view busy now lives here, collapsed by default
+          (also keeps the extra DistributionChart unmounted, and its SVG
+          path uncomputed, until asked for). ── */}
       <div className={embedded ? "" : "mb-8"}>
         <button
           type="button"
@@ -623,6 +623,31 @@ function PersonalizedResultContent({
 
         {detailsOpen && (
           <div className="mt-4 flex flex-col gap-4">
+            {gridCards.length > 0 && (
+              <div>
+                <div className="grid grid-cols-3 gap-2">
+                  {gridCards.map((card) => (
+                    <MiniStatCard
+                      key={card.key}
+                      label={card.label}
+                      displayValue={card.displayValue}
+                      fillPercent={card.fillPercent}
+                      sub={card.sub}
+                      highlight={card.highlight}
+                    />
+                  ))}
+                </div>
+                {!hasNetWorthOrK401 && <p className="mt-2 text-[11px] text-white/30">{t.usDashboardAddMoreHint}</p>}
+              </div>
+            )}
+
+            {compareItems.length > 0 && (
+              <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5">
+                <h2 className="mb-4 text-[15px] font-bold text-white/90">{t.usDashboardCompareChartTitle}</h2>
+                <CompareBarChart items={compareItems} />
+              </div>
+            )}
+
             {(genderIncomeRef?.value != null || maritalIncomeRef?.value != null) && (
               <div className="divide-y divide-white/[0.06] rounded-xl border border-white/10 bg-white/[0.02] px-5 py-1">
                 {genderIncomeRef?.value != null && (
@@ -639,22 +664,6 @@ function PersonalizedResultContent({
                     value={formatUsd(maritalIncomeRef.value)}
                   />
                 )}
-              </div>
-            )}
-
-            {(placePercentile != null || countyPercentile != null || statePercentile != null || nationalPercentile != null) && (
-              <div className="flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.02] p-5">
-                <p className="mb-3 self-start text-[12px] font-semibold text-white/50">{t.usDashboardIncomeSectionTitle}</p>
-                <DistributionChart
-                  monthlySalary={input.annualIncome}
-                  width={280}
-                  lang={lang}
-                  dark
-                  min={15000}
-                  max={500000}
-                  averageValue={county?.medianHouseholdIncome ?? nationalMedianHouseholdIncome ?? 75000}
-                />
-                <p className="mt-2 text-[11px] text-white/30">{formatTemplate(t.usAcs5YearLabel, { range: acs5YearRange })}</p>
               </div>
             )}
 
