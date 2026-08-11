@@ -5,7 +5,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, Home } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { formatTemplate } from "@/lib/i18n";
 import { formatUsdCompact } from "@/lib/usFormat";
@@ -179,7 +179,7 @@ export default function UsInputPanel({ collapsible = false }: { collapsible?: bo
   const homeHref = `${localeBase}?${buildUsSearchParams(form, lang, from).toString()}`;
   // Skips the map entirely — a nationwide result only needs income (plus the
   // gender/marital/age defaults), never a state/county pick. See
-  // DashboardResultClient, which renders a full result even with no ?st=/?co=.
+  // PersonalizedResult, which renders a full result even with no ?st=/?co=.
   const nationalResultHref = `${localeBase}/result?${buildUsSearchParams(form, lang, from).toString()}`;
 
   return (
@@ -188,22 +188,26 @@ export default function UsInputPanel({ collapsible = false }: { collapsible?: bo
       style={{ background: "rgba(10,11,13,0.85)" }}
     >
       <div className="mx-auto max-w-5xl">
+        {/* Brand masthead — sits above the input form on every /us page
+            (this panel is rendered on all of them), so it's the one place
+            that needs wiring. Always visible and keeps every answer —
+            clicking never resets gender/marital/age/income/net worth/401k,
+            it just changes the destination. */}
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <Link href={homeHref} className="group flex min-w-0 items-baseline gap-2">
+            <span className="truncate text-[15px] font-extrabold tracking-tight text-white transition-colors group-hover:text-[#34D399]">
+              {t.usAppTitle}
+            </span>
+            <span className="hidden truncate text-[12px] text-white/40 sm:inline">{t.usMastheadTagline}</span>
+          </Link>
+        </div>
+
         {/* Stacked (not right-aligned) below md — the language selector is a
             fixed element pinned to the same top-right corner, so an
             inline-right chip here would run under it on narrow screens. */}
         <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
           <div className="flex items-center gap-3">
             <h2 className="text-[13px] font-bold uppercase tracking-wide text-[#34D399]">{t.usInputTitle}</h2>
-            {/* Always visible (every /us page renders this panel) and keeps
-                every answer — clicking never resets gender/marital/age/
-                income/net worth/401k, it just changes the destination. */}
-            <Link
-              href={homeHref}
-              className="flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.06] px-2.5 py-1 text-[11px] font-semibold text-white/70 transition-colors hover:border-[#34D399] hover:text-white"
-            >
-              <Home className="h-3 w-3" />
-              {t.home}
-            </Link>
           </div>
           <button
             type="button"

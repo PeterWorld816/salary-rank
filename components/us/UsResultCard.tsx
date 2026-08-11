@@ -70,7 +70,7 @@ type NamedPercent = { key: string; label: string; percent: number };
 
 export default function UsResultCard({
   stateName,
-  countyName,
+  locationName,
   countyPercentile,
   nationalPercentile,
   annualIncome,
@@ -85,7 +85,7 @@ export default function UsResultCard({
   variant = "card",
 }: {
   stateName: string;
-  countyName: string;
+  locationName: string;
   countyPercentile: number | null;
   nationalPercentile: number | null;
   annualIncome: number;
@@ -105,7 +105,7 @@ export default function UsResultCard({
   const height = isStory ? STORY_HEIGHT : CARD_HEIGHT;
 
   // ── Pick the 1-2 most impressive percentiles to feature big, instead of
-  // dumping every number in at the same size (see DashboardResultClient's
+  // dumping every number in at the same size (see PersonalizedResult's
   // headline, which uses the same "best rank wins" idea for its narrative). ──
   const shortLabels: Record<string, string> = {
     county: t.usDashboardCountyIncomeLabel,
@@ -193,7 +193,7 @@ export default function UsResultCard({
       )}
 
       <div style={{ display: "flex", color: "rgba(255,255,255,0.4)", fontSize: "12px", marginBottom: "8px" }}>
-        {countyName}, {stateName}
+        {locationName}, {stateName}
       </div>
 
       {featured == null ? (

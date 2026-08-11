@@ -52,17 +52,25 @@ export type UsMapMarker = { id: string; lng: number; lat: number; label?: string
 // fills, so a marker needs a color that never blends into the map itself.
 const MARKER_ACCENT = "#FBBF24";
 
-function MapPinMarker({ label }: { label?: string }) {
+function MapPinMarker({ label, clickable, hovered }: { label?: string; clickable?: boolean; hovered?: boolean }) {
   return (
-    <g style={{ pointerEvents: "none" }}>
+    <g style={{ pointerEvents: clickable ? "auto" : "none", cursor: clickable ? "pointer" : "default" }}>
       <path
         d="M0,0 C0,0 -8,-14 -8,-20 A8,8 0 1 1 8,-20 C8,-14 0,0 0,0 Z"
         fill={MARKER_ACCENT}
         stroke="#050607"
         strokeWidth={1.5}
-        style={{ filter: `drop-shadow(0 0 6px ${MARKER_ACCENT}) drop-shadow(0 2px 5px rgba(0,0,0,0.6))` }}
+        style={{
+          filter: `drop-shadow(0 0 6px ${MARKER_ACCENT}) drop-shadow(0 2px 5px rgba(0,0,0,0.6))`,
+          transform: hovered ? "scale(1.15)" : "scale(1)",
+          transformOrigin: "0px 0px",
+          transition: "transform 120ms ease",
+        }}
       />
       <circle cx={0} cy={-20} r={3} fill="#050607" />
+      {/* Bigger invisible hit target than the pin's own path — the pin
+          glyph itself is too thin to reliably tap on a phone screen. */}
+      {clickable && <circle cx={0} cy={-14} r={18} fill="transparent" />}
       {label && (
         <text
           x={0}
@@ -75,6 +83,7 @@ function MapPinMarker({ label }: { label?: string }) {
             stroke: "rgba(5,6,7,0.75)",
             strokeWidth: 3,
             paintOrder: "stroke",
+            pointerEvents: "none",
           }}
         >
           {label}
@@ -95,6 +104,7 @@ export default function UsMap({
   getFill,
   getLabel,
   markers = [],
+  onMarkerSelect,
 }: {
   geo: FeatureCollection<Geometry, UsMapFeatureProps>;
   // false (default) = whole-US Albers projection (for the 50-state map).
@@ -116,8 +126,12 @@ export default function UsMap({
   getLabel: (id: string) => string;
   // Optional pins drawn on top of the geography layer — see UsMapMarker.
   markers?: UsMapMarker[];
+  // Makes each marker itself clickable (e.g. picking a town) instead of
+  // purely decorative — omit to keep markers as plain, non-interactive pins.
+  onMarkerSelect?: (id: string) => void;
 }) {
   const [hovered, setHovered] = useState<{ label: string; x: number; y: number } | null>(null);
+  const [hoveredMarker, setHoveredMarker] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
   const [center, setCenter] = useState<[number, number]>([0, 0]);
   // Timestamp of the last accepted tap, used to tell a double-tap (zoom
@@ -162,7 +176,7 @@ export default function UsMap({
 
   // County map (fit=true): only the top N largest-by-area counties get a
   // persistent label — everything else stays tooltip-only (see `hovered`).
-  // A single-feature map (CountyPlaceMap's one-county-polygon view) skips
+  // A single-feature map (TownPickerMap's one-county-polygon view) skips
   // this entirely — the page heading already names the county, and the
   // label would otherwise sit right on top of any city marker.
   const countyLabelIds = useMemo(() => {
@@ -299,8 +313,14 @@ export default function UsMap({
   );
 
   const markerEls = markers.map((m) => (
-    <Marker key={m.id} coordinates={[m.lng, m.lat]}>
-      <MapPinMarker label={m.label} />
+    <Marker
+      key={m.id}
+      coordinates={[m.lng, m.lat]}
+      onClick={onMarkerSelect ? () => onMarkerSelect(m.id) : undefined}
+      onMouseEnter={onMarkerSelect ? () => setHoveredMarker(m.id) : undefined}
+      onMouseLeave={onMarkerSelect ? () => setHoveredMarker((h) => (h === m.id ? null : h)) : undefined}
+    >
+      <MapPinMarker label={m.label} clickable={Boolean(onMarkerSelect)} hovered={hoveredMarker === m.id} />
     </Marker>
   ));
 

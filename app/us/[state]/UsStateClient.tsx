@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
@@ -8,9 +8,8 @@ import { useLanguage } from "@/lib/LanguageProvider";
 import { useLocaleBase } from "@/lib/useLocaleBase";
 import { formatTemplate } from "@/lib/i18n";
 import UsShell from "@/components/us/UsShell";
-import UsInputPanel from "@/components/us/UsInputPanel";
+import PersonalizedResult from "@/components/us/result/PersonalizedResult";
 import UsMap, { type UsMapFeatureProps } from "@/components/us/UsMap";
-import UsGeoList from "@/components/us/UsGeoList";
 import IncomeLegend from "@/components/us/IncomeLegend";
 import Footer from "@/components/us/Footer";
 import Spinner from "@/components/Spinner";
@@ -24,7 +23,7 @@ import {
   acs1Vintage,
 } from "@/lib/usIncomeCalc";
 import { getValueAtPercentile } from "@/lib/percentileTable";
-import { buildResultQuery } from "@/components/us/result/useResultLocation";
+import { buildCountyHref } from "@/components/us/result/useResultLocation";
 import { incomeFill } from "@/components/us/colorScale";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
 import { PercentileThresholds } from "@/components/us/PercentileThresholds";
@@ -37,7 +36,6 @@ function UsStateContent({
   const sp = useSearchParams();
   const qs = sp.toString();
   const base = useLocaleBase();
-  const [mobileView, setMobileView] = useState<"list" | "map">("list");
 
   const values = getCountiesForState(state.fips)
     .map((c) => c.medianHouseholdIncome)
@@ -63,10 +61,10 @@ function UsStateContent({
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  // Picking a county opens the unified result dashboard — see
-  // app/us/result/DashboardResultClient.tsx.
+  // Picking a county opens its merged SEO+result page — see
+  // app/us/[state]/[county]/page.tsx.
   function getHref(fips: string) {
-    return `${base}/result?${buildResultQuery(sp, state.abbr, fips)}`;
+    return buildCountyHref(base, sp, state.abbr, fips);
   }
 
   function getLabel(fips: string) {
@@ -86,19 +84,9 @@ function UsStateContent({
     router.push(getHref(fips));
   }
 
-  const countyItems = useMemo(
-    () =>
-      geo.features.map((f) => {
-        const fips = String(f.id);
-        const income = getCountyIncome(fips)?.medianHouseholdIncome;
-        return { id: fips, name: f.properties?.name ?? fips, sub: income ? formatUsd(income) : undefined };
-      }),
-    [geo]
-  );
-
   return (
     <UsShell>
-      <UsInputPanel />
+      <PersonalizedResult presetState={state} variant="compact" inputCollapsible={false} />
 
       <div className="mx-auto max-w-5xl px-4 pb-16 pt-8 sm:px-6">
         <Link
@@ -167,52 +155,11 @@ function UsStateContent({
             {t.usCountyNoDataDesc}
           </div>
         ) : (
-          <>
-            {/* Desktop (md+): map stays put, search + full county list sits beside it. */}
-            <div className="hidden gap-6 md:flex md:items-start">
-              <div className="min-w-0 flex-1 rounded-2xl border border-white/10 bg-white/[0.02] p-2 sm:p-4">
-                <UsMap geo={geo} fit onSelect={handleSelect} getFill={getFill} getLabel={getLabel} height={520} />
-                <IncomeLegend min={min} max={max} />
-              </div>
-              <div className="w-72 flex-shrink-0">
-                <UsGeoList
-                  items={countyItems}
-                  onSelect={handleSelect}
-                  searchPlaceholder={t.usSearchCountyPlaceholder}
-                  emptyText={t.usListNoResults}
-                  maxHeight={520}
-                />
-              </div>
-            </div>
-
-            {/* Mobile (<md): list-first, map is an opt-in zoomable toggle view. */}
-            <div className="md:hidden">
-              <div className="mb-3 flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setMobileView((v) => (v === "map" ? "list" : "map"))}
-                  className="rounded-md border border-white/15 px-3 py-1.5 text-[13px] font-semibold text-white/80 transition-colors hover:border-[#34D399] hover:text-white"
-                >
-                  {mobileView === "map" ? t.usViewList : t.usViewMap}
-                </button>
-              </div>
-              {mobileView === "map" ? (
-                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-2">
-                  <UsMap geo={geo} fit onSelect={handleSelect} getFill={getFill} getLabel={getLabel} height={420} zoomable />
-                  <p className="mt-2 text-center text-[11px] text-white/35">{t.usZoomHint}</p>
-                  <IncomeLegend min={min} max={max} />
-                </div>
-              ) : (
-                <UsGeoList
-                  items={countyItems}
-                  onSelect={handleSelect}
-                  searchPlaceholder={t.usSearchCountyPlaceholder}
-                  emptyText={t.usListNoResults}
-                  maxHeight={420}
-                />
-              )}
-            </div>
-          </>
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-2 sm:p-4">
+            <UsMap geo={geo} fit onSelect={handleSelect} getFill={getFill} getLabel={getLabel} height={520} zoomable />
+            <p className="mt-2 text-center text-[11px] text-white/35 sm:hidden">{t.usZoomHint}</p>
+            <IncomeLegend min={min} max={max} />
+          </div>
         )}
 
         {/* Crawlable directory of every county in the state — plain internal

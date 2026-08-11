@@ -1,7 +1,9 @@
 // The result flow used to be three separate steps — /result/overall,
 // /result/state, /result/demographic — before it was consolidated into one
-// scrolling dashboard at /result (see app/us/result/DashboardResultClient.tsx).
-// These routes are disallowed in robots.txt (app/robots.ts) and never in the
+// scrolling dashboard at /result (see components/us/result/PersonalizedResult.tsx),
+// which itself now redirects to /us/[state]/[county](/[place]) whenever a
+// county was picked. These routes are disallowed in robots.txt (app/robots.ts)
+// and never in the
 // sitemap, so there's no SEO reason to keep them as real pages — but old
 // shared links and bookmarks may still point at them, so each one redirects
 // to the dashboard instead of 404ing, carrying every query param along.

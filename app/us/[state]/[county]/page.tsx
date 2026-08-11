@@ -1,13 +1,19 @@
-// SEO landing page for a single county — median income, its position vs the
-// state/national distributions, income thresholds, nearby counties, and a
-// CTA into the calculator (/us/result/**). No generateStaticParams (3,144
-// counties is too slow to prerender at build time); instead this ISR-caches
-// each county's HTML for a day after its first real visit. That only works
-// if this page never reads searchParams — reading it anywhere forces Next.js
-// to render fully per-request, bypassing the ISR cache — so the one thing
-// this route used to do with the query string (the old single-page result
-// URL's `?d=` redirect) now happens in middleware.ts instead, before the
-// request ever reaches here.
+// County step of the state -> county -> town drill-down: a compact
+// PersonalizedResult ("compact" variant — income/net-worth top-% only, see
+// that file) up top, computed client-side from whatever's already in the
+// query string, then the county's static SEO content — median income vs
+// state/national, income thresholds — and finally the town-picker map (or a
+// "no town-level data" message) that continues the drill-down into
+// /us/[state]/[county]/[place], which is where the full personalized result
+// lives. No generateStaticParams (3,144 counties is too slow to prerender
+// at build time); instead this ISR-caches each county's HTML for a day
+// after its first real visit. That only works if THIS SERVER COMPONENT
+// never reads searchParams itself (reading it anywhere forces Next.js to
+// render fully per-request, bypassing the ISR cache) — PersonalizedResult
+// reads them client-side instead, inside its own Suspense boundary, so only
+// that subtree opts out of the static render. The old single-page result
+// URL's `?d=` redirect happens in middleware.ts, before the request ever
+// reaches here.
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -28,10 +34,10 @@ import { translations, formatTemplate } from "@/lib/i18n";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
 import { PercentileThresholds } from "@/components/us/PercentileThresholds";
 import PlaceSearchList from "@/components/us/PlaceSearchList";
-import CountyPlaceMap from "@/components/us/CountyPlaceMap";
+import TownPickerMap from "@/components/us/TownPickerMap";
 import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
-import AdSlot from "@/components/ads/AdSlot";
+import PersonalizedResult from "@/components/us/result/PersonalizedResult";
 
 export const revalidate = 86400;
 
@@ -86,7 +92,7 @@ export default function UsCountyPage({ params }: { params: Params }) {
     .map((fips) => getCountyIncome(fips))
     .filter((c): c is NonNullable<typeof c> => c != null);
 
-  const calculatorHref = `${base}/result?st=${state.abbr}&co=${county.fips}`;
+  const placeHrefBase = `${base}/${state.abbr}/${county.fips}`;
 
   const places = getPlacesForCounty(county.fips)
     .slice()
@@ -97,7 +103,7 @@ export default function UsCountyPage({ params }: { params: Params }) {
     sub: p.medianHouseholdIncome != null ? formatUsd(p.medianHouseholdIncome) : undefined,
   }));
 
-  // Single-feature FeatureCollection for CountyPlaceMap's `fit` projection —
+  // Single-feature FeatureCollection for TownPickerMap's `fit` projection —
   // undefined on the rare county whose FIPS isn't in us-atlas's topology,
   // in which case the plain PlaceSearchList below is used as a fallback.
   const countyFeature = getUsCountiesGeoForState(state.fips).features.find((f) => String(f.id) === county.fips);
@@ -105,6 +111,7 @@ export default function UsCountyPage({ params }: { params: Params }) {
 
   return (
     <UsShell>
+      <PersonalizedResult presetState={state} presetCounty={county} variant="compact" />
       <div className="mx-auto max-w-2xl px-4 pb-16 pt-8 sm:px-6">
         <Link
           href={`${base}/${state.abbr}`}
@@ -144,67 +151,40 @@ export default function UsCountyPage({ params }: { params: Params }) {
                 <PercentileThresholds rows={thresholdRows} topPercentTemplate={t.topPercentTemplate} />
               </div>
             )}
-
-            {/* EXPERIMENT: AdSlot temporarily removed to isolate its effect */}
-
-            <div className="mb-8 rounded-xl border border-[#34D399]/25 bg-[#34D399]/[0.06] px-5 py-5 text-center">
-              <p className="mb-1.5 text-[15px] font-bold text-white">
-                {formatTemplate(t.usCountyCtaHeadingTemplate, { county: stripStateSuffix(county.name, state.name) })}
-              </p>
-              <p className="mb-4 text-[13px] text-white/60">{t.usCountyCtaBody}</p>
-              <Link
-                href={calculatorHref}
-                className="inline-block rounded-md bg-[#34D399] px-6 py-2.5 text-[14px] font-semibold text-black transition-opacity hover:opacity-90"
-              >
-                {t.usCountyCtaButton}
-              </Link>
-            </div>
           </>
         )}
 
-        {places.length > 0 && (
-          <div className="mb-8">
-            <h2 className="mb-1 text-[16px] font-bold text-white/90">
-              {formatTemplate(t.usCountyPlaceListHeadingTemplate, { county: stripStateSuffix(county.name, state.name) })}
-            </h2>
-            <p className="mb-4 text-[13px] text-white/45">{t.usCountyPlaceListHint}</p>
-            {countyGeo ? (
-              <CountyPlaceMap
-                stateName={state.name}
-                countyName={stripStateSuffix(county.name, state.name)}
-                countyGeo={countyGeo}
-                places={places}
-                calculatorHref={calculatorHref}
-              />
-            ) : (
-              <PlaceSearchList
-                items={placeItems}
-                resultHrefBase={calculatorHref}
-                searchPlaceholder={t.usSearchPlacePlaceholder}
-                emptyText={t.usListNoResults}
-              />
-            )}
-
-            {/* Crawlable directory, independent of the search widget above —
-                same reasoning as UsStateClient's county directory: plain
-                internal links a crawler follows without executing JS. */}
-            <ul className="mt-4 grid grid-cols-1 gap-x-6 sm:grid-cols-2">
-              {places.map((p) => (
-                <li key={p.fips}>
-                  <Link
-                    href={`${base}/${state.abbr}/${county.fips}/${p.fips}`}
-                    className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-[13px] text-white/70 transition-colors hover:bg-white/[0.04] hover:text-white"
-                  >
-                    <span className="truncate">{stripStateSuffix(p.name, state.name)}</span>
-                    {p.medianHouseholdIncome != null && (
-                      <span className="shrink-0 tabular-nums text-white/40">{formatUsd(p.medianHouseholdIncome)}</span>
-                    )}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <div className="mb-8">
+          {places.length === 0 ? (
+            <div className="rounded-xl border border-white/10 bg-white/[0.02] px-5 py-8 text-center">
+              <p className="mb-1 text-[14px] font-semibold text-white/70">{t.usCountyNoPlaceDataTitle}</p>
+              <p className="text-[12px] text-white/40">{t.usCountyNoPlaceDataDesc}</p>
+            </div>
+          ) : (
+            <>
+              <h2 className="mb-1 text-[16px] font-bold text-white/90">
+                {formatTemplate(t.usCountyPlaceListHeadingTemplate, { county: stripStateSuffix(county.name, state.name) })}
+              </h2>
+              <p className="mb-4 text-[13px] text-white/45">{t.usCountyPlaceListHint}</p>
+              {countyGeo ? (
+                <TownPickerMap
+                  stateName={state.name}
+                  countyName={stripStateSuffix(county.name, state.name)}
+                  countyGeo={countyGeo}
+                  places={places}
+                  placeHrefBase={placeHrefBase}
+                />
+              ) : (
+                <PlaceSearchList
+                  items={placeItems}
+                  resultHrefBase={placeHrefBase}
+                  searchPlaceholder={t.usSearchPlacePlaceholder}
+                  emptyText={t.usListNoResults}
+                />
+              )}
+            </>
+          )}
+        </div>
 
         {nearbyCounties.length > 0 && (
           <div className="mb-8">

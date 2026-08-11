@@ -1,11 +1,15 @@
-// SEO landing page for a single place (city/town/CDP) — mirrors
-// app/us/[state]/[county]/page.tsx's pattern exactly (median income, position
-// vs county/state/national, income thresholds, sibling places, CTA into the
-// dashboard). No generateStaticParams (32,000+ places is far too slow to
-// prerender); instead this ISR-caches each place's HTML for a day after its
-// first real visit — same reasoning as the county page, and same rule: this
-// page must never read searchParams, or Next.js forces per-request dynamic
-// rendering and the ISR cache never kicks in.
+// Town step — the end of the state -> county -> town drill-down (see
+// app/us/[state]/[county]/page.tsx's town-picker map): the "full"
+// PersonalizedResult variant on top (headline, share card, mini stat grid,
+// compare chart, details toggle — this town's own percentile, computed
+// client-side from whatever's already in the query string), then the
+// town's static SEO content below — median income, its position vs
+// county/state/national, sibling places. No generateStaticParams (32,000+
+// places is far too slow to prerender); instead this ISR-caches each
+// place's HTML for a day after its first real visit — same reasoning as
+// the county page, and same rule: this SERVER COMPONENT must never read
+// searchParams itself, or Next.js forces per-request dynamic rendering and
+// the ISR cache never kicks in.
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -19,6 +23,7 @@ import {
   getNationalIncomePercentile,
   getPlaceIncomePercentile,
   acs5YearRange,
+  type UsCountyIncome,
 } from "@/lib/usIncomeCalc";
 import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serverLocale";
 import { pageMetadata, siteTitle, siteDescription } from "@/lib/seo";
@@ -26,27 +31,41 @@ import { translations, formatTemplate } from "@/lib/i18n";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
 import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
+import PersonalizedResult from "@/components/us/result/PersonalizedResult";
 
 export const revalidate = 86400;
 
 type Params = { state: string; county: string; place: string };
 
-function resolve(params: Params) {
+function resolveStateCounty(params: Params) {
   const state = getStateByAbbr(params.state);
   const county = state ? getCountyIncome(params.county) : null;
+  if (!state || !county || county.stateFips !== state.fips) return null;
+  return { state, county };
+}
+
+// A place fips that doesn't resolve, or resolves to a place outside this
+// county (a stale/hand-edited URL), isn't a 404 — the county itself is real,
+// so this falls back to "no town data" below rather than notFound().
+function resolvePlace(params: Params, county: UsCountyIncome) {
   const place = getPlaceIncome(params.place);
-  if (!state || !county || county.stateFips !== state.fips || !place || place.countyFips !== county.fips) return null;
-  return { state, county, place };
+  return place && place.countyFips === county.fips ? place : null;
 }
 
 export function generateMetadata({ params }: { params: Params }): Metadata {
   // EXPERIMENT: hardcoded, no headers() call (matches the county page)
   const locale: "us" | "kr" = "us";
   const path = `/us/${params.state}/${params.county}/${params.place}`;
-  const resolved = resolve(params);
-  if (!resolved) return pageMetadata(locale, path, siteTitle(locale), siteDescription(locale));
+  const stateCounty = resolveStateCounty(params);
+  if (!stateCounty) return pageMetadata(locale, path, siteTitle(locale), siteDescription(locale));
 
-  const { place } = resolved;
+  const place = resolvePlace(params, stateCounty.county);
+  if (!place) {
+    // No real content to index at this URL — same "thin content" bar the
+    // null-median case below already holds every place page to.
+    return { ...pageMetadata(locale, path, siteTitle(locale), siteDescription(locale)), robots: { index: false, follow: true } };
+  }
+
   const t = translations[getLangForLocale(locale)];
   const placeName = place.name;
   const title = formatTemplate(t.usPlacePageHeadingTemplate, { place: placeName });
@@ -63,14 +82,43 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
 }
 
 export default function UsPlacePage({ params }: { params: Params }) {
-  const resolved = resolve(params);
-  if (!resolved) notFound();
-  const { state, county, place } = resolved;
+  const stateCounty = resolveStateCounty(params);
+  if (!stateCounty) notFound();
+  const { state, county } = stateCounty;
+  const place = resolvePlace(params, county);
 
   // EXPERIMENT: hardcoded, no headers() call
   const lang = getLangForLocale("us");
   const t = translations[lang];
   const base = "/us";
+  const countyHref = `${base}/${state.abbr}/${county.fips}`;
+
+  if (!place) {
+    return (
+      <UsShell>
+        <div className="mx-auto max-w-2xl px-4 pb-16 pt-8 sm:px-6">
+          <Link
+            href={countyHref}
+            className="mb-6 inline-flex items-center gap-1 text-[13px] text-white/50 transition-colors hover:text-white/80"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            {t.usPlaceBackToCounty}
+          </Link>
+          <div className="rounded-xl border border-white/10 bg-white/[0.02] px-5 py-10 text-center">
+            <p className="mb-1.5 text-[15px] font-semibold text-white/80">{t.usPlaceNoDataTitle}</p>
+            <p className="mb-6 text-[13px] text-white/45">{t.usPlaceNoDataDesc}</p>
+            <Link
+              href={countyHref}
+              className="inline-block rounded-md bg-[#34D399] px-6 py-2.5 text-[14px] font-semibold text-black transition-opacity hover:opacity-90"
+            >
+              {t.usPlaceNoDataCta}
+            </Link>
+          </div>
+        </div>
+        <Footer />
+      </UsShell>
+    );
+  }
 
   const median = place.medianHouseholdIncome;
   const countyPercentile = median != null ? getPlaceIncomePercentile(place.fips, median) : null;
@@ -82,14 +130,14 @@ export default function UsPlacePage({ params }: { params: Params }) {
     .sort((a, b) => a.name.localeCompare(b.name))
     .slice(0, 8);
 
-  const calculatorHref = `${base}/result?st=${state.abbr}&co=${county.fips}&pl=${place.fips}`;
   const countyName = stripStateSuffix(county.name, state.name);
 
   return (
     <UsShell>
+      <PersonalizedResult presetState={state} presetCounty={county} presetPlace={place} variant="full" />
       <div className="mx-auto max-w-2xl px-4 pb-16 pt-8 sm:px-6">
         <Link
-          href={`${base}/${state.abbr}/${county.fips}`}
+          href={countyHref}
           className="mb-6 inline-flex items-center gap-1 text-[13px] text-white/50 transition-colors hover:text-white/80"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -106,32 +154,17 @@ export default function UsPlacePage({ params }: { params: Params }) {
             <p className="text-[12px] text-white/40">{t.usCountyNoDataDesc}</p>
           </div>
         ) : (
-          <>
-            <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
-              <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-                <span className="text-[13px] text-white/55">{t.usPlaceMedianLabel}</span>
-                <span className="text-[18px] font-bold tabular-nums text-white">{formatUsd(median)}</span>
-              </div>
-              <div className="space-y-1.5 pt-3 text-[13px] leading-relaxed text-white/70">
-                {countyPercentile != null && <p>{formatTemplate(t.usPlaceVsCountyTemplate, { percent: countyPercentile, county: countyName })}</p>}
-                {statePercentile != null && <p>{formatTemplate(t.usPlaceVsStateTemplate, { percent: statePercentile, state: state.name })}</p>}
-                {nationalPercentile != null && <p>{formatTemplate(t.usPlaceVsNationalTemplate, { percent: nationalPercentile })}</p>}
-              </div>
+          <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
+            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+              <span className="text-[13px] text-white/55">{t.usPlaceMedianLabel}</span>
+              <span className="text-[18px] font-bold tabular-nums text-white">{formatUsd(median)}</span>
             </div>
-
-            <div className="mb-8 rounded-xl border border-[#34D399]/25 bg-[#34D399]/[0.06] px-5 py-5 text-center">
-              <p className="mb-1.5 text-[15px] font-bold text-white">
-                {formatTemplate(t.usPlaceCtaHeadingTemplate, { place: stripStateSuffix(place.name, state.name) })}
-              </p>
-              <p className="mb-4 text-[13px] text-white/60">{t.usCountyCtaBody}</p>
-              <Link
-                href={calculatorHref}
-                className="inline-block rounded-md bg-[#34D399] px-6 py-2.5 text-[14px] font-semibold text-black transition-opacity hover:opacity-90"
-              >
-                {t.usCountyCtaButton}
-              </Link>
+            <div className="space-y-1.5 pt-3 text-[13px] leading-relaxed text-white/70">
+              {countyPercentile != null && <p>{formatTemplate(t.usPlaceVsCountyTemplate, { percent: countyPercentile, county: countyName })}</p>}
+              {statePercentile != null && <p>{formatTemplate(t.usPlaceVsStateTemplate, { percent: statePercentile, state: state.name })}</p>}
+              {nationalPercentile != null && <p>{formatTemplate(t.usPlaceVsNationalTemplate, { percent: nationalPercentile })}</p>}
             </div>
-          </>
+          </div>
         )}
 
         {otherPlaces.length > 0 && (

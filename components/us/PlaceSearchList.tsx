@@ -16,14 +16,13 @@ export default function PlaceSearchList({
   emptyText,
 }: {
   items: UsGeoListItem[];
-  // Full dashboard URL up through "?st=...&co=..." — e.g.
-  // "/us/result?st=CA&co=06037". The county page never reads searchParams
-  // (see its file header — that's what keeps it ISR-cacheable), so there's
-  // no existing query string to merge in here; the default handler just
-  // appends "&pl=<id>" to this fixed base. Ignored when `onSelect` is given.
+  // The county's own page path (e.g. "/us/CA/06037") — the picked place's
+  // fips is appended as a path segment to reach its own SEO+result page.
+  // Ignored when `onSelect` is given.
   resultHrefBase?: string;
   // Overrides the default push-to-resultHrefBase navigation — used by the
-  // dashboard to update the "pl" param in place instead of navigating.
+  // dashboard's city picker chip to navigate with today's answers carried
+  // along instead of this component's plain path-only push.
   onSelect?: (placeFips: string) => void;
   searchPlaceholder: string;
   emptyText: string;
@@ -35,7 +34,7 @@ export default function PlaceSearchList({
       onSelect(placeFips);
       return;
     }
-    if (resultHrefBase) router.push(`${resultHrefBase}&pl=${placeFips}`);
+    if (resultHrefBase) router.push(`${resultHrefBase}/${placeFips}`);
   }
 
   return <UsGeoList items={items} onSelect={handleSelect} searchPlaceholder={searchPlaceholder} emptyText={emptyText} />;

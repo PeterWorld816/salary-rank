@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
 import { getAppLocale, getOriginalPathname } from "@/lib/serverLocale";
 import { pageMetadata, resultOgImage } from "@/lib/seo";
 import AdSlot from "@/components/ads/AdSlot";
-import DashboardResultClient from "./DashboardResultClient";
+import PersonalizedResult from "@/components/us/result/PersonalizedResult";
 
 const META = {
   us: {
@@ -21,9 +22,37 @@ export function generateMetadata({ searchParams }: { searchParams: Record<string
   return pageMetadata(locale, getOriginalPathname(), m.title, m.description, { image: resultOgImage(locale, searchParams) });
 }
 
-export default function ResultDashboardPage() {
+// /us/result?st=&co=(&pl=) used to be the whole dashboard; that content now
+// lives at the top of /us/[state]/[county](/[place]) instead (see those
+// routes' page.tsx), so old shared links pointing here permanently redirect
+// there, carrying every other param (d, lang, from) along. A bare
+// /us/result?d=... with no st/co is still real, though — the nationwide-only
+// result for a visitor who skipped the map entirely via UsInputPanel's "See
+// national result" CTA has no state/county page to redirect to.
+export default function ResultDashboardPage({
+  searchParams,
+}: {
+  searchParams: Record<string, string | string[] | undefined>;
+}) {
+  const locale = getAppLocale();
+  const prefix = locale === "kr" ? "/kr" : "/us";
+  const st = typeof searchParams.st === "string" ? searchParams.st : undefined;
+  const co = typeof searchParams.co === "string" ? searchParams.co : undefined;
+  const pl = typeof searchParams.pl === "string" ? searchParams.pl : undefined;
+
+  if (st && co) {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(searchParams)) {
+      if (key === "st" || key === "co" || key === "pl" || typeof value !== "string") continue;
+      params.set(key, value);
+    }
+    const qs = params.toString();
+    const path = pl ? `${prefix}/${st}/${co}/${pl}` : `${prefix}/${st}/${co}`;
+    permanentRedirect(qs ? `${path}?${qs}` : path);
+  }
+
   // AdSlot is a Server Component (headers()-based production-host check) —
-  // DashboardResultClient is "use client", so it's rendered here and threaded
+  // PersonalizedResult is "use client", so it's rendered here and threaded
   // down as a prop instead of imported there directly.
-  return <DashboardResultClient adSlot={<AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_RESULT!} className="mb-8" />} />;
+  return <PersonalizedResult adSlot={<AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_RESULT!} className="mb-8" />} />;
 }
