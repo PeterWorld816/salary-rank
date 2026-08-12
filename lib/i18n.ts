@@ -86,8 +86,6 @@ export interface Translations {
   usSearchStatePlaceholder: string;
   usSearchPlacePlaceholder: string;
   usListNoResults: string;
-  usViewMap: string;
-  usViewList: string;
   usZoomHint: string;
   usBackToUsMap: string;
   usBackToStateMap: string;
@@ -130,6 +128,7 @@ export interface Translations {
   usStateThresholdsHeadingTemplate: string; // template: {state}
   usStateCountyListHeadingTemplate: string; // template: {state}
   usStateCountyListHint: string;
+  usSearchCountyPlaceholder: string;
 
   // ── County SEO landing page (app/us/[state]/[county]/page.tsx)
   usCountyPageHeadingTemplate: string; // template: {county}
@@ -184,6 +183,7 @@ export interface Translations {
   usDetailsToggleShow: string;
   usDetailsToggleHide: string;
   usDashboardAddMoreHint: string;
+  usCoachingInsightTitle: string;
 
   // ── Insights (app/us/insights/**)
   footerInsights: string;
@@ -194,6 +194,8 @@ export interface Translations {
   usInsightsCtaTitle: string;
   usInsightsCtaBody: string;
   usInsightsCtaButton: string;
+  usInsightsRelatedHeading: string;
+  usInsightsSeeAll: string;
 }
 
 export const translations: Record<LangCode, Translations> = {
@@ -250,15 +252,13 @@ export const translations: Record<LangCode, Translations> = {
     usSeeNationalResultButtonTemplate: "{income}가 전국에서 상위 몇 %인지 보기",
     usApply: "적용하고 지도 보기",
     usMapTitle: "주(State)를 선택하세요",
-    usMapHint: "지도 위에서 주를 클릭하면 카운티별 지도로 이동해요",
+    usMapHint: "지도나 목록에서 주를 선택하면 카운티별 지도로 이동해요",
     usLegendNoData: "데이터 없음",
     usStateMapTitleTemplate: "{state} 카운티를 선택하세요",
     usStateMapHint: "카운티를 클릭하면 그 카운티 기준 결과를 볼 수 있어요",
     usSearchStatePlaceholder: "주 이름 검색...",
     usSearchPlacePlaceholder: "도시 이름 검색...",
     usListNoResults: "검색 결과가 없어요",
-    usViewMap: "🗺️ 지도로 보기",
-    usViewList: "📋 목록으로 보기",
     usZoomHint: "손가락으로 확대·이동하거나 더블탭으로 확대/축소하세요",
     usBackToUsMap: "미국 지도로",
     usBackToStateMap: "주 지도로",
@@ -300,6 +300,7 @@ export const translations: Record<LangCode, Translations> = {
     usStateThresholdsHeadingTemplate: "{state} 소득 상위 기준선",
     usStateCountyListHeadingTemplate: "{state}의 카운티",
     usStateCountyListHint: "카운티별 가구 중위소득이에요. 카운티를 누르면 자세한 내용을 볼 수 있어요.",
+    usSearchCountyPlaceholder: "카운티 이름 검색...",
 
     usCountyPageHeadingTemplate: "{county} 소득은 상위 몇 %?",
     usCountyMetaDescriptionTemplate: "{county}의 가구 중위소득은 {median}이에요. 상위 1%·5%·10%·25% 소득 기준선과 함께 내 소득이 어디쯤인지 확인해보세요.",
@@ -308,7 +309,7 @@ export const translations: Record<LangCode, Translations> = {
     usCountyThresholdsHeading: "이 카운티의 소득 기준선",
     usCountyNearbyHeading: "인접 카운티",
     usCountyPlaceListHeadingTemplate: "{county}에서 타운을 선택하세요",
-    usCountyPlaceListHint: "지도에서 타운을 누르면 그 타운 기준 결과를 바로 볼 수 있어요.",
+    usCountyPlaceListHint: "지도나 목록에서 타운을 선택하면 그 타운 기준 결과를 바로 볼 수 있어요.",
     usCountyMapPickHint: "지도의 마커를 누르면 그 타운으로 이동해요.",
     usCountyNoPlaceDataTitle: "이 카운티는 타운 단위 데이터가 없어요",
     usCountyNoPlaceDataDesc: "위의 카운티 전체 결과만 확인할 수 있어요.",
@@ -351,6 +352,7 @@ export const translations: Record<LangCode, Translations> = {
     usDetailsToggleShow: "전체 내역 보기",
     usDetailsToggleHide: "전체 내역 접기",
     usDashboardAddMoreHint: "순자산·401(k)을 입력하면 더 많은 순위가 추가돼요.",
+    usCoachingInsightTitle: "이 결과가 당신에게 의미하는 것",
 
     footerInsights: "인사이트",
     usInsightsTitle: "인사이트",
@@ -360,6 +362,8 @@ export const translations: Record<LangCode, Translations> = {
     usInsightsCtaTitle: "내 소득은 상위 몇 %일까요?",
     usInsightsCtaBody: "성별·결혼상태·연소득을 입력하고 지도에서 지역을 고르면 30초 안에 확인할 수 있어요.",
     usInsightsCtaButton: "지금 확인하기",
+    usInsightsRelatedHeading: "관련 글 더 보기",
+    usInsightsSeeAll: "인사이트 전체 보기",
   },
   en: {
     privacyNotice: "We don't collect personal data. Every calculation runs right in your browser.",
@@ -414,15 +418,13 @@ export const translations: Record<LangCode, Translations> = {
     usSeeNationalResultButtonTemplate: "See where {income} ranks nationwide",
     usApply: "Apply & view map",
     usMapTitle: "Select a state",
-    usMapHint: "Click a state on the map to see its county-level map",
+    usMapHint: "Pick a state on the map or list to see its county-level map",
     usLegendNoData: "No data",
     usStateMapTitleTemplate: "Select a county in {state}",
     usStateMapHint: "Click a county to see your result for that county",
     usSearchStatePlaceholder: "Search states...",
     usSearchPlacePlaceholder: "Search cities...",
     usListNoResults: "No results found",
-    usViewMap: "🗺️ View map",
-    usViewList: "📋 View list",
     usZoomHint: "Pinch or drag to pan/zoom, double-tap to toggle zoom",
     usBackToUsMap: "US map",
     usBackToStateMap: "State map",
@@ -464,6 +466,7 @@ export const translations: Record<LangCode, Translations> = {
     usStateThresholdsHeadingTemplate: "Top income thresholds in {state}",
     usStateCountyListHeadingTemplate: "Counties in {state}",
     usStateCountyListHint: "Median household income by county. Tap a county to see the full breakdown.",
+    usSearchCountyPlaceholder: "Search counties...",
 
     usCountyPageHeadingTemplate: "What's your income percentile in {county}?",
     usCountyMetaDescriptionTemplate: "The median household income in {county} is {median}. See how your salary compares — plus top 1%, 5%, 10%, and 25% income thresholds.",
@@ -472,7 +475,7 @@ export const translations: Record<LangCode, Translations> = {
     usCountyThresholdsHeading: "Income thresholds in this county",
     usCountyNearbyHeading: "Nearby counties",
     usCountyPlaceListHeadingTemplate: "Select a town in {county}",
-    usCountyPlaceListHint: "Tap a town on the map to see your result for that town.",
+    usCountyPlaceListHint: "Pick a town on the map or list to see your result for that town.",
     usCountyMapPickHint: "Tap a marker to go to that town.",
     usCountyNoPlaceDataTitle: "No town-level data for this county",
     usCountyNoPlaceDataDesc: "Only the county-level result above is available.",
@@ -515,6 +518,7 @@ export const translations: Record<LangCode, Translations> = {
     usDetailsToggleShow: "See full breakdown",
     usDetailsToggleHide: "Hide full breakdown",
     usDashboardAddMoreHint: "Add your net worth and 401(k) to unlock more rankings.",
+    usCoachingInsightTitle: "What this means for you",
 
     footerInsights: "Insights",
     usInsightsTitle: "Insights",
@@ -524,6 +528,8 @@ export const translations: Record<LangCode, Translations> = {
     usInsightsCtaTitle: "So — what's your income percentile?",
     usInsightsCtaBody: "Enter your gender, marital status, and income, then pick your state and county — takes about 30 seconds.",
     usInsightsCtaButton: "Check now",
+    usInsightsRelatedHeading: "More to read",
+    usInsightsSeeAll: "See all insights",
   },
 };
 

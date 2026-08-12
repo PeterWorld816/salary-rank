@@ -10,6 +10,7 @@ import { formatTemplate } from "@/lib/i18n";
 import UsShell from "@/components/us/UsShell";
 import PersonalizedResult from "@/components/us/result/PersonalizedResult";
 import UsMap, { type UsMapFeatureProps } from "@/components/us/UsMap";
+import UsGeoList from "@/components/us/UsGeoList";
 import IncomeLegend from "@/components/us/IncomeLegend";
 import Footer from "@/components/us/Footer";
 import Spinner from "@/components/Spinner";
@@ -25,7 +26,7 @@ import {
 import { getValueAtPercentile } from "@/lib/percentileTable";
 import { buildCountyHref } from "@/components/us/result/useResultLocation";
 import { incomeFill } from "@/components/us/colorScale";
-import { formatUsd } from "@/lib/usFormat";
+import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
 import { PercentileThresholds } from "@/components/us/PercentileThresholds";
 
 function UsStateContent({
@@ -37,11 +38,19 @@ function UsStateContent({
   const qs = sp.toString();
   const base = useLocaleBase();
 
-  const values = getCountiesForState(state.fips)
-    .map((c) => c.medianHouseholdIncome)
-    .filter((v): v is number => v != null);
+  const counties = getCountiesForState(state.fips);
+  const values = counties.map((c) => c.medianHouseholdIncome).filter((v): v is number => v != null);
   const min = values.length ? Math.min(...values) : 0;
   const max = values.length ? Math.max(...values) : 1;
+
+  const countyItems = counties
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((c) => ({
+      id: c.fips,
+      name: stripStateSuffix(c.name, state.name),
+      sub: c.medianHouseholdIncome != null ? formatUsd(c.medianHouseholdIncome) : undefined,
+    }));
 
   const stateIncome = getStateIncome(state.fips);
 
@@ -82,7 +91,7 @@ function UsStateContent({
 
   return (
     <UsShell>
-      <PersonalizedResult presetState={state} variant="compact" inputCollapsible={false} />
+      <PersonalizedResult presetState={state} variant="compact" />
 
       <div className="mx-auto max-w-5xl px-4 pb-16 pt-8 sm:px-6">
         <Link
@@ -152,8 +161,26 @@ function UsStateContent({
           </div>
         ) : (
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-2 sm:p-4">
-            <UsMap geo={geo} fit onSelect={handleSelect} getFill={getFill} getLabel={getLabel} height={520} zoomable />
-            <p className="mt-2 text-center text-[11px] text-white/35 sm:hidden">{t.usZoomHint}</p>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+              <div className="min-w-0 flex-1">
+                <UsMap geo={geo} fit onSelect={handleSelect} getFill={getFill} getLabel={getLabel} height={520} zoomable />
+                <p className="mt-2 text-center text-[11px] text-white/35 sm:hidden">{t.usZoomHint}</p>
+              </div>
+
+              <div className="w-full shrink-0 sm:w-64">
+                <p className="mb-0.5 text-[13px] font-bold text-white/90">
+                  {formatTemplate(t.usStateCountyListHeadingTemplate, { state: state.name })}
+                </p>
+                <p className="mb-2 text-[11px] text-white/40">{t.usStateCountyListHint}</p>
+                <UsGeoList
+                  items={countyItems}
+                  onSelect={handleSelect}
+                  searchPlaceholder={t.usSearchCountyPlaceholder}
+                  emptyText={t.usListNoResults}
+                  maxHeight={460}
+                />
+              </div>
+            </div>
             <IncomeLegend min={min} max={max} />
           </div>
         )}

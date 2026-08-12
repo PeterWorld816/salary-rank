@@ -8,12 +8,14 @@ import { formatTemplate } from "@/lib/i18n";
 import UsShell from "@/components/us/UsShell";
 import UsInputPanel from "@/components/us/UsInputPanel";
 import UsMap, { type UsMapFeatureProps } from "@/components/us/UsMap";
+import UsGeoList from "@/components/us/UsGeoList";
 import IncomeLegend from "@/components/us/IncomeLegend";
 import Footer from "@/components/us/Footer";
 import Spinner from "@/components/Spinner";
 import { getStateByFips } from "@/data/us/stateMeta";
 import { getStateIncome, getAllStateIncomes, acs5YearRange } from "@/lib/usIncomeCalc";
 import { incomeFill } from "@/components/us/colorScale";
+import { formatUsd } from "@/lib/usFormat";
 
 function UsHomeContent({ geo }: { geo: FeatureCollection<Geometry, UsMapFeatureProps> }) {
   const { t } = useLanguage();
@@ -51,6 +53,16 @@ function UsHomeContent({ geo }: { geo: FeatureCollection<Geometry, UsMapFeatureP
     router.push(getHref(fips));
   }
 
+  const stateItems = geo.features
+    .map((f) => {
+      const fips = String(f.id);
+      const state = getStateByFips(fips);
+      if (!state) return null;
+      const income = getStateIncome(fips)?.medianHouseholdIncome;
+      return { id: fips, name: state.name, sub: income != null ? formatUsd(income) : undefined };
+    })
+    .filter((s): s is { id: string; name: string; sub: string | undefined } => s != null);
+
   return (
     <UsShell>
       <UsInputPanel />
@@ -65,8 +77,22 @@ function UsHomeContent({ geo }: { geo: FeatureCollection<Geometry, UsMapFeatureP
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-2 sm:p-4">
-          <UsMap geo={geo} onSelect={handleSelect} getFill={getFill} getLabel={getLabel} height={480} zoomable />
-          <p className="mt-2 text-center text-[11px] text-white/35 sm:hidden">{t.usZoomHint}</p>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+            <div className="min-w-0 flex-1">
+              <UsMap geo={geo} onSelect={handleSelect} getFill={getFill} getLabel={getLabel} height={480} zoomable />
+              <p className="mt-2 text-center text-[11px] text-white/35 sm:hidden">{t.usZoomHint}</p>
+            </div>
+
+            <div className="w-full shrink-0 sm:w-64">
+              <UsGeoList
+                items={stateItems}
+                onSelect={handleSelect}
+                searchPlaceholder={t.usSearchStatePlaceholder}
+                emptyText={t.usListNoResults}
+                maxHeight={480}
+              />
+            </div>
+          </div>
           <IncomeLegend min={min} max={max} />
         </div>
 

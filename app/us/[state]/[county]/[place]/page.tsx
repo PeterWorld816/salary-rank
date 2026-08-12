@@ -29,6 +29,7 @@ import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serve
 import { pageMetadata, siteTitle, siteDescription } from "@/lib/seo";
 import { translations, formatTemplate } from "@/lib/i18n";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
+import { getAllInsights } from "@/lib/insights";
 import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
 import PersonalizedResult from "@/components/us/result/PersonalizedResult";
@@ -131,6 +132,7 @@ export default function UsPlacePage({ params }: { params: Params }) {
     .slice(0, 8);
 
   const countyName = stripStateSuffix(county.name, state.name);
+  const relatedArticles = getAllInsights(lang).slice(0, 2);
 
   return (
     <UsShell>
@@ -185,6 +187,30 @@ export default function UsPlacePage({ params }: { params: Params }) {
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+
+        {relatedArticles.length > 0 && (
+          <div className="mb-8">
+            <h2 className="mb-3 text-[16px] font-bold text-white/90">{t.usInsightsRelatedHeading}</h2>
+            <div className="flex flex-col gap-3">
+              {relatedArticles.map((a) => (
+                <Link
+                  key={a.slug}
+                  href={`${base}/insights/${a.slug}`}
+                  className="block rounded-xl border border-white/10 bg-white/[0.03] p-4 transition-colors hover:border-[#34D399]/40"
+                >
+                  <h3 className="mb-1 text-[14px] font-bold text-white/90">{a.title}</h3>
+                  <p className="text-[12px] leading-relaxed text-white/55">{a.description}</p>
+                </Link>
+              ))}
+            </div>
+            <Link
+              href={`${base}/insights`}
+              className="mt-3 inline-block text-[12px] text-white/40 transition-colors hover:text-white/70"
+            >
+              {t.usInsightsSeeAll} →
+            </Link>
           </div>
         )}
 

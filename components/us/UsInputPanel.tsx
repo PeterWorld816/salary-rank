@@ -1,14 +1,22 @@
 "use client";
-// Sticky input panel shown above the map on every /us page. Reads/writes the
-// "d" query param (lib/usInput.ts) so answers survive /us -> /us/[state] ->
+// Fixed header shown on every /us page: a slim always-visible bar (Home +
+// brand + collapsed "YOUR INFO" summary chip) that stays pinned to the top of
+// the viewport while scrolling, Robinhood-style. Tapping the chip expands the
+// full input form in normal document flow below the bar — only that expanded
+// state is allowed to scroll away, per design. Reads/writes the "d" query
+// param (lib/usInput.ts) so answers survive /us -> /us/[state] ->
 // /us/[state]/[county] navigation, same trick as the Korea quiz's ?d= param.
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Home } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { formatUsdCompact } from "@/lib/usFormat";
 import { US_AGE_BANDS, US_GENDERS, US_MARITAL_STATUSES, buildUsSearchParams, decodeUsInput, encodeUsInput, type UsInput } from "@/lib/usInput";
+
+// Height of the fixed slim bar (collapsed state) — the spacer below it must
+// match exactly, or page content would either gap or slide under the bar.
+const HEADER_HEIGHT = 56;
 
 const DEFAULT_INPUT: UsInput = {
   gender: "male",
@@ -137,7 +145,7 @@ function CurrencyField({
   );
 }
 
-export default function UsInputPanel({ collapsible = false }: { collapsible?: boolean } = {}) {
+export default function UsInputPanel() {
   const { t, tr, lang } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
@@ -145,10 +153,9 @@ export default function UsInputPanel({ collapsible = false }: { collapsible?: bo
   const [form, setForm] = useState<UsInput>(() => readUsInputFromSearch(sp));
   // No "d" param yet means this is a fresh visit with nothing changed —
   // start expanded so the fields are immediately visible. Once a "d" param
-  // exists (a shared link, or coming back from the map), start collapsed.
-  // `collapsible` (the result page) always starts collapsed regardless — the
-  // summary chip is enough there, and the full form is one tap away.
-  const [expanded, setExpanded] = useState(() => (collapsible ? false : !sp.get("d")));
+  // exists (a shared link, or coming back from the map), start collapsed —
+  // the summary chip is enough, and the full form is one tap away.
+  const [expanded, setExpanded] = useState(() => !sp.get("d"));
 
   // A pending "compare with a friend" challenge (see lib/usInput.ts) lives in
   // its own query param, independent of "d" — apply()/homeHref below rebuild
@@ -178,103 +185,113 @@ export default function UsInputPanel({ collapsible = false }: { collapsible?: bo
   const homeHref = `${localeBase}?${buildUsSearchParams(form, lang, from).toString()}`;
 
   return (
-    <div
-      className="sticky top-0 z-40 border-b border-white/10 px-4 py-4 backdrop-blur-md sm:px-6"
-      style={{ background: "rgba(10,11,13,0.85)" }}
-    >
-      <div className="mx-auto max-w-5xl">
-        {/* Brand masthead — sits above the input form on every /us page
-            (this panel is rendered on all of them), so it's the one place
-            that needs wiring. Always visible and keeps every answer —
-            clicking never resets gender/marital/age/income/net worth/401k,
-            it just changes the destination. */}
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <Link href={homeHref} className="group flex min-w-0 items-baseline gap-2">
-            <span className="truncate text-[15px] font-extrabold tracking-tight text-white transition-colors group-hover:text-[#34D399]">
-              {t.usAppTitle}
-            </span>
-            <span className="hidden truncate text-[12px] text-white/40 sm:inline">{t.usMastheadTagline}</span>
-          </Link>
-        </div>
-
-        {/* Stacked (not right-aligned) below md — the language selector is a
-            fixed element pinned to the same top-right corner, so an
-            inline-right chip here would run under it on narrow screens. */}
-        <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
-          <div className="flex items-center gap-3">
-            <h2 className="text-[13px] font-bold uppercase tracking-wide text-[#34D399]">{t.usInputTitle}</h2>
+    <>
+      {/* Collapsed: pinned to the viewport top (Robinhood-style top bar) so
+          it stays visible while the page scrolls. Expanded: back to a plain
+          in-flow block — the spec only requires the *slim* bar to stay
+          fixed; once the fields are showing it's fine for content (and the
+          panel itself) to scroll normally. */}
+      <div
+        className={`inset-x-0 top-0 z-40 border-b border-white/10 backdrop-blur-md ${expanded ? "relative" : "fixed"}`}
+        style={{ background: "rgba(10,11,13,0.85)" }}
+      >
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 sm:px-6" style={{ height: HEADER_HEIGHT }}>
+          <div className="flex min-w-0 items-center gap-2.5">
+            <Link
+              href={homeHref}
+              aria-label={t.home}
+              className="flex shrink-0 items-center justify-center rounded-full p-1.5 text-white/50 transition-colors hover:bg-white/[0.08] hover:text-[#34D399]"
+            >
+              <Home className="h-4 w-4" />
+            </Link>
+            <Link href={homeHref} className="group flex min-w-0 items-baseline gap-2">
+              <span className="truncate text-[14px] font-extrabold tracking-tight text-white transition-colors group-hover:text-[#34D399]">
+                {t.usAppTitle}
+              </span>
+              <span className="hidden truncate text-[12px] text-white/40 sm:inline">{t.usMastheadTagline}</span>
+            </Link>
           </div>
+
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
             aria-expanded={expanded}
             aria-label={expanded ? "Collapse input panel" : "Expand input panel"}
-            className={`flex w-fit items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[12px] font-semibold text-white/70 transition-colors hover:text-white ${
-              collapsible ? "" : "md:hidden"
-            }`}
+            className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[12px] font-semibold text-white/70 transition-colors hover:border-[#34D399]/40 hover:text-white"
           >
-            {!expanded && <span className="max-w-[260px] truncate">{summary}</span>}
+            <span className="max-w-[140px] truncate sm:max-w-[280px]">{summary}</span>
             <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`} />
           </button>
         </div>
 
-        <div className={expanded ? "flex flex-col gap-5" : collapsible ? "hidden" : "hidden md:flex md:flex-col md:gap-5"}>
-          <div>
-            <h3 className="mb-2.5 text-[12px] font-semibold text-white/50">{t.usGroupWho}</h3>
-            <div className="flex flex-col gap-3 sm:flex-row sm:gap-6">
-              <PillGroup
-                label={t.usFieldGender}
-                value={form.gender}
-                options={US_GENDERS.map((g) => ({ id: g.id, label: tr(g.label) }))}
-                onChange={(v) => apply({ ...form, gender: v as UsInput["gender"] })}
-              />
-              <PillGroup
-                label={t.usFieldMarital}
-                value={form.maritalStatus}
-                options={US_MARITAL_STATUSES.map((m) => ({ id: m.id, label: tr(m.label) }))}
-                onChange={(v) => apply({ ...form, maritalStatus: v as UsInput["maritalStatus"] })}
-              />
-              <PillGroup
-                label={t.usFieldAgeBand}
-                value={form.ageBand}
-                options={US_AGE_BANDS.map((b) => ({ id: b.id, label: tr(b.label) }))}
-                onChange={(v) => apply({ ...form, ageBand: v as UsInput["ageBand"] })}
-              />
-            </div>
-          </div>
+        {expanded && (
+          <div className="mx-auto max-w-5xl px-4 pb-5 sm:px-6">
+            <div className="flex flex-col gap-5 border-t border-white/[0.06] pt-4">
+              <h2 className="text-[12px] font-bold uppercase tracking-wide text-[#34D399]">{t.usInputTitle}</h2>
 
-          <div>
-            <h3 className="mb-2.5 text-[12px] font-semibold text-white/50">{t.usGroupMoney}</h3>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <CurrencyField
-                label={t.usFieldIncome}
-                value={form.annualIncome}
-                onCommit={(v) => apply({ ...form, annualIncome: v ?? form.annualIncome })}
-              />
-            </div>
-          </div>
+              <div>
+                <h3 className="mb-2.5 text-[12px] font-semibold text-white/50">{t.usGroupWho}</h3>
+                <div className="flex flex-col gap-3 sm:flex-row sm:gap-6">
+                  <PillGroup
+                    label={t.usFieldGender}
+                    value={form.gender}
+                    options={US_GENDERS.map((g) => ({ id: g.id, label: tr(g.label) }))}
+                    onChange={(v) => apply({ ...form, gender: v as UsInput["gender"] })}
+                  />
+                  <PillGroup
+                    label={t.usFieldMarital}
+                    value={form.maritalStatus}
+                    options={US_MARITAL_STATUSES.map((m) => ({ id: m.id, label: tr(m.label) }))}
+                    onChange={(v) => apply({ ...form, maritalStatus: v as UsInput["maritalStatus"] })}
+                  />
+                  <PillGroup
+                    label={t.usFieldAgeBand}
+                    value={form.ageBand}
+                    options={US_AGE_BANDS.map((b) => ({ id: b.id, label: tr(b.label) }))}
+                    onChange={(v) => apply({ ...form, ageBand: v as UsInput["ageBand"] })}
+                  />
+                </div>
+              </div>
 
-          <div>
-            <h3 className="mb-2.5 text-[12px] font-semibold text-white/50">{t.usFieldAssetsSectionTitle}</h3>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <CurrencyField
-                label={t.usFieldNetWorth}
-                helper={t.usFieldNetWorthHelper}
-                placeholder={t.usFieldOptionalPlaceholder}
-                value={form.netWorth}
-                onCommit={(v) => apply({ ...form, netWorth: v })}
-              />
-              <CurrencyField
-                label={t.usFieldK401}
-                helper={t.usFieldK401Helper}
-                placeholder={t.usFieldOptionalPlaceholder}
-                value={form.k401}
-                onCommit={(v) => apply({ ...form, k401: v })}
-              />
+              <div>
+                <h3 className="mb-2.5 text-[12px] font-semibold text-white/50">{t.usGroupMoney}</h3>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <CurrencyField
+                    label={t.usFieldIncome}
+                    value={form.annualIncome}
+                    onCommit={(v) => apply({ ...form, annualIncome: v ?? form.annualIncome })}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <h3 className="mb-2.5 text-[12px] font-semibold text-white/50">{t.usFieldAssetsSectionTitle}</h3>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <CurrencyField
+                    label={t.usFieldNetWorth}
+                    helper={t.usFieldNetWorthHelper}
+                    placeholder={t.usFieldOptionalPlaceholder}
+                    value={form.netWorth}
+                    onCommit={(v) => apply({ ...form, netWorth: v })}
+                  />
+                  <CurrencyField
+                    label={t.usFieldK401}
+                    helper={t.usFieldK401Helper}
+                    placeholder={t.usFieldOptionalPlaceholder}
+                    value={form.k401}
+                    onCommit={(v) => apply({ ...form, k401: v })}
+                  />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
-    </div>
+
+      {/* Spacer so fixed (collapsed) mode doesn't slide under the page
+          content below it — not needed when expanded, since the panel is
+          `relative` (in normal flow) there. */}
+      {!expanded && <div style={{ height: HEADER_HEIGHT }} aria-hidden />}
+    </>
   );
 }

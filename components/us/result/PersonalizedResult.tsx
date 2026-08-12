@@ -64,6 +64,8 @@ import { useResultLocation, buildPlaceHref } from "@/components/us/result/useRes
 import { NoDataCard, StatRow, MiniStatCard } from "@/components/us/result/ResultBits";
 import { CompareBarChart, type CompareBarItem } from "@/components/us/result/CompareBarChart";
 import CityPickerChip from "@/components/us/result/CityPickerChip";
+import CoachingInsightCard from "@/components/us/result/CoachingInsightCard";
+import { buildCoachingInsight } from "@/lib/insightMessages";
 
 type Metric = { key: string; percent: number };
 type GridCard = { key: string; label: string; displayValue: string; fillPercent: number; sub?: string; highlight: boolean };
@@ -76,14 +78,12 @@ function PersonalizedResultContent({
   presetCounty,
   presetPlace,
   variant,
-  inputCollapsible,
 }: {
   adSlot?: React.ReactNode;
   presetState: StateMeta | null;
   presetCounty: UsCountyIncome | null;
   presetPlace: UsPlaceIncome | null;
   variant: Variant;
-  inputCollapsible: boolean;
 }) {
   const { t, tr, lang } = useLanguage();
   const base = useLocaleBase();
@@ -141,9 +141,10 @@ function PersonalizedResultContent({
 
   // ── "compact" — used on the state and county pages, neither of which is
   // the end of the drill-down (a county/town-picker map follows below), so
-  // this shows just the input panel plus the most-specific income percentile
-  // available (county, falling back to state, falling back to national) and
-  // the net-worth percentile — no headline narrative, share card, or charts. ──
+  // this shows just the input panel plus a big "Where do you rank?" bell
+  // curve for the most-specific income percentile available (county,
+  // falling back to state, falling back to national) — no headline
+  // narrative, share card, or full breakdown toggle. ──
   if (variant === "compact") {
     const incomePercent = countyPercentile ?? statePercentile ?? nationalPercentile;
     const incomePercentLabel = countyFips
@@ -151,27 +152,45 @@ function PersonalizedResultContent({
       : state
         ? t.usStatePercentileHeroLabel
         : t.usNationalPercentileHeroLabel;
+    const tier = incomePercent != null ? getTier(incomePercent) : null;
     return (
       <>
-        <UsInputPanel collapsible={inputCollapsible} />
+        <UsInputPanel />
         <div className="mx-auto max-w-2xl px-6 pt-8">
-          <p className="mb-3 text-[13px] font-semibold text-white/50">{t.usCountyResultLabel}</p>
-          {incomePercent != null || netWorthPercentile != null ? (
-            <div className="flex flex-wrap gap-2">
-              {incomePercent != null && (
-                <MiniStatCard
-                  label={incomePercentLabel}
-                  displayValue={formatTemplate(t.topPercentTemplate, { percent: incomePercent })}
-                  fillPercent={100 - incomePercent}
-                  highlight
-                />
+          {incomePercent != null ? (
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
+              <p className="mb-3 text-[13px] font-semibold text-white/50">{t.usCountyResultLabel}</p>
+              {tier && (
+                <div className="mb-3 flex justify-center">
+                  <TierBadge tier={tier} />
+                </div>
               )}
-              {netWorthPercentile != null && (
-                <MiniStatCard
-                  label={t.usNetWorthHeroLabel}
-                  displayValue={formatTemplate(t.topPercentTemplate, { percent: netWorthPercentile })}
-                  fillPercent={100 - netWorthPercentile}
+              <div className="text-[48px] font-extrabold leading-none tracking-tight text-[#FBBF24]">
+                {formatTemplate(t.topPercentTemplate, { percent: incomePercent })}
+              </div>
+              <p className="mt-2 text-[13px] font-semibold text-white/70">{incomePercentLabel}</p>
+
+              <div className="mt-6 flex flex-col items-center">
+                <DistributionChart
+                  monthlySalary={input.annualIncome}
+                  width={280}
+                  lang={lang}
+                  dark
+                  min={15000}
+                  max={500000}
+                  averageValue={county?.medianHouseholdIncome ?? nationalMedianHouseholdIncome ?? 75000}
                 />
+                <p className="mt-2 text-[11px] text-white/30">{formatTemplate(t.usAcs5YearLabel, { range: acs5YearRange })}</p>
+              </div>
+
+              {netWorthPercentile != null && (
+                <div className="mt-6 flex justify-center">
+                  <MiniStatCard
+                    label={t.usNetWorthHeroLabel}
+                    displayValue={formatTemplate(t.topPercentTemplate, { percent: netWorthPercentile })}
+                    fillPercent={100 - netWorthPercentile}
+                  />
+                </div>
               )}
             </div>
           ) : (
@@ -192,6 +211,34 @@ function PersonalizedResultContent({
   const k401 = input.k401 != null ? getK401Comparison(input.ageBand, input.k401) : null;
   const genderIncomeRef = countyFips ? getCountyGenderIncomeReference(countyFips, input.gender) : null;
   const maritalIncomeRef = countyFips ? getCountyMaritalIncomeReference(countyFips, input.maritalStatus) : null;
+
+  // ── Coaching insight — age/situation-aware narrative (see
+  // lib/insightMessages.ts for the full decision logic and cited sources).
+  // Prefers the age-band-relative percentile over the flat national one so
+  // the message reflects "vs. people your age", not just "vs. everyone". ──
+  const coachingInsight = useMemo(
+    () =>
+      buildCoachingInsight({
+        lang,
+        ageBand: input.ageBand,
+        annualIncome: input.annualIncome,
+        netWorth: input.netWorth,
+        k401: input.k401,
+        incomePercentile: ageIncomePercentile ?? nationalPercentile,
+        netWorthPercentile: ageNetWorthPercentile ?? netWorthPercentile,
+      }),
+    [
+      lang,
+      input.ageBand,
+      input.annualIncome,
+      input.netWorth,
+      input.k401,
+      ageIncomePercentile,
+      nationalPercentile,
+      ageNetWorthPercentile,
+      netWorthPercentile,
+    ]
+  );
 
   const heroPercent = placePercentile ?? countyPercentile ?? statePercentile ?? nationalPercentile;
 
@@ -493,6 +540,11 @@ function PersonalizedResultContent({
         </div>
       )}
 
+      {/* ── Coaching insight — always shown (national income percentile is
+          effectively always available), placed right after the bell curve
+          and ahead of the share card so it reads as the main takeaway. ── */}
+      <CoachingInsightCard insight={coachingInsight} title={t.usCoachingInsightTitle} />
+
       {/* ── Share card — off-screen (not display:none, so html-to-image can
           still capture it) until Share/Save/Save Story is actually clicked,
           at which point it swaps into view as a preview of what was just
@@ -725,14 +777,14 @@ function PersonalizedResultContent({
   if (embedded)
     return (
       <>
-        <UsInputPanel collapsible={inputCollapsible} />
+        <UsInputPanel />
         {content}
       </>
     );
 
   return (
     <UsShell>
-      <UsInputPanel collapsible={inputCollapsible} />
+      <UsInputPanel />
       {content}
     </UsShell>
   );
@@ -744,17 +796,12 @@ export default function PersonalizedResult({
   presetCounty = null,
   presetPlace = null,
   variant = "standalone",
-  inputCollapsible = true,
 }: {
   adSlot?: React.ReactNode;
   presetState?: StateMeta | null;
   presetCounty?: UsCountyIncome | null;
   presetPlace?: UsPlaceIncome | null;
   variant?: Variant;
-  // The standalone/full/compact-embedded UsInputPanel defaults to
-  // collapsed — the state page passes false to keep its long-standing
-  // "expanded on a fresh visit" behavior instead.
-  inputCollapsible?: boolean;
 }) {
   return (
     <Suspense
@@ -778,7 +825,6 @@ export default function PersonalizedResult({
         presetCounty={presetCounty}
         presetPlace={presetPlace}
         variant={variant}
-        inputCollapsible={inputCollapsible}
       />
     </Suspense>
   );

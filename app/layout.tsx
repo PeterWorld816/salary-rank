@@ -30,8 +30,7 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // EXPERIMENT: hardcoded, no headers() call
-  const lang = "en" as const;
+  const lang = getLangForLocale(getAppLocale());
 
   return (
     <html lang={lang}>
