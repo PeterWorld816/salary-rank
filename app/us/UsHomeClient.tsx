@@ -6,12 +6,13 @@ import { useLanguage } from "@/lib/LanguageProvider";
 import { useLocaleBase } from "@/lib/useLocaleBase";
 import { formatTemplate } from "@/lib/i18n";
 import UsShell from "@/components/us/UsShell";
-import UsInputPanel from "@/components/us/UsInputPanel";
 import UsMap, { type UsMapFeatureProps } from "@/components/us/UsMap";
 import UsGeoList from "@/components/us/UsGeoList";
 import IncomeLegend from "@/components/us/IncomeLegend";
 import Footer from "@/components/us/Footer";
 import Spinner from "@/components/Spinner";
+import CompactResultCard from "@/components/us/result/CompactResultCard";
+import CompactInsightSection from "@/components/us/result/CompactInsightSection";
 import { getStateByFips } from "@/data/us/stateMeta";
 import { getStateIncome, getAllStateIncomes, acs5YearRange } from "@/lib/usIncomeCalc";
 import { incomeFill } from "@/components/us/colorScale";
@@ -65,7 +66,7 @@ function UsHomeContent({ geo }: { geo: FeatureCollection<Geometry, UsMapFeatureP
 
   return (
     <UsShell>
-      <UsInputPanel />
+      <CompactResultCard presetState={null} presetCounty={null} />
 
       <div className="mx-auto max-w-5xl px-4 pb-16 pt-8 sm:px-6">
         <h1 className="mb-2 text-[28px] font-extrabold tracking-tight text-balance">{t.usAppTitle}</h1>
@@ -96,7 +97,11 @@ function UsHomeContent({ geo }: { geo: FeatureCollection<Geometry, UsMapFeatureP
           <IncomeLegend min={min} max={max} />
         </div>
 
-        <div className="mt-10 rounded-lg bg-white/[0.03] px-4 py-3 text-center">
+        <div className="mt-8">
+          <CompactInsightSection presetState={null} presetCounty={null} />
+        </div>
+
+        <div className="mt-2 rounded-lg bg-white/[0.03] px-4 py-3 text-center">
           <p className="text-[12px] text-white/40">{formatTemplate(t.usSourceCensus, { range: acs5YearRange })}</p>
           <p className="mt-1 text-[12px] text-white/30">{t.usDisclaimer}</p>
           <p className="mt-1 text-[12px] text-white/25">🔒 {t.privacyNotice}</p>

@@ -6,22 +6,25 @@
 // curve) is supplementary and lives behind the "See full breakdown" toggle
 // or, for the share card, behind actually clicking Share/Save.
 //
-// Rendered in three variants, one per step of the state -> county -> town
-// drill-down:
+// Rendered in two variants:
 //  - "standalone" (default) at /us/result — the nationwide-only fallback for
 //    visitors who skip the map entirely. Owns its own UsShell/back-link/h1/
 //    sources footer/bottom nav/Footer.
-//  - "compact" at the top of /us/[state] and /us/[state]/[county] — just the
-//    input panel plus 1-2 stat tiles (income/net-worth top-%), since neither
-//    page is the end of the drill-down: the state page still points at a
-//    county-picker map below, and the county page at a town-picker map.
 //  - "full" at the top of /us/[state]/[county]/[place] — the whole bell-curve
 //    dashboard, since the town is where the drill-down ends.
-// "compact"/"full" resolve state/county/place from route params server-side
-// (see each route's `resolve()`) and pass them in as presets so this
-// component never needs its own ?st=/?co=/?pl=; the parent page already
-// supplies UsShell, the page's one <h1>, the sources footer, and Footer, so
-// both trim that out and render just the personalized cards.
+// Both resolve state/county/place from route params server-side (see each
+// route's `resolve()`) and pass them in as presets so this component never
+// needs its own ?st=/?co=/?pl=; the parent page already supplies UsShell,
+// the page's one <h1>, the sources footer, and Footer, so "full" trims that
+// out and renders just the personalized cards.
+//
+// The home/state/county steps (/us, /us/[state], /us/[state]/[county]) use a
+// different, thinner pair of components instead — CompactResultCard.tsx
+// (bell curve) and CompactInsightSection.tsx (coaching insight), sharing
+// their calculation via useCompactResult.ts — since neither page is the end
+// of the drill-down and both need the bell curve and insight card at
+// different points around their own map/next-step section, not bundled
+// together the way this component's "full" dashboard is.
 import { Suspense, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -32,12 +35,13 @@ import { formatTemplate } from "@/lib/i18n";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
 import { US_AGE_BANDS, US_GENDERS, US_MARITAL_STATUSES, decodeFriendChallenge, encodeFriendChallenge } from "@/lib/usInput";
 import { getTier } from "@/lib/tier";
+import { getCountyName } from "@/lib/usCountyNames";
 import type { StateMeta } from "@/data/us/stateMeta";
 import {
-  getCountyIncome,
-  getCountyIncomePercentile,
-  getPlaceIncomePercentile,
-  getPlacesForCounty,
+  getIncomePercentileFromAnchors,
+  getPlaceIncomePercentileFromCounty,
+  resolveIncomeReference,
+  getStateIncome,
   getStateIncomePercentile,
   getNationalIncomePercentile,
   getNationalIncomePercentileForAgeBand,
@@ -45,13 +49,15 @@ import {
   getUsNetWorthPercentileForAgeBand,
   overallUsNetWorth,
   getK401Comparison,
-  getCountyGenderIncomeReference,
-  getCountyMaritalIncomeReference,
   nationalMedianHouseholdIncome,
   acs5YearRange,
   type UsCountyIncome,
   type UsPlaceIncome,
 } from "@/lib/usIncomeCalc";
+import type { PercentileAnchor } from "@/lib/percentileTable";
+import { buildPercentileGapNote } from "@/lib/percentileGap";
+import nationalIncomeData from "@/data/us/nationalIncome.json";
+import netWorthPercentilesUS from "@/data/us/netWorthPercentilesUS.json";
 import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
 import UsInputPanel from "@/components/us/UsInputPanel";
@@ -70,19 +76,21 @@ import { buildCoachingInsight } from "@/lib/insightMessages";
 type Metric = { key: string; percent: number };
 type GridCard = { key: string; label: string; displayValue: string; fillPercent: number; sub?: string; highlight: boolean };
 
-type Variant = "standalone" | "full" | "compact";
+type Variant = "standalone" | "full";
 
 function PersonalizedResultContent({
   adSlot,
   presetState,
   presetCounty,
   presetPlace,
+  presetPlacesForCounty,
   variant,
 }: {
   adSlot?: React.ReactNode;
   presetState: StateMeta | null;
   presetCounty: UsCountyIncome | null;
   presetPlace: UsPlaceIncome | null;
+  presetPlacesForCounty: UsPlaceIncome[];
   variant: Variant;
 }) {
   const { t, tr, lang } = useLanguage();
@@ -116,7 +124,7 @@ function PersonalizedResultContent({
   // left to patch. ──
   const placeItems = useMemo(() => {
     if (!countyFips || !state) return [];
-    return getPlacesForCounty(countyFips)
+    return presetPlacesForCounty
       .slice()
       .sort((a, b) => a.name.localeCompare(b.name))
       .map((p) => ({
@@ -124,7 +132,7 @@ function PersonalizedResultContent({
         name: stripStateSuffix(p.name, state.name),
         sub: p.medianHouseholdIncome != null ? formatUsd(p.medianHouseholdIncome) : undefined,
       }));
-  }, [countyFips, state]);
+  }, [countyFips, state, presetPlacesForCounty]);
 
   function handleSelectPlace(placeFips: string) {
     if (!state || !countyFips) return;
@@ -134,83 +142,25 @@ function PersonalizedResultContent({
   // ── Every percentile the old 3-step flow computed, all at once ──
   const nationalPercentile = getNationalIncomePercentile(input.annualIncome);
   const statePercentile = state ? getStateIncomePercentile(state.fips, input.annualIncome) : null;
-  const countyPercentile = countyFips ? getCountyIncomePercentile(countyFips, input.annualIncome) : null;
-  const placePercentile = place ? getPlaceIncomePercentile(place.fips, input.annualIncome) : null;
+  const countyPercentile = county ? getIncomePercentileFromAnchors(county.percentileAnchors, input.annualIncome) : null;
+  const placePercentile =
+    place && county
+      ? getPlaceIncomePercentileFromCounty(county.medianHouseholdIncome, county.percentileAnchors, place.medianHouseholdIncome, input.annualIncome)
+      : null;
   const ageIncomePercentile = getNationalIncomePercentileForAgeBand(input.ageBand, input.annualIncome);
   const netWorthPercentile = input.netWorth != null ? getUsNetWorthPercentile(input.netWorth) : null;
 
-  // ── "compact" — used on the state and county pages, neither of which is
-  // the end of the drill-down (a county/town-picker map follows below), so
-  // this shows just the input panel plus a big "Where do you rank?" bell
-  // curve for the most-specific income percentile available (county,
-  // falling back to state, falling back to national) — no headline
-  // narrative, share card, or full breakdown toggle. ──
-  if (variant === "compact") {
-    const incomePercent = countyPercentile ?? statePercentile ?? nationalPercentile;
-    const incomePercentLabel = countyFips
-      ? t.usCountyPercentileHeroLabel
-      : state
-        ? t.usStatePercentileHeroLabel
-        : t.usNationalPercentileHeroLabel;
-    const tier = incomePercent != null ? getTier(incomePercent) : null;
-    return (
-      <>
-        <UsInputPanel />
-        <div className="mx-auto max-w-2xl px-6 pt-8">
-          {incomePercent != null ? (
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
-              <p className="mb-3 text-[13px] font-semibold text-white/50">{t.usCountyResultLabel}</p>
-              {tier && (
-                <div className="mb-3 flex justify-center">
-                  <TierBadge tier={tier} />
-                </div>
-              )}
-              <div className="text-[48px] font-extrabold leading-none tracking-tight text-[#FBBF24]">
-                {formatTemplate(t.topPercentTemplate, { percent: incomePercent })}
-              </div>
-              <p className="mt-2 text-[13px] font-semibold text-white/70">{incomePercentLabel}</p>
-
-              <div className="mt-6 flex flex-col items-center">
-                <DistributionChart
-                  monthlySalary={input.annualIncome}
-                  width={280}
-                  lang={lang}
-                  dark
-                  min={15000}
-                  max={500000}
-                  averageValue={county?.medianHouseholdIncome ?? nationalMedianHouseholdIncome ?? 75000}
-                />
-                <p className="mt-2 text-[11px] text-white/30">{formatTemplate(t.usAcs5YearLabel, { range: acs5YearRange })}</p>
-              </div>
-
-              {netWorthPercentile != null && (
-                <div className="mt-6 flex justify-center">
-                  <MiniStatCard
-                    label={t.usNetWorthHeroLabel}
-                    displayValue={formatTemplate(t.topPercentTemplate, { percent: netWorthPercentile })}
-                    fillPercent={100 - netWorthPercentile}
-                  />
-                </div>
-              )}
-            </div>
-          ) : (
-            <NoDataCard title={t.usCountyNoDataTitle} desc={t.usCountyNoDataDesc} />
-          )}
-        </div>
-      </>
-    );
-  }
-
-  // From here on, only "full" and "standalone" remain — `embedded`
-  // distinguishes them through the rest of this component, same as the
-  // former true/false embedded prop.
+  // `embedded` distinguishes "full" from "standalone" through the rest of
+  // this component, same as the former true/false embedded prop.
   const embedded = variant === "full";
 
   const ageNetWorthPercentile =
     input.netWorth != null ? getUsNetWorthPercentileForAgeBand(input.ageBand, input.netWorth) : null;
   const k401 = input.k401 != null ? getK401Comparison(input.ageBand, input.k401) : null;
-  const genderIncomeRef = countyFips ? getCountyGenderIncomeReference(countyFips, input.gender) : null;
-  const maritalIncomeRef = countyFips ? getCountyMaritalIncomeReference(countyFips, input.maritalStatus) : null;
+  const genderIncomeRef = county ? resolveIncomeReference(county.byGender[input.gender], county.medianHouseholdIncome) : null;
+  const maritalIncomeRef = county
+    ? resolveIncomeReference(county.byMaritalStatus[input.maritalStatus], county.medianHouseholdIncome)
+    : null;
 
   // ── Coaching insight — age/situation-aware narrative (see
   // lib/insightMessages.ts for the full decision logic and cited sources).
@@ -241,6 +191,39 @@ function PersonalizedResultContent({
   );
 
   const heroPercent = placePercentile ?? countyPercentile ?? statePercentile ?? nationalPercentile;
+
+  // ── Percentile gap — "$X more and you'd reach the top Y%", read straight
+  // off whichever geography's real percentileAnchors is most specific (place
+  // has no anchors of its own — see getPlaceIncomePercentileFromCounty above
+  // — so a place result borrows its county's curve). When a place *is*
+  // selected, `incomeScale` re-centers the gap the same way placePercentile
+  // itself does (countyMedian/placeMedian, via getPercentileRankRelativeTo)
+  // so the gap note and the headline percentile stay consistent instead of
+  // silently comparing two different baselines. Net worth only ever has the
+  // national anchors (no state/county breakdown — see lib/usIncomeCalc.ts). ──
+  const stateIncomeForGap = state ? getStateIncome(state.fips) : null;
+  const anchorsForGap: PercentileAnchor[] =
+    county && county.percentileAnchors.length >= 2
+      ? county.percentileAnchors
+      : stateIncomeForGap && stateIncomeForGap.percentileAnchors.length >= 2
+        ? stateIncomeForGap.percentileAnchors
+        : (nationalIncomeData.percentileAnchors as PercentileAnchor[]);
+  const incomeScale =
+    place && county?.medianHouseholdIncome != null && place.medianHouseholdIncome != null && place.medianHouseholdIncome > 0
+      ? county.medianHouseholdIncome / place.medianHouseholdIncome
+      : 1;
+  const gapNote = useMemo(
+    () =>
+      buildPercentileGapNote({
+        t,
+        incomeAnchors: anchorsForGap,
+        annualIncome: input.annualIncome,
+        incomeScale,
+        netWorthAnchors: netWorthPercentilesUS.percentileAnchors as PercentileAnchor[],
+        netWorth: input.netWorth,
+      }),
+    [t, anchorsForGap, input.annualIncome, incomeScale, input.netWorth]
+  );
 
   const ageBand = US_AGE_BANDS.find((b) => b.id === input.ageBand);
   const ageBandLabel = ageBand ? tr(ageBand.label) : input.ageBand;
@@ -401,8 +384,8 @@ function PersonalizedResultContent({
 
   // ── Friend challenge banner (ported from the old overall step) ──
   const friendChallenge = decodeFriendChallenge(from ?? "");
-  const friendCounty = friendChallenge ? getCountyIncome(friendChallenge.countyFips) : null;
-  const friendPlaceName = friendChallenge ? friendCounty?.name ?? friendChallenge.stateAbbr.toUpperCase() : null;
+  const friendCountyName = friendChallenge ? getCountyName(friendChallenge.countyFips) : null;
+  const friendPlaceName = friendChallenge ? friendCountyName ?? friendChallenge.stateAbbr.toUpperCase() : null;
   const friendOutEarnsPercent = friendChallenge ? Math.max(1, Math.min(99, 100 - friendChallenge.percentile)) : null;
 
   // The most specific place name we have — the town's own (stripped of its
@@ -543,7 +526,7 @@ function PersonalizedResultContent({
       {/* ── Coaching insight — always shown (national income percentile is
           effectively always available), placed right after the bell curve
           and ahead of the share card so it reads as the main takeaway. ── */}
-      <CoachingInsightCard insight={coachingInsight} title={t.usCoachingInsightTitle} />
+      <CoachingInsightCard insight={coachingInsight} title={t.usCoachingInsightTitle} gapNote={gapNote} />
 
       {/* ── Share card — off-screen (not display:none, so html-to-image can
           still capture it) until Share/Save/Save Story is actually clicked,
@@ -795,12 +778,18 @@ export default function PersonalizedResult({
   presetState = null,
   presetCounty = null,
   presetPlace = null,
+  presetPlacesForCounty = [],
   variant = "standalone",
 }: {
   adSlot?: React.ReactNode;
   presetState?: StateMeta | null;
   presetCounty?: UsCountyIncome | null;
   presetPlace?: UsPlaceIncome | null;
+  // The county's sibling places, for the inline city picker — resolved
+  // server-side (see app/us/[state]/[county]/[place]/page.tsx) since the
+  // full places-per-county dataset is server-only (lib/usCountyPlaceData.ts).
+  // Only "full" actually renders the picker; other variants can omit this.
+  presetPlacesForCounty?: UsPlaceIncome[];
   variant?: Variant;
 }) {
   return (
@@ -813,7 +802,7 @@ export default function PersonalizedResult({
             </div>
           </UsShell>
         ) : (
-          <div className={`flex items-center justify-center ${variant === "compact" ? "py-8" : "py-20"}`}>
+          <div className="flex items-center justify-center py-20">
             <Spinner className="h-6 w-6 border-[3px] border-white/20 border-t-[#34D399]" />
           </div>
         )
@@ -824,6 +813,7 @@ export default function PersonalizedResult({
         presetState={presetState}
         presetCounty={presetCounty}
         presetPlace={presetPlace}
+        presetPlacesForCounty={presetPlacesForCounty}
         variant={variant}
       />
     </Suspense>

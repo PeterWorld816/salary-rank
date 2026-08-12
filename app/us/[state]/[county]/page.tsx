@@ -1,31 +1,25 @@
-// County step of the state -> county -> town drill-down: a compact
-// PersonalizedResult ("compact" variant — income/net-worth top-% only, see
-// that file) up top, computed client-side from whatever's already in the
-// query string, then the county's static SEO content — median income vs
-// state/national, income thresholds — and finally the town-picker map (or a
-// "no town-level data" message) that continues the drill-down into
+// County step of the state -> county -> town drill-down: a thin bell-curve
+// card (CompactResultCard) up top, computed client-side from whatever's
+// already in the query string, then the county's static SEO content —
+// median income vs state/national, income thresholds — the town-picker map
+// (or a "no town-level data" message), and finally a coaching-insight card
+// (CompactInsightSection) that continues the drill-down into
 // /us/[state]/[county]/[place], which is where the full personalized result
-// lives. No generateStaticParams (3,144 counties is too slow to prerender
-// at build time); instead this ISR-caches each county's HTML for a day
-// after its first real visit. That only works if THIS SERVER COMPONENT
+// lives. Both compact pieces share their calculation via useCompactResult.ts
+// — see that file. No generateStaticParams (3,144 counties is too slow to
+// prerender at build time); instead this ISR-caches each county's HTML for a
+// day after its first real visit. That only works if THIS SERVER COMPONENT
 // never reads searchParams itself (reading it anywhere forces Next.js to
-// render fully per-request, bypassing the ISR cache) — PersonalizedResult
-// reads them client-side instead, inside its own Suspense boundary, so only
-// that subtree opts out of the static render. The old single-page result
-// URL's `?d=` redirect happens in middleware.ts, before the request ever
-// reaches here.
+// render fully per-request, bypassing the ISR cache) — CompactResultCard and
+// CompactInsightSection read them client-side instead, each inside its own
+// Suspense boundary, so only those subtrees opt out of the static render.
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { getStateByAbbr } from "@/data/us/stateMeta";
-import {
-  getCountyIncome,
-  getStateIncomePercentile,
-  getNationalIncomePercentile,
-  getPlacesForCounty,
-  acs5YearRange,
-} from "@/lib/usIncomeCalc";
+import { getCountyIncome, getPlacesForCounty } from "@/lib/usCountyPlaceData";
+import { getStateIncomePercentile, getNationalIncomePercentile, acs5YearRange } from "@/lib/usIncomeCalc";
 import { getValueAtPercentile } from "@/lib/percentileTable";
 import { getUsCountiesGeoForState } from "@/lib/usGeo";
 import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serverLocale";
@@ -36,7 +30,8 @@ import { PercentileThresholds } from "@/components/us/PercentileThresholds";
 import TownPickerMap from "@/components/us/TownPickerMap";
 import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
-import PersonalizedResult from "@/components/us/result/PersonalizedResult";
+import CompactResultCard from "@/components/us/result/CompactResultCard";
+import CompactInsightSection from "@/components/us/result/CompactInsightSection";
 
 export const revalidate = 86400;
 
@@ -101,7 +96,7 @@ export default function UsCountyPage({ params }: { params: Params }) {
 
   return (
     <UsShell>
-      <PersonalizedResult presetState={state} presetCounty={county} variant="compact" />
+      <CompactResultCard presetState={state} presetCounty={county} />
       <div className="mx-auto max-w-2xl px-4 pb-16 pt-8 sm:px-6">
         <Link
           href={`${base}/${state.abbr}`}
@@ -172,6 +167,10 @@ export default function UsCountyPage({ params }: { params: Params }) {
               )}
             </>
           )}
+        </div>
+
+        <div className="mb-8">
+          <CompactInsightSection presetState={state} presetCounty={county} />
         </div>
 
         <div className="rounded-lg bg-white/[0.03] px-4 py-3 text-center">

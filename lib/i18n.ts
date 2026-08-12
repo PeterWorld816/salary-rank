@@ -184,6 +184,9 @@ export interface Translations {
   usDetailsToggleHide: string;
   usDashboardAddMoreHint: string;
   usCoachingInsightTitle: string;
+  usPercentileGapIncomeTemplate: string; // template: {amount}, {percent}
+  usPercentileGapNetWorthTemplate: string; // template: {amount}, {percent}
+  usPercentileGapMaxedOut: string;
 
   // ── Insights (app/us/insights/**)
   footerInsights: string;
@@ -353,6 +356,9 @@ export const translations: Record<LangCode, Translations> = {
     usDetailsToggleHide: "전체 내역 접기",
     usDashboardAddMoreHint: "순자산·401(k)을 입력하면 더 많은 순위가 추가돼요.",
     usCoachingInsightTitle: "이 결과가 당신에게 의미하는 것",
+    usPercentileGapIncomeTemplate: "소득을 {amount} 더 모으면 상위 {percent}%로 올라갈 수 있어요.",
+    usPercentileGapNetWorthTemplate: "자산을 {amount} 더 모으면 미국 전체 상위 {percent}%로 올라갈 수 있어요.",
+    usPercentileGapMaxedOut: "이미 우리가 추적하는 가장 높은 구간에 있어요!",
 
     footerInsights: "인사이트",
     usInsightsTitle: "인사이트",
@@ -519,6 +525,9 @@ export const translations: Record<LangCode, Translations> = {
     usDetailsToggleHide: "Hide full breakdown",
     usDashboardAddMoreHint: "Add your net worth and 401(k) to unlock more rankings.",
     usCoachingInsightTitle: "What this means for you",
+    usPercentileGapIncomeTemplate: "Earn {amount} more and you'd reach the top {percent}%.",
+    usPercentileGapNetWorthTemplate: "Grow your net worth by {amount} more and you'd reach the nationwide top {percent}%.",
+    usPercentileGapMaxedOut: "You're already in the highest tier we track!",
 
     footerInsights: "Insights",
     usInsightsTitle: "Insights",
@@ -550,8 +559,4 @@ export const DEFAULT_LANG: LangCode = "ko";
 export function detectBrowserLang(): LangCode {
   if (typeof navigator === "undefined") return DEFAULT_LANG;
   return navigator.language.slice(0, 2).toLowerCase() === "ko" ? "ko" : "en";
-}
-
-export function isLangCode(value: unknown): value is LangCode {
-  return value === "ko" || value === "en";
 }

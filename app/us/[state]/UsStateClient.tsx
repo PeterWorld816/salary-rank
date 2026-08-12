@@ -1,5 +1,5 @@
 "use client";
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
@@ -8,21 +8,15 @@ import { useLanguage } from "@/lib/LanguageProvider";
 import { useLocaleBase } from "@/lib/useLocaleBase";
 import { formatTemplate } from "@/lib/i18n";
 import UsShell from "@/components/us/UsShell";
-import PersonalizedResult from "@/components/us/result/PersonalizedResult";
+import CompactResultCard from "@/components/us/result/CompactResultCard";
+import CompactInsightSection from "@/components/us/result/CompactInsightSection";
 import UsMap, { type UsMapFeatureProps } from "@/components/us/UsMap";
 import UsGeoList from "@/components/us/UsGeoList";
 import IncomeLegend from "@/components/us/IncomeLegend";
 import Footer from "@/components/us/Footer";
 import Spinner from "@/components/Spinner";
 import type { StateMeta } from "@/data/us/stateMeta";
-import {
-  getCountyIncome,
-  getCountiesForState,
-  getStateIncome,
-  getNationalIncomePercentile,
-  acs5YearRange,
-  acs1Vintage,
-} from "@/lib/usIncomeCalc";
+import { getStateIncome, getNationalIncomePercentile, acs5YearRange, acs1Vintage, type UsCountyIncome } from "@/lib/usIncomeCalc";
 import { getValueAtPercentile } from "@/lib/percentileTable";
 import { buildCountyHref } from "@/components/us/result/useResultLocation";
 import { incomeFill } from "@/components/us/colorScale";
@@ -30,15 +24,24 @@ import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
 import { PercentileThresholds } from "@/components/us/PercentileThresholds";
 
 function UsStateContent({
-  state, geo, countyListAdSlot,
-}: { state: StateMeta; geo: FeatureCollection<Geometry, UsMapFeatureProps>; countyListAdSlot?: React.ReactNode }) {
+  state, geo, counties, countyListAdSlot,
+}: {
+  state: StateMeta;
+  geo: FeatureCollection<Geometry, UsMapFeatureProps>;
+  // This state's counties only (resolved server-side, see
+  // app/us/[state]/page.tsx) — the full 3,144-county dataset is server-only
+  // (lib/usCountyPlaceData.ts) precisely because it's too large to ship to
+  // every /us/[state] visitor just to render one state's map.
+  counties: UsCountyIncome[];
+  countyListAdSlot?: React.ReactNode;
+}) {
   const { t } = useLanguage();
   const router = useRouter();
   const sp = useSearchParams();
   const qs = sp.toString();
   const base = useLocaleBase();
 
-  const counties = getCountiesForState(state.fips);
+  const countyByFips = useMemo(() => new Map(counties.map((c) => [c.fips, c])), [counties]);
   const values = counties.map((c) => c.medianHouseholdIncome).filter((v): v is number => v != null);
   const min = values.length ? Math.min(...values) : 0;
   const max = values.length ? Math.max(...values) : 1;
@@ -75,12 +78,12 @@ function UsStateContent({
   function getLabel(fips: string) {
     const feature = geo.features.find((f) => String(f.id) === fips);
     const name = feature?.properties?.name ?? fips;
-    const income = getCountyIncome(fips);
+    const income = countyByFips.get(fips);
     return income?.medianHouseholdIncome ? `${name} — $${income.medianHouseholdIncome.toLocaleString("en-US")}` : name;
   }
 
   function getFill(fips: string) {
-    return incomeFill(getCountyIncome(fips)?.medianHouseholdIncome ?? null, min, max);
+    return incomeFill(countyByFips.get(fips)?.medianHouseholdIncome ?? null, min, max);
   }
 
   // Single navigation entry point shared by both the map (Geography onClick)
@@ -91,7 +94,7 @@ function UsStateContent({
 
   return (
     <UsShell>
-      <PersonalizedResult presetState={state} variant="compact" />
+      <CompactResultCard presetState={state} presetCounty={null} />
 
       <div className="mx-auto max-w-5xl px-4 pb-16 pt-8 sm:px-6">
         <Link
@@ -187,6 +190,10 @@ function UsStateContent({
 
         <div className="mt-8">{countyListAdSlot}</div>
 
+        <div className="mt-8">
+          <CompactInsightSection presetState={state} presetCounty={null} />
+        </div>
+
         <div className="mt-2 rounded-lg bg-white/[0.03] px-4 py-3 text-center">
           <p className="text-[12px] text-white/40">{formatTemplate(t.usSourceCensus, { range: acs5YearRange })}</p>
           <p className="mt-1 text-[12px] text-white/30">{t.usDisclaimer}</p>
@@ -201,6 +208,7 @@ function UsStateContent({
 export default function UsStateClient(props: {
   state: StateMeta;
   geo: FeatureCollection<Geometry, UsMapFeatureProps>;
+  counties: UsCountyIncome[];
   countyListAdSlot?: React.ReactNode;
 }) {
   return (

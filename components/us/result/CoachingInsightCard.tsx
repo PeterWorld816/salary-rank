@@ -12,7 +12,20 @@ const TONE_ACCENT: Record<CoachingInsight["tone"], string> = {
   building: "#34D399",
 };
 
-export default function CoachingInsightCard({ insight, title }: { insight: CoachingInsight; title: string }) {
+export default function CoachingInsightCard({
+  insight,
+  title,
+  gapNote,
+}: {
+  insight: CoachingInsight;
+  title: string;
+  // The percentile-gap line ("save $X more to reach the top Y%") — computed
+  // from real percentileAnchors data for whichever geography level is on
+  // screen (see lib/percentileTable.ts's getNextPercentileGap). Optional and
+  // rendered separately from `insight` so lib/insightMessages.ts's own
+  // narrative logic stays untouched.
+  gapNote?: string | null;
+}) {
   const accent = TONE_ACCENT[insight.tone];
   return (
     <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.02] p-5">
@@ -20,6 +33,11 @@ export default function CoachingInsightCard({ insight, title }: { insight: Coach
       <p className="mb-3 text-[16px] font-bold leading-snug text-balance" style={{ color: accent }}>
         {insight.headline}
       </p>
+      {gapNote && (
+        <p className="mb-3 rounded-lg border border-[#FBBF24]/25 bg-[#FBBF24]/10 px-3 py-2 text-[13px] font-semibold leading-snug text-[#FBBF24]">
+          {gapNote}
+        </p>
+      )}
       <div className="flex flex-col gap-2.5">
         {insight.paragraphs.map((p, i) => (
           <p key={i} className="text-[13px] leading-relaxed text-white/75">

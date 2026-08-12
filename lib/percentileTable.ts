@@ -80,6 +80,23 @@ export function getValueAtPercentile(table: PercentileAnchor[], topPercent: numb
   return interpolateValue(table[upperIndex], table[upperIndex + 1], clamped);
 }
 
+// "Top X%" milestone the user hasn't reached yet, and how much more value
+// they'd need to get there — table is sorted ascending by topPercent /
+// descending by value (see the type comment above), so the anchors whose
+// value beats `currentValue` are exactly the ones the user hasn't cleared;
+// the smallest of those (last one in that filtered slice) is the nearest
+// milestone, not the most extreme one. Returns null once currentValue is
+// already at or above the best-tracked anchor (table[0]) — there's no
+// further milestone in this table to report.
+export type PercentileGap = { nextTierPercent: number; amountNeeded: number };
+
+export function getNextPercentileGap(table: PercentileAnchor[], currentValue: number): PercentileGap | null {
+  const above = table.filter((anchor) => anchor.value > currentValue);
+  if (above.length === 0) return null;
+  const next = above[above.length - 1];
+  return { nextTierPercent: next.topPercent, amountNeeded: next.value - currentValue };
+}
+
 // 같은 분포 모양(로그정규 형태)을 하고 평균만 다르다고 가정하고, 그룹 평균 대비로
 // value를 다시 스케일링한 뒤 같은 전체 백분위표에 대조한다 — "동일 연령대/직종/
 // 지역/결혼상태에서는 상위 몇 %?"를 구하는 근사 방법.
