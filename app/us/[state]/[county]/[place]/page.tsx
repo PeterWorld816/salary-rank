@@ -18,13 +18,14 @@ import { getStateByAbbr } from "@/data/us/stateMeta";
 import { getCountyIncome, getPlaceIncome, getPlacesForCounty, type UsCountyIncome } from "@/lib/usCountyPlaceData";
 import { getStateIncomePercentile, getNationalIncomePercentile, getPlaceIncomePercentileFromCounty, acs5YearRange } from "@/lib/usIncomeCalc";
 import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serverLocale";
-import { pageMetadata, siteTitle, siteDescription } from "@/lib/seo";
+import { pageMetadata, siteTitle, siteDescription, locationOgImage } from "@/lib/seo";
 import { translations, formatTemplate } from "@/lib/i18n";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
 import { getAllInsights } from "@/lib/insights";
 import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
 import PersonalizedResult from "@/components/us/result/PersonalizedResult";
+import AdSlot from "@/components/ads/AdSlot";
 
 export const revalidate = 86400;
 
@@ -62,16 +63,23 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
   const t = translations[getLangForLocale(locale)];
   const placeName = place.name;
   const title = formatTemplate(t.usPlacePageHeadingTemplate, { place: placeName });
+  const median = place.medianHouseholdIncome;
   const description =
-    place.medianHouseholdIncome != null
-      ? formatTemplate(t.usPlaceMetaDescriptionTemplate, { place: placeName, median: formatUsd(place.medianHouseholdIncome) })
-      : siteDescription(locale);
+    median != null ? formatTemplate(t.usPlaceMetaDescriptionTemplate, { place: placeName, median: formatUsd(median) }) : siteDescription(locale);
 
-  const meta = pageMetadata(locale, path, title, description);
+  // Real per-place numbers instead of the static og-us.png/og-kr.png
+  // fallback — see app/us/og/route.tsx's "location mode".
+  const image = locationOgImage(locale, {
+    locationName: placeName,
+    medianHouseholdIncome: median,
+    percentile: median != null ? getNationalIncomePercentile(median) : null,
+  });
+
+  const meta = pageMetadata(locale, path, title, description, { image });
   // Thin/no-data pages (this place's B19013 estimate was too unreliable to
   // show, ~12% of places) aren't worth indexing — same bar the rest of /us
   // holds real content pages to.
-  return place.medianHouseholdIncome == null ? { ...meta, robots: { index: false, follow: true } } : meta;
+  return median == null ? { ...meta, robots: { index: false, follow: true } } : meta;
 }
 
 export default function UsPlacePage({ params }: { params: Params }) {
@@ -139,6 +147,11 @@ export default function UsPlacePage({ params }: { params: Params }) {
         presetPlace={place}
         presetPlacesForCounty={placesForCounty}
         variant="full"
+        // AdSlot is a Server Component (headers()-based production-host
+        // check) — PersonalizedResult is "use client" and can't import it
+        // directly, so it's rendered here and threaded down as a prop
+        // instead, same pattern as the state/result pages' own AdSlot.
+        adSlot={<AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_RESULT!} className="mb-8" />}
       />
       <div className="mx-auto max-w-2xl px-4 pb-16 pt-8 sm:px-6">
         <Link

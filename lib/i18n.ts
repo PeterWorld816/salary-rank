@@ -55,7 +55,7 @@ export interface Translations {
   usCompareCardYou: string;
   usCompareCardFriend: string;
 
-  // ── Share card footer (components/us/UsResultCard.tsx)
+  // ── Share card footer (components/us/UsShareCardWide.tsx, UsShareCardStory.tsx)
   usShareCardSource: string;
 
   // ── /us section (US Census-based income map)
@@ -126,6 +126,8 @@ export interface Translations {
   // ── State SEO landing content (app/us/[state]/UsStateClient.tsx)
   usStateIncomeIntroTemplate: string; // template: {state}, {median}, {percent}
   usStateThresholdsHeadingTemplate: string; // template: {state}
+  usStateRankTemplate: string; // template: {state}, {rank}, {total}
+  usStateNearbyRankedHeading: string;
   usStateCountyListHeadingTemplate: string; // template: {state}
   usStateCountyListHint: string;
   usSearchCountyPlaceholder: string;
@@ -187,6 +189,16 @@ export interface Translations {
   usPercentileGapIncomeTemplate: string; // template: {amount}, {percent}
   usPercentileGapNetWorthTemplate: string; // template: {amount}, {percent}
   usPercentileGapMaxedOut: string;
+  usSimilarIncomePopulationTemplate: string; // template: {count}
+
+  // ── Compare-with-a-friend invite page (app/us/compare/[inviteId])
+  usComparePageTitle: string;
+  usCompareInviteIntro: string;
+  usCompareFormHeading: string;
+  usCompareLocationContextTemplate: string; // template: {location}
+  usCompareFormSubmit: string;
+  usCompareResultSentenceTemplate: string; // template: {youPercent}, {friendPercent}
+  usCompareShareAgainButton: string;
 
   // ── Insights (app/us/insights/**)
   footerInsights: string;
@@ -301,6 +313,8 @@ export const translations: Record<LangCode, Translations> = {
 
     usStateIncomeIntroTemplate: "{state}의 가구 중위소득은 {median}으로, 전국 기준 상위 {percent}%에 해당해요.",
     usStateThresholdsHeadingTemplate: "{state} 소득 상위 기준선",
+    usStateRankTemplate: "{state}는 미국 51개 주(+D.C.) 중 가구 중위소득 기준 {rank}위예요 (총 {total}개 중).",
+    usStateNearbyRankedHeading: "소득 수준이 비슷한 주",
     usStateCountyListHeadingTemplate: "{state}의 카운티",
     usStateCountyListHint: "카운티별 가구 중위소득이에요. 카운티를 누르면 자세한 내용을 볼 수 있어요.",
     usSearchCountyPlaceholder: "카운티 이름 검색...",
@@ -359,6 +373,15 @@ export const translations: Record<LangCode, Translations> = {
     usPercentileGapIncomeTemplate: "소득을 {amount} 더 모으면 상위 {percent}%로 올라갈 수 있어요.",
     usPercentileGapNetWorthTemplate: "자산을 {amount} 더 모으면 미국 전체 상위 {percent}%로 올라갈 수 있어요.",
     usPercentileGapMaxedOut: "이미 우리가 추적하는 가장 높은 구간에 있어요!",
+    usSimilarIncomePopulationTemplate: "당신과 비슷한 소득대의 사람은 미국에 대략 {count}명 정도예요.",
+
+    usComparePageTitle: "친구와 비교하기",
+    usCompareInviteIntro: "친구가 초대했어요! 정보를 입력하면 두 사람의 소득 순위를 나란히 비교해드려요.",
+    usCompareFormHeading: "내 정보 입력하고 비교하기",
+    usCompareLocationContextTemplate: "{location} 기준으로 비교해요",
+    usCompareFormSubmit: "내 순위 비교하기",
+    usCompareResultSentenceTemplate: "당신은 상위 {youPercent}%, 친구는 상위 {friendPercent}%예요.",
+    usCompareShareAgainButton: "나도 친구에게 공유하기",
 
     footerInsights: "인사이트",
     usInsightsTitle: "인사이트",
@@ -470,6 +493,8 @@ export const translations: Record<LangCode, Translations> = {
 
     usStateIncomeIntroTemplate: "The median household income in {state} is {median}, which ranks in the top {percent}% nationally.",
     usStateThresholdsHeadingTemplate: "Top income thresholds in {state}",
+    usStateRankTemplate: "{state} ranks #{rank} of {total} states (and D.C.) by median household income.",
+    usStateNearbyRankedHeading: "States with a similar income level",
     usStateCountyListHeadingTemplate: "Counties in {state}",
     usStateCountyListHint: "Median household income by county. Tap a county to see the full breakdown.",
     usSearchCountyPlaceholder: "Search counties...",
@@ -528,6 +553,15 @@ export const translations: Record<LangCode, Translations> = {
     usPercentileGapIncomeTemplate: "Earn {amount} more and you'd reach the top {percent}%.",
     usPercentileGapNetWorthTemplate: "Grow your net worth by {amount} more and you'd reach the nationwide top {percent}%.",
     usPercentileGapMaxedOut: "You're already in the highest tier we track!",
+    usSimilarIncomePopulationTemplate: "About {count} people in the US are in a similar income bracket as you.",
+
+    usComparePageTitle: "Compare with a friend",
+    usCompareInviteIntro: "A friend invited you! Enter your info and we'll compare your income rank side by side.",
+    usCompareFormHeading: "Enter your info to compare",
+    usCompareLocationContextTemplate: "Comparing within {location}",
+    usCompareFormSubmit: "Compare my rank",
+    usCompareResultSentenceTemplate: "You're in the top {youPercent}%, your friend is in the top {friendPercent}%.",
+    usCompareShareAgainButton: "Share this comparison",
 
     footerInsights: "Insights",
     usInsightsTitle: "Insights",

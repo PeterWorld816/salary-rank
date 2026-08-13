@@ -5,7 +5,7 @@ import { getUsCountiesGeoForState } from "@/lib/usGeo";
 import { getCountiesForState } from "@/lib/usCountyPlaceData";
 import { getStateIncome, getNationalIncomePercentile } from "@/lib/usIncomeCalc";
 import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serverLocale";
-import { pageMetadata, siteTitle, siteDescription } from "@/lib/seo";
+import { pageMetadata, siteTitle, siteDescription, locationOgImage } from "@/lib/seo";
 import { formatTemplate, translations } from "@/lib/i18n";
 import { formatUsd } from "@/lib/usFormat";
 import UsStateClient from "./UsStateClient";
@@ -26,22 +26,24 @@ export function generateMetadata({ params }: { params: { state: string } }): Met
   const locale = getAppLocale();
   const state = getStateByAbbr(params.state);
   const title = state ? `${state.name} — ${siteTitle(locale)}` : siteTitle(locale);
-  return pageMetadata(locale, getOriginalPathname(), title, buildDescription(state, locale));
-}
+  const median = state ? getStateIncome(state.fips)?.medianHouseholdIncome ?? null : null;
+  const percentile = median != null ? getNationalIncomePercentile(median) : null;
 
-function buildDescription(state: ReturnType<typeof getStateByAbbr>, locale: ReturnType<typeof getAppLocale>): string {
-  if (!state) return siteDescription(locale);
-  const income = getStateIncome(state.fips);
-  const median = income?.medianHouseholdIncome;
-  if (median == null) return siteDescription(locale);
+  const description =
+    state && median != null
+      ? formatTemplate(translations[getLangForLocale(locale)].usStateIncomeIntroTemplate, {
+          state: state.name,
+          median: formatUsd(median),
+          percent: percentile ?? "—",
+        })
+      : siteDescription(locale);
 
-  const t = translations[getLangForLocale(locale)];
-  const nationalPercentile = getNationalIncomePercentile(median);
-  return formatTemplate(t.usStateIncomeIntroTemplate, {
-    state: state.name,
-    median: formatUsd(median),
-    percent: nationalPercentile ?? "—",
-  });
+  // Real per-state numbers (median income, its national percentile) instead
+  // of the static og-us.png/og-kr.png fallback — see app/us/og/route.tsx's
+  // "location mode".
+  const image = state ? locationOgImage(locale, { locationName: state.name, medianHouseholdIncome: median, percentile }) : undefined;
+
+  return pageMetadata(locale, getOriginalPathname(), title, description, { image });
 }
 
 export default function UsStatePage({ params }: { params: { state: string } }) {

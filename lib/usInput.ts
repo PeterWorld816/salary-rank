@@ -107,6 +107,12 @@ export function buildUsSearchParams(input: UsInput, lang: string, from?: string 
 // "Compare with a friend" challenge snapshot — deliberately just a
 // percentile + location code, no personal data, decodable by anyone with
 // the link (same no-server-storage principle as the rest of /us).
+//
+// Superseded by buildCompareInviteHref/the /us/compare/[inviteId] route
+// below, which shows an actual side-by-side comparison instead of just a
+// banner on the sharer's own page — kept only so links people already
+// shared under the old scheme keep working (see the friend-banner code in
+// PersonalizedResult.tsx, which still decodes this).
 export type FriendChallenge = {
   percentile: number; // the sharer's own county (or nationwide) top-%
   stateAbbr: string;
@@ -125,4 +131,27 @@ export function decodeFriendChallenge(raw: string): FriendChallenge | null {
   if (!Number.isFinite(percentile) || percentile < 1 || percentile > 99) return null;
   if (!stateAbbr || !countyFips) return null;
   return { percentile, stateAbbr, countyFips };
+}
+
+// "Compare with a friend" invite link — unlike FriendChallenge above, this
+// carries the inviter's *full* answer set (not just a percentile), encoded
+// with the exact same encodeUsInput used for every other /us link, so
+// /us/compare/[inviteId] can compute a live, real comparison instead of
+// showing a static "you beat X%" banner. Location travels as ordinary
+// ?st=/?co=/?pl= query params — the same convention the rest of /us
+// already uses — so this never needs its own server-side storage either.
+// Reused by both PersonalizedResult's "Compare with a friend" button (the
+// inviter is "you") and the compare page's own "Share this comparison"
+// button (the inviter is whichever side just filled in their answers).
+export function buildCompareInviteHref(
+  base: string,
+  input: UsInput,
+  lang: string,
+  stateAbbr: string,
+  countyFips: string,
+  placeFips?: string | null
+): string {
+  const params = new URLSearchParams({ st: stateAbbr, co: countyFips, lang });
+  if (placeFips) params.set("pl", placeFips);
+  return `${base}/compare/${encodeUsInput(input)}?${params.toString()}`;
 }

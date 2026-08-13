@@ -2,7 +2,7 @@
 // across /us — see lib/usIncomeCalc.ts) to a gamified tier badge. Used for
 // both income and net worth percentiles, which share the same buckets. Pure
 // function, no React — safe to reuse in the result page and the share card
-// (components/us/UsResultCard.tsx renders it with inline styles instead of
+// (components/us/UsShareCardWide.tsx/UsShareCardStory.tsx render it with inline styles instead of
 // Tailwind classes).
 
 export type TierColor = "gold" | "mint";
@@ -17,7 +17,7 @@ const TIER_LEVELS: { max: number; emoji: string; label: string; color: TierColor
   { max: 1, emoji: "🏆", label: "Elite Earner", color: "gold" },
   { max: 5, emoji: "💎", label: "High Roller", color: "gold" },
   { max: 15, emoji: "🚀", label: "Fast Climber", color: "gold" },
-  { max: 35, emoji: "📈", label: "Above Average", color: "mint" },
+  { max: 35, emoji: "📈", label: "On the Rise", color: "mint" },
   { max: 60, emoji: "🌱", label: "Steady Grower", color: "mint" },
   { max: 85, emoji: "🔧", label: "Building Up", color: "mint" },
 ];

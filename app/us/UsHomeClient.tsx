@@ -18,7 +18,13 @@ import { getStateIncome, getAllStateIncomes, acs5YearRange } from "@/lib/usIncom
 import { incomeFill } from "@/components/us/colorScale";
 import { formatUsd } from "@/lib/usFormat";
 
-function UsHomeContent({ geo }: { geo: FeatureCollection<Geometry, UsMapFeatureProps> }) {
+function UsHomeContent({
+  geo,
+  adSlot,
+}: {
+  geo: FeatureCollection<Geometry, UsMapFeatureProps>;
+  adSlot?: React.ReactNode;
+}) {
   const { t } = useLanguage();
   const router = useRouter();
   const sp = useSearchParams();
@@ -107,13 +113,21 @@ function UsHomeContent({ geo }: { geo: FeatureCollection<Geometry, UsMapFeatureP
           <p className="mt-1 text-[12px] text-white/25">🔒 {t.privacyNotice}</p>
         </div>
 
+        <div className="mt-8">{adSlot}</div>
+
         <Footer />
       </div>
     </UsShell>
   );
 }
 
-export default function UsHomeClient({ geo }: { geo: FeatureCollection<Geometry, UsMapFeatureProps> }) {
+export default function UsHomeClient({
+  geo,
+  adSlot,
+}: {
+  geo: FeatureCollection<Geometry, UsMapFeatureProps>;
+  adSlot?: React.ReactNode;
+}) {
   return (
     <Suspense
       fallback={
@@ -124,7 +138,7 @@ export default function UsHomeClient({ geo }: { geo: FeatureCollection<Geometry,
         </UsShell>
       }
     >
-      <UsHomeContent geo={geo} />
+      <UsHomeContent geo={geo} adSlot={adSlot} />
     </Suspense>
   );
 }

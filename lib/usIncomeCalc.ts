@@ -25,6 +25,12 @@ import {
   type PercentileAnchor,
 } from "@/lib/percentileTable";
 import type { UsAgeBandId } from "@/lib/usInput";
+import { US_STATES } from "@/data/us/stateMeta";
+// Type-only — zero runtime cost, same reasoning as the `export type { ... }`
+// re-export a few lines down: erased entirely at compile time, so it never
+// triggers usCountyPlaceData.ts's `import "server-only"` guard even though
+// this file itself is client-safe.
+import type { UsCountyIncome, UsPlaceIncome } from "@/lib/usCountyPlaceData";
 
 export type UsAcs1YearIncome = {
   year: number;
@@ -71,6 +77,39 @@ export function getStateIncome(stateFips: string): UsStateIncome | null {
 
 export function getAllStateIncomes(): UsStateIncome[] {
   return stateIncomeData.states as UsStateIncome[];
+}
+
+// This state's rank by median household income among the 50 states + D.C.
+// — the same real pages this site actually has (see data/us/stateMeta.ts's
+// US_STATES); stateIncome.json also carries a Puerto Rico row the Census
+// publishes alongside the states, which is deliberately excluded here so
+// "rank 1 of 51" always matches an actual /us/{state} page on this site.
+const REAL_STATE_FIPS = new Set(US_STATES.map((s) => s.fips));
+
+export function getStateIncomeRank(stateFips: string): { rank: number; total: number } | null {
+  const ranked = getAllStateIncomes()
+    .filter((s) => REAL_STATE_FIPS.has(s.fips) && s.medianHouseholdIncome != null)
+    .sort((a, b) => (b.medianHouseholdIncome as number) - (a.medianHouseholdIncome as number));
+
+  const index = ranked.findIndex((s) => s.fips === stateFips);
+  if (index === -1) return null;
+  return { rank: index + 1, total: ranked.length };
+}
+
+// The `limit` closest-ranked states on each side of this one, for a "similar
+// states" list — e.g. rank 25 of 51 with limit=2 returns ranks 23-27 minus
+// this state itself. Same ranked order/exclusions as getStateIncomeRank.
+export function getNearbyRankedStates(stateFips: string, limit = 2): UsStateIncome[] {
+  const ranked = getAllStateIncomes()
+    .filter((s) => REAL_STATE_FIPS.has(s.fips) && s.medianHouseholdIncome != null)
+    .sort((a, b) => (b.medianHouseholdIncome as number) - (a.medianHouseholdIncome as number));
+
+  const index = ranked.findIndex((s) => s.fips === stateFips);
+  if (index === -1) return [];
+
+  const start = Math.max(0, index - limit);
+  const end = Math.min(ranked.length, index + limit + 1);
+  return ranked.slice(start, end).filter((s) => s.fips !== stateFips);
 }
 
 // The "reference value" shown alongside a county's overall median — prefers
@@ -129,6 +168,34 @@ export function getNationalIncomePercentile(annualIncome: number): number | null
 }
 
 export const nationalMedianHouseholdIncome = nationalIncomeData.medianHouseholdIncome as number | null;
+
+// "Most specific percentile available for a location" — place (if one's
+// selected) falling back to county, then state, then nationwide. This is
+// the same fallback order PersonalizedResult.tsx and useCompactResult.ts
+// each already inline once for a single person; the compare page needs the
+// identical logic twice (inviter and friend, same location), so it's
+// factored out here rather than duplicated a third time.
+export function getMostSpecificIncomePercentile(
+  annualIncome: number,
+  stateFips: string,
+  county: UsCountyIncome | null,
+  place: UsPlaceIncome | null
+): number | null {
+  if (place && county) {
+    const placePercentile = getPlaceIncomePercentileFromCounty(
+      county.medianHouseholdIncome,
+      county.percentileAnchors,
+      place.medianHouseholdIncome,
+      annualIncome
+    );
+    if (placePercentile != null) return placePercentile;
+  }
+  if (county) {
+    const countyPercentile = getIncomePercentileFromAnchors(county.percentileAnchors, annualIncome);
+    if (countyPercentile != null) return countyPercentile;
+  }
+  return getStateIncomePercentile(stateFips, annualIncome) ?? getNationalIncomePercentile(annualIncome);
+}
 
 // Net worth has no per-state/county breakdown (the Fed's Survey of Consumer
 // Finances is only reliable at the national level) — always compared

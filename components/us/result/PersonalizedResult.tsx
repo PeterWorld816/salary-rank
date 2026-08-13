@@ -27,13 +27,13 @@
 // together the way this component's "full" dashboard is.
 import { Suspense, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ChevronDown, Link2, X, ChevronLeft } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { useLocaleBase } from "@/lib/useLocaleBase";
 import { formatTemplate } from "@/lib/i18n";
-import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
-import { US_AGE_BANDS, US_GENDERS, US_MARITAL_STATUSES, decodeFriendChallenge, encodeFriendChallenge } from "@/lib/usInput";
+import { formatUsd, formatPeopleCount, stripStateSuffix } from "@/lib/usFormat";
+import { US_AGE_BANDS, US_GENDERS, US_MARITAL_STATUSES, decodeFriendChallenge, buildCompareInviteHref } from "@/lib/usInput";
 import { getTier } from "@/lib/tier";
 import { getCountyName } from "@/lib/usCountyNames";
 import type { StateMeta } from "@/data/us/stateMeta";
@@ -54,15 +54,18 @@ import {
   type UsCountyIncome,
   type UsPlaceIncome,
 } from "@/lib/usIncomeCalc";
-import type { PercentileAnchor } from "@/lib/percentileTable";
+import { estimateBandPopulation, type PercentileAnchor } from "@/lib/percentileTable";
 import { buildPercentileGapNote } from "@/lib/percentileGap";
+import { useCountUp } from "@/lib/useCountUp";
+import { US_TOTAL_HOUSEHOLDS_2024 } from "@/lib/usPopulation";
 import nationalIncomeData from "@/data/us/nationalIncome.json";
 import netWorthPercentilesUS from "@/data/us/netWorthPercentilesUS.json";
 import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
 import UsInputPanel from "@/components/us/UsInputPanel";
 import TierBadge from "@/components/us/TierBadge";
-import UsResultCard, { CARD_WIDTH, CARD_HEIGHT, STORY_WIDTH, STORY_HEIGHT } from "@/components/us/UsResultCard";
+import UsShareCardWide, { WIDE_WIDTH, WIDE_HEIGHT } from "@/components/us/UsShareCardWide";
+import UsShareCardStory, { STORY_WIDTH, STORY_HEIGHT } from "@/components/us/UsShareCardStory";
 import DistributionChart from "@/components/DistributionChart";
 import ShareButtons from "@/components/ShareButtons";
 import Spinner from "@/components/Spinner";
@@ -95,7 +98,6 @@ function PersonalizedResultContent({
 }) {
   const { t, tr, lang } = useLanguage();
   const base = useLocaleBase();
-  const pathname = usePathname();
   const router = useRouter();
   const loc = useResultLocation(presetState, presetCounty, presetPlace);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -287,6 +289,16 @@ function PersonalizedResultContent({
   }
   const headlineTier = headlineTierPercent != null ? getTier(headlineTierPercent) : null;
 
+  // ── The "reveal" flourishes — a brief count-up instead of the number just
+  // appearing, plus a real "how many people are near you" line right under
+  // it. Both keyed off the same headlineTierPercent/annualIncome the number
+  // itself already shows, no separate computation path. ──
+  const animatedHeadlinePercent = useCountUp(headlineTierPercent);
+  const similarIncomePopulation =
+    headlineTierPercent != null
+      ? estimateBandPopulation(nationalIncomeData.percentileAnchors as PercentileAnchor[], input.annualIncome, US_TOTAL_HOUSEHOLDS_2024)
+      : null;
+
   // ── Mini stat grid — every metric above, as one compact card each
   // (label + percent + ring gauge) instead of a section per metric. Fill
   // direction is always "how full = how good": percentile cards fill by
@@ -317,8 +329,9 @@ function PersonalizedResultContent({
       highlight: best?.key === "state",
     },
     // "Top nationwide" (national-only percentile) is deliberately left out of
-    // this grid — UsResultCard's share card already surfaces the nationwide
-    // percent, so a mini box here would just repeat it. It stays in
+    // this grid — the share cards (UsShareCardWide/UsShareCardStory) already
+    // surface the nationwide percent, so a mini box here would just repeat
+    // it. It stays in
     // `metrics`/`compareItems` below for the headline pick and compare chart.
     ageIncomePercentile != null && {
       key: "ageIncome",
@@ -415,12 +428,16 @@ function PersonalizedResultContent({
         ? `${locationName}, ${state.name}`
         : t.usAppTitle;
 
+  // ── "Compare with a friend" — genuinely different from Share/Save above:
+  // this builds a dedicated /compare/[inviteId] invite link (see
+  // buildCompareInviteHref, lib/usInput.ts) carrying this person's full
+  // answer set, not just a link back to this same page. Whoever opens it
+  // fills in their own info and gets an actual side-by-side comparison
+  // screen, not a "you beat X%" banner. ──
   async function handleCompare() {
-    if (!ready || !state || !countyFips || heroPercent == null) return;
-    const challenge = encodeFriendChallenge({ percentile: heroPercent, stateAbbr: state.abbr, countyFips });
-    const params = new URLSearchParams(qs);
-    params.set("from", challenge);
-    const compareUrl = `${window.location.origin}${pathname}?${params.toString()}`;
+    if (!ready || !state || !countyFips) return;
+    const href = buildCompareInviteHref(base, input, lang, state.abbr, countyFips, place?.fips ?? null);
+    const compareUrl = `${window.location.origin}${href}`;
 
     try {
       if (!navigator.clipboard?.writeText) throw new Error("Clipboard API unavailable");
@@ -486,7 +503,11 @@ function PersonalizedResultContent({
         </>
       )}
 
-      {/* ── Headline: "top X%" + the percent as one big number ── */}
+      {/* ── Headline: "top X%" + the percent as one big number, count-up
+          animated, plus a real "how many people are near you" line — the
+          actual "reveal" moment this page builds to, so the share buttons
+          right below stay reachable without scrolling past the chart/
+          insight card first (see the moved block right after this one). ── */}
       <div className="mb-8 rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
         {headline == null || headlineTierPercent == null ? (
           <NoDataCard title={t.usCountyNoDataTitle} desc={t.usCountyNoDataDesc} />
@@ -498,40 +519,24 @@ function PersonalizedResultContent({
               </div>
             )}
             <div className="text-[56px] font-extrabold leading-none tracking-tight text-[#FBBF24]">
-              {formatTemplate(t.topPercentTemplate, { percent: headlineTierPercent })}
+              {formatTemplate(t.topPercentTemplate, { percent: animatedHeadlinePercent ?? 0 })}
             </div>
             <p className="mt-3 text-[15px] font-semibold leading-snug text-balance text-white/80">{headline}</p>
+            {similarIncomePopulation != null && (
+              <p className="mt-3 text-[12px] leading-relaxed text-white/45">
+                {formatTemplate(t.usSimilarIncomePopulationTemplate, { count: formatPeopleCount(similarIncomePopulation, lang) })}
+              </p>
+            )}
           </>
         )}
       </div>
 
-      {/* ── Bell curve — the one chart always on screen. Everything else
-          (mini stat grid, compare chart, gender/marital reference rows,
-          net-worth curve) lives behind "See full breakdown" below. ── */}
-      {(placePercentile != null || countyPercentile != null || statePercentile != null || nationalPercentile != null) && (
-        <div className="mb-8 flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.02] p-5">
-          <DistributionChart
-            monthlySalary={input.annualIncome}
-            width={280}
-            lang={lang}
-            dark
-            min={15000}
-            max={500000}
-            averageValue={county?.medianHouseholdIncome ?? nationalMedianHouseholdIncome ?? 75000}
-          />
-          <p className="mt-2 text-[11px] text-white/30">{formatTemplate(t.usAcs5YearLabel, { range: acs5YearRange })}</p>
-        </div>
-      )}
-
-      {/* ── Coaching insight — always shown (national income percentile is
-          effectively always available), placed right after the bell curve
-          and ahead of the share card so it reads as the main takeaway. ── */}
-      <CoachingInsightCard insight={coachingInsight} title={t.usCoachingInsightTitle} gapNote={gapNote} />
-
       {/* ── Share card — off-screen (not display:none, so html-to-image can
           still capture it) until Share/Save/Save Story is actually clicked,
           at which point it swaps into view as a preview of what was just
-          shared/saved. ── */}
+          shared/saved. Moved up here, right under the headline (rather than
+          after the bell curve/insight card below), so the percentile and a
+          way to act on it both land above the fold. ── */}
       {ready && state && locationName && (
         <div
           className={
@@ -542,15 +547,13 @@ function PersonalizedResultContent({
           aria-hidden={!shareCardVisible}
         >
           <div className={shareCardVisible ? "overflow-hidden rounded-3xl shadow-[0_12px_48px_rgba(0,0,0,0.5)]" : ""}>
-            <UsResultCard
+            <UsShareCardWide
               stateName={state.name}
               locationName={locationName}
               countyPercentile={countyPercentile}
               nationalPercentile={nationalPercentile}
               annualIncome={input.annualIncome}
               netWorthPercentile={netWorthPercentile}
-              k401Balance={input.k401}
-              k401VsMedianPercent={k401?.vsMedianPercent ?? null}
               ageBandLabel={ageBandLabel}
               ageIncomePercentile={ageIncomePercentile}
               ageNetWorthPercentile={ageNetWorthPercentile}
@@ -567,21 +570,18 @@ function PersonalizedResultContent({
           html-to-image still lays it out. */}
       {ready && state && locationName && (
         <div className="pointer-events-none absolute left-[-9999px] top-0 overflow-hidden" aria-hidden>
-          <UsResultCard
+          <UsShareCardStory
             stateName={state.name}
             locationName={locationName}
             countyPercentile={countyPercentile}
             nationalPercentile={nationalPercentile}
             annualIncome={input.annualIncome}
             netWorthPercentile={netWorthPercentile}
-            k401Balance={input.k401}
-            k401VsMedianPercent={k401?.vsMedianPercent ?? null}
             ageBandLabel={ageBandLabel}
             ageIncomePercentile={ageIncomePercentile}
             ageNetWorthPercentile={ageNetWorthPercentile}
             cardRef={storyCardRef}
             lang={lang}
-            variant="story"
           />
         </div>
       )}
@@ -592,8 +592,8 @@ function PersonalizedResultContent({
           <div className="mb-3">
             <ShareButtons
               cardRef={cardRef}
-              width={CARD_WIDTH}
-              height={CARD_HEIGHT}
+              width={WIDE_WIDTH}
+              height={WIDE_HEIGHT}
               shareTitle={shareTitle}
               shareText={shareText}
               downloadName={`us-income-${state.abbr}-${countyFips}.png`}
@@ -639,6 +639,31 @@ function PersonalizedResultContent({
           <NoDataCard title={t.usDashboardSharePromptTitle} desc={t.usDashboardSharePromptDesc} />
         </div>
       )}
+
+      {/* ── Bell curve — the one chart always on screen (besides the
+          headline above). Everything else (mini stat grid, compare chart,
+          gender/marital reference rows, net-worth curve) lives behind "See
+          full breakdown" below. ── */}
+      {(placePercentile != null || countyPercentile != null || statePercentile != null || nationalPercentile != null) && (
+        <div className="mb-8 flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.02] p-5">
+          <DistributionChart
+            monthlySalary={input.annualIncome}
+            width={280}
+            lang={lang}
+            dark
+            min={15000}
+            max={500000}
+            averageValue={county?.medianHouseholdIncome ?? nationalMedianHouseholdIncome ?? 75000}
+          />
+          <p className="mt-2 text-[11px] text-white/30">{formatTemplate(t.usAcs5YearLabel, { range: acs5YearRange })}</p>
+        </div>
+      )}
+
+      {/* ── Coaching insight — always shown (national income percentile is
+          effectively always available), placed right after the bell curve
+          so it reads as the follow-up takeaway once the headline/share
+          moment above has landed. ── */}
+      <CoachingInsightCard insight={coachingInsight} title={t.usCoachingInsightTitle} gapNote={gapNote} />
 
       {/* ── See full breakdown — mini stat grid, compare chart,
           gender/marital reference rows, net-worth curve. Everything that
@@ -720,6 +745,14 @@ function PersonalizedResultContent({
         )}
       </div>
 
+      {/* Kept well clear of the result card / share / compare buttons above
+          — an ad placed near those risks accidental taps, which AdSense
+          treats as invalid click activity, not just bad UX. Rendered for
+          "full" (embedded, the place page) too, unlike the rest of this
+          block below: the place page has nowhere else to put its own ad, so
+          it passes one in via the adSlot prop same as standalone does. */}
+      {embedded && adSlot && <div className="mt-8">{adSlot}</div>}
+
       {!embedded && (
         <>
           <div className="mb-8 mt-8 rounded-lg bg-white/[0.03] px-4 py-3 text-center">
@@ -746,9 +779,6 @@ function PersonalizedResultContent({
             </div>
           )}
 
-          {/* Kept well clear of the result card / share / compare buttons
-              above — an ad placed near those risks accidental taps, which
-              AdSense treats as invalid click activity, not just bad UX. */}
           <div className="mt-8">{adSlot}</div>
 
           <Footer />

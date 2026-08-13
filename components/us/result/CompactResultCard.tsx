@@ -20,6 +20,7 @@ import type { StateMeta } from "@/data/us/stateMeta";
 import type { UsCountyIncome } from "@/lib/usIncomeCalc";
 import { useCompactResult, type CompactLevel } from "@/components/us/result/useCompactResult";
 import type { Translations } from "@/lib/i18n";
+import { useCountUp } from "@/lib/useCountUp";
 
 const LEVEL_LABEL_KEY: Record<CompactLevel, keyof Translations> = {
   national: "usNationalPercentileHeroLabel",
@@ -41,6 +42,7 @@ function CompactResultCardInner({
 }) {
   const { t, lang } = useLanguage();
   const result = useCompactResult(presetState, presetCounty);
+  const animatedPercent = useCountUp(result.ready ? result.incomePercent : null);
 
   return (
     <>
@@ -51,7 +53,7 @@ function CompactResultCardInner({
             <div className="flex min-w-0 flex-col items-start gap-1">
               <TierBadge tier={result.tier} />
               <div className="text-[32px] font-extrabold leading-none tracking-tight text-[#FBBF24]">
-                {formatTemplate(t.topPercentTemplate, { percent: result.incomePercent })}
+                {formatTemplate(t.topPercentTemplate, { percent: animatedPercent ?? 0 })}
               </div>
               <p className="text-[12px] font-semibold text-white/60">{t[LEVEL_LABEL_KEY[result.level]]}</p>
             </div>

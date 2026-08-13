@@ -23,7 +23,7 @@ import { getStateIncomePercentile, getNationalIncomePercentile, acs5YearRange } 
 import { getValueAtPercentile } from "@/lib/percentileTable";
 import { getUsCountiesGeoForState } from "@/lib/usGeo";
 import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serverLocale";
-import { pageMetadata, siteTitle, siteDescription } from "@/lib/seo";
+import { pageMetadata, siteTitle, siteDescription, locationOgImage } from "@/lib/seo";
 import { translations, formatTemplate } from "@/lib/i18n";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
 import { PercentileThresholds } from "@/components/us/PercentileThresholds";
@@ -32,6 +32,7 @@ import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
 import CompactResultCard from "@/components/us/result/CompactResultCard";
 import CompactInsightSection from "@/components/us/result/CompactInsightSection";
+import AdSlot from "@/components/ads/AdSlot";
 
 export const revalidate = 86400;
 
@@ -53,12 +54,19 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
   const { county } = resolved;
   const t = translations[getLangForLocale(locale)];
   const title = formatTemplate(t.usCountyPageHeadingTemplate, { county: county.name });
+  const median = county.medianHouseholdIncome;
   const description =
-    county.medianHouseholdIncome != null
-      ? formatTemplate(t.usCountyMetaDescriptionTemplate, { county: county.name, median: formatUsd(county.medianHouseholdIncome) })
-      : siteDescription(locale);
+    median != null ? formatTemplate(t.usCountyMetaDescriptionTemplate, { county: county.name, median: formatUsd(median) }) : siteDescription(locale);
 
-  return pageMetadata(locale, `/us/${params.state}/${params.county}`, title, description);
+  // Real per-county numbers instead of the static og-us.png/og-kr.png
+  // fallback — see app/us/og/route.tsx's "location mode".
+  const image = locationOgImage(locale, {
+    locationName: county.name,
+    medianHouseholdIncome: median,
+    percentile: median != null ? getNationalIncomePercentile(median) : null,
+  });
+
+  return pageMetadata(locale, `/us/${params.state}/${params.county}`, title, description, { image });
 }
 
 export default function UsCountyPage({ params }: { params: Params }) {
@@ -138,6 +146,12 @@ export default function UsCountyPage({ params }: { params: Params }) {
             )}
           </>
         )}
+
+        {/* Same slot as the state page's county-list ad (both are "geo
+            directory" pages, not the personalized result) — kept below the
+            thresholds table, clear of the compact result card/insight
+            section's own interactive bits above and below it. */}
+        <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_GEO!} className="mb-8" />
 
         <div className="mb-8">
           {places.length === 0 ? (

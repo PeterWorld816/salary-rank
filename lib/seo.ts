@@ -89,3 +89,20 @@ export function resultOgImage(locale: AppLocale, searchParams: Record<string, st
   if (typeof st === "string") params.set("st", st);
   return `/us/og?${params.toString()}`;
 }
+
+// Same dynamic image route (app/us/og/route.tsx), personalized instead by
+// this *location's* own numbers rather than a visitor's ?d= answer — used
+// by the state/county/place pages' generateMetadata, which only ever knows
+// the location, not any particular visitor. Every field here is public,
+// location-level data these pages already compute for their own on-page
+// copy (median income, national percentile), so this never needs a
+// visitor's input to produce a real (not fallback) share image.
+export function locationOgImage(
+  locale: AppLocale,
+  params: { locationName: string; medianHouseholdIncome: number | null; percentile: number | null }
+): string {
+  const qs = new URLSearchParams({ lang: locale === "kr" ? "ko" : "en", loc: params.locationName });
+  if (params.medianHouseholdIncome != null) qs.set("median", String(params.medianHouseholdIncome));
+  if (params.percentile != null) qs.set("percentile", String(params.percentile));
+  return `/us/og?${qs.toString()}`;
+}

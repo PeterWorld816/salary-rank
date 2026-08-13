@@ -109,3 +109,34 @@ export function getPercentileRankRelativeTo(
   const rescaled = value * (overallAverage / subgroupAverage);
   return getPercentileRankFromTable(table, rescaled);
 }
+
+// "Roughly how many people share this income bracket" — finds the real
+// Census-published bracket `value` falls into (the same two neighboring
+// anchors getPercentileRankFromTable would interpolate between) and returns
+// what share of `totalPopulation` that bracket's topPercent span represents.
+// Deliberately the actual published bracket, not an arbitrary "±N
+// percentage points around you" — every number here still traces back to
+// the same anchor table the rest of this app already uses, nothing invented.
+export function estimateBandPopulation(table: PercentileAnchor[], value: number, totalPopulation: number): number {
+  if (table.length < 2) return 0;
+
+  const top = table[0];
+  const bottom = table[table.length - 1];
+
+  let a: PercentileAnchor;
+  let b: PercentileAnchor;
+  if (value >= top.value) {
+    [a, b] = [top, table[1]];
+  } else if (value <= bottom.value) {
+    [a, b] = [table[table.length - 2], bottom];
+  } else {
+    const upperIndex = table.findIndex((anchor, i) => {
+      const next = table[i + 1];
+      return next && value <= anchor.value && value >= next.value;
+    });
+    [a, b] = [table[upperIndex], table[upperIndex + 1]];
+  }
+
+  const spanPercent = Math.abs(b.topPercent - a.topPercent);
+  return Math.round(totalPopulation * (spanPercent / 100));
+}

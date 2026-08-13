@@ -15,8 +15,16 @@ import UsGeoList from "@/components/us/UsGeoList";
 import IncomeLegend from "@/components/us/IncomeLegend";
 import Footer from "@/components/us/Footer";
 import Spinner from "@/components/Spinner";
-import type { StateMeta } from "@/data/us/stateMeta";
-import { getStateIncome, getNationalIncomePercentile, acs5YearRange, acs1Vintage, type UsCountyIncome } from "@/lib/usIncomeCalc";
+import { getStateByFips, type StateMeta } from "@/data/us/stateMeta";
+import {
+  getStateIncome,
+  getNationalIncomePercentile,
+  getStateIncomeRank,
+  getNearbyRankedStates,
+  acs5YearRange,
+  acs1Vintage,
+  type UsCountyIncome,
+} from "@/lib/usIncomeCalc";
 import { getValueAtPercentile } from "@/lib/percentileTable";
 import { buildCountyHref } from "@/components/us/result/useResultLocation";
 import { incomeFill } from "@/components/us/colorScale";
@@ -68,6 +76,13 @@ function UsStateContent({
         })
         .filter((row): row is { percent: number; amount: number } => row != null)
     : [];
+
+  // "Where does this state rank against the other 50?" — real data, not
+  // just "vs. the nation" — see lib/usIncomeCalc.ts's getStateIncomeRank/
+  // getNearbyRankedStates (both already exclude Puerto Rico, which
+  // stateIncome.json carries but this site has no page for).
+  const stateRank = getStateIncomeRank(state.fips);
+  const nearbyStates = getNearbyRankedStates(state.fips, 2);
 
   // Picking a county opens its merged SEO+result page — see
   // app/us/[state]/[county]/page.tsx.
@@ -132,6 +147,49 @@ function UsStateContent({
                 </p>
                 <PercentileThresholds rows={thresholdRows} topPercentTemplate={t.topPercentTemplate} />
               </>
+            )}
+
+            {stateRank && (
+              <div className="mt-5 border-t border-white/[0.06] pt-4">
+                <p className="text-[14px] leading-relaxed text-white/70">
+                  {formatTemplate(t.usStateRankTemplate, { state: state.name, rank: stateRank.rank, total: stateRank.total })}
+                </p>
+                {nearbyStates.length > 0 && (
+                  <>
+                    <p className="mb-2 mt-4 text-[12px] font-semibold uppercase tracking-wide text-white/45">
+                      {t.usStateNearbyRankedHeading}
+                    </p>
+                    <ul className="flex flex-col gap-1.5">
+                      {nearbyStates.map((s) => {
+                        const nearbyMeta = getStateByFips(s.fips);
+                        const nearbyHref = nearbyMeta ? (qs ? `${base}/${nearbyMeta.abbr}?${qs}` : `${base}/${nearbyMeta.abbr}`) : null;
+                        const row = (
+                          <>
+                            <span>{s.name}</span>
+                            <span className="tabular-nums text-white/80">
+                              {s.medianHouseholdIncome != null ? formatUsd(s.medianHouseholdIncome) : "—"}
+                            </span>
+                          </>
+                        );
+                        return (
+                          <li key={s.fips}>
+                            {nearbyHref ? (
+                              <Link
+                                href={nearbyHref}
+                                className="flex items-center justify-between text-[13px] text-white/60 transition-colors hover:text-white"
+                              >
+                                {row}
+                              </Link>
+                            ) : (
+                              <div className="flex items-center justify-between text-[13px] text-white/60">{row}</div>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </>
+                )}
+              </div>
             )}
           </div>
         )}
