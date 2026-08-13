@@ -15,16 +15,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { getStateByAbbr } from "@/data/us/stateMeta";
-import {
-  getCountyIncome,
-  getPlaceIncome,
-  getPlacesForCounty,
-  getStateIncomePercentile,
-  getNationalIncomePercentile,
-  getPlaceIncomePercentile,
-  acs5YearRange,
-  type UsCountyIncome,
-} from "@/lib/usIncomeCalc";
+import { getCountyIncome, getPlaceIncome, getPlacesForCounty, type UsCountyIncome } from "@/lib/usCountyPlaceData";
+import { getStateIncomePercentile, getNationalIncomePercentile, getPlaceIncomePercentileFromCounty, acs5YearRange } from "@/lib/usIncomeCalc";
 import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serverLocale";
 import { pageMetadata, siteTitle, siteDescription } from "@/lib/seo";
 import { translations, formatTemplate } from "@/lib/i18n";
@@ -122,11 +114,16 @@ export default function UsPlacePage({ params }: { params: Params }) {
   }
 
   const median = place.medianHouseholdIncome;
-  const countyPercentile = median != null ? getPlaceIncomePercentile(place.fips, median) : null;
+  // Where this place's own median lands within the county's income
+  // distribution — `median` doubles as both the place's median (the curve
+  // gets re-centered on it) and the "income" being ranked against it.
+  const countyPercentile =
+    median != null ? getPlaceIncomePercentileFromCounty(county.medianHouseholdIncome, county.percentileAnchors, median, median) : null;
   const statePercentile = median != null ? getStateIncomePercentile(state.fips, median) : null;
   const nationalPercentile = median != null ? getNationalIncomePercentile(median) : null;
 
-  const otherPlaces = getPlacesForCounty(county.fips)
+  const placesForCounty = getPlacesForCounty(county.fips);
+  const otherPlaces = placesForCounty
     .filter((p) => p.fips !== place.fips)
     .sort((a, b) => a.name.localeCompare(b.name))
     .slice(0, 8);
@@ -136,7 +133,13 @@ export default function UsPlacePage({ params }: { params: Params }) {
 
   return (
     <UsShell>
-      <PersonalizedResult presetState={state} presetCounty={county} presetPlace={place} variant="full" />
+      <PersonalizedResult
+        presetState={state}
+        presetCounty={county}
+        presetPlace={place}
+        presetPlacesForCounty={placesForCounty}
+        variant="full"
+      />
       <div className="mx-auto max-w-2xl px-4 pb-16 pt-8 sm:px-6">
         <Link
           href={countyHref}

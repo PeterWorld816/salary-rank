@@ -12,19 +12,6 @@ function acceptsKorean(acceptLanguage: string | null): boolean {
   return primary.startsWith("ko");
 }
 
-// /us/[state]/[county] (and /kr/...) used to be the single-page result URL,
-// with answers carried in ?d=. It's now a real SEO content page (see
-// app/us/[state]/[county]/page.tsx) that ISR-caches on `revalidate = 86400`
-// — which only works if the page itself never reads searchParams (Next.js
-// forces full per-request dynamic rendering for any page that does). So the
-// "old shared link still works" redirect lives here instead, at the edge,
-// before it ever reaches that page. It points at /result (see
-// app/us/result/page.tsx), which itself immediately redirects on to
-// /us/[state]/[county] since this legacy path always carries a county —
-// rather than the old /result/overall first step, which no longer exists as
-// a real page — just a redirect stub (lib/legacyResultRedirect.ts).
-const LEGACY_COUNTY_RESULT_PATH = /^\/(us|kr)\/([a-z]{2})\/(\d{5})$/i;
-
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -32,16 +19,6 @@ export function middleware(request: NextRequest) {
     const locale = acceptsKorean(request.headers.get("accept-language")) ? "kr" : "us";
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}`;
-    return NextResponse.redirect(url);
-  }
-
-  const legacyMatch = pathname.match(LEGACY_COUNTY_RESULT_PATH);
-  if (legacyMatch && request.nextUrl.searchParams.has("d")) {
-    const [, prefix, stateAbbr, countyFips] = legacyMatch;
-    const url = request.nextUrl.clone();
-    url.pathname = `/${prefix}/result`;
-    url.searchParams.set("st", stateAbbr);
-    url.searchParams.set("co", countyFips);
     return NextResponse.redirect(url);
   }
 

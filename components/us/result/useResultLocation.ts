@@ -8,12 +8,18 @@
 // State/county/place can also arrive already resolved from the server (the
 // /us/[state]/[county]/[place] route tree — see those pages' `resolve()`)
 // instead of from ?st=/?co=/?pl=. `presetState`/`presetCounty`/`presetPlace`
-// take priority when given; the query-string lookup only runs as a fallback,
-// which keeps this hook usable both there and on the nationwide-only
-// /us/result page (no route params to preset from).
+// take priority when given.
+//
+// There's no ?co=/?pl= fallback lookup here (there used to be): county/place
+// data is server-only (lib/usCountyPlaceData.ts) precisely because it's too
+// large to bundle client-side, so this hook can't resolve an arbitrary fips
+// on its own. That's fine in practice — /us/result redirects any ?st=&co=
+// URL to the real /us/[state]/[county] page (which supplies presetCounty)
+// before it ever reaches here, so a bare ?co=/?pl= with no preset isn't a
+// reachable case from any real link on the site.
 import { useSearchParams } from "next/navigation";
 import { getStateByAbbr, type StateMeta } from "@/data/us/stateMeta";
-import { getCountyIncome, getPlaceIncome, type UsCountyIncome, type UsPlaceIncome } from "@/lib/usIncomeCalc";
+import type { UsCountyIncome, UsPlaceIncome } from "@/lib/usIncomeCalc";
 import { readUsInputFromSearch } from "@/components/us/UsInputPanel";
 import type { UsInput } from "@/lib/usInput";
 
@@ -42,22 +48,19 @@ export function useResultLocation(
   const sp = useSearchParams();
   const qs = sp.toString();
   const stateAbbr = sp.get("st");
-  const countyFipsParam = sp.get("co");
-  const placeFipsParam = sp.get("pl");
   const input = readUsInputFromSearch(sp);
   const from = sp.get("from");
 
   const state = presetState ?? (stateAbbr ? getStateByAbbr(stateAbbr) : null);
-  const county = presetCounty ?? (countyFipsParam ? getCountyIncome(countyFipsParam) : null);
+  const county = presetCounty ?? null;
   const countyFips = county?.fips ?? null;
 
   if (!state || !county || !countyFips) return { ready: false, input, qs, from };
 
   // A place only counts if it's actually inside this county — a stale/
-  // mismatched preset or ?pl= (e.g. hand-edited URL, or left over after a
-  // county change) silently drops back to county-only rather than showing
-  // the wrong city.
-  const rawPlace = presetPlace !== undefined ? presetPlace : placeFipsParam ? getPlaceIncome(placeFipsParam) : null;
+  // mismatched preset (e.g. left over after a county change) silently drops
+  // back to county-only rather than showing the wrong city.
+  const rawPlace = presetPlace ?? null;
   const place = rawPlace && rawPlace.countyFips === countyFips ? rawPlace : null;
 
   return { ready: true, state, county, countyFips, place, input, qs, from };

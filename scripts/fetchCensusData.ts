@@ -375,6 +375,11 @@ async function main() {
   }
 
   writeJson("data/us/countyIncome.json", { meta: commonMeta, counties });
+  // Slim {fips, name}-only companion for lib/usCountyNames.ts, the one
+  // client-safe way to resolve an arbitrary county's name (the "friend
+  // challenge" banner) without shipping the full ~5.3MB countyIncome.json
+  // to the browser — keep this in sync whenever counties are refetched.
+  writeJson("data/us/countyNames.json", { counties: counties.map((c) => ({ fips: c.fips, name: c.name })) });
 
   const pct = (n: number) => `${((n / counties.length) * 100).toFixed(1)}%`;
   const withMale = counties.filter((c) => c.byGender.male != null).length;

@@ -104,10 +104,6 @@ export function buildUsSearchParams(input: UsInput, lang: string, from?: string 
   return params;
 }
 
-export function appendUsQuery(pathname: string, queryString: string): string {
-  return queryString ? `${pathname}?${queryString}` : pathname;
-}
-
 // "Compare with a friend" challenge snapshot — deliberately just a
 // percentile + location code, no personal data, decodable by anyone with
 // the link (same no-server-storage principle as the rest of /us).

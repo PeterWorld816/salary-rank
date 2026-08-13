@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getStateByAbbr, US_STATES } from "@/data/us/stateMeta";
 import { getUsCountiesGeoForState } from "@/lib/usGeo";
+import { getCountiesForState } from "@/lib/usCountyPlaceData";
 import { getStateIncome, getNationalIncomePercentile } from "@/lib/usIncomeCalc";
 import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serverLocale";
 import { pageMetadata, siteTitle, siteDescription } from "@/lib/seo";
@@ -48,10 +49,12 @@ export default function UsStatePage({ params }: { params: { state: string } }) {
   if (!state) notFound();
 
   const geo = getUsCountiesGeoForState(state.fips);
+  const counties = getCountiesForState(state.fips);
   return (
     <UsStateClient
       state={state}
       geo={geo}
+      counties={counties}
       // AdSlot is a Server Component (reads headers() for the production-host
       // check) — UsStateClient is "use client" and can't import it directly,
       // so it's rendered here and threaded down as a prop instead.

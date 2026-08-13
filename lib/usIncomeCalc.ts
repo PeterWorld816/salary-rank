@@ -2,9 +2,17 @@
 // the same generic log-log percentile interpolation as lib/salaryCalc.ts and
 // lib/netWorthCalc.ts (lib/percentileTable.ts), just fed by Census-derived
 // anchor tables (USD) instead of the Korean statistics ones.
+//
+// Deliberately client-safe: every JSON this file imports is small (state has
+// 51 rows, national/net-worth/401k/age-band tables are single objects). The
+// two genuinely large datasets — countyIncome.json (~5.3MB) and
+// placeIncome.json (~6.8MB) — live in lib/usCountyPlaceData.ts instead,
+// guarded by `server-only`, so they can never end up in a client bundle.
+// Client components that need one specific county/place's numbers take the
+// already-resolved object as a prop (from a server component that does the
+// fips lookup) and feed it through the pure helpers below instead of doing
+// their own fips -> object lookup against the full dataset.
 import stateIncomeData from "@/data/us/stateIncome.json";
-import countyIncomeData from "@/data/us/countyIncome.json";
-import placeIncomeData from "@/data/us/placeIncome.json";
 import nationalIncomeData from "@/data/us/nationalIncome.json";
 import netWorthPercentilesUS from "@/data/us/netWorthPercentilesUS.json";
 import k401Data from "@/data/us/401kByAge.json";
@@ -16,7 +24,7 @@ import {
   clampDisplayPercent,
   type PercentileAnchor,
 } from "@/lib/percentileTable";
-import type { UsAgeBandId, UsGenderId, UsMaritalStatusId } from "@/lib/usInput";
+import type { UsAgeBandId } from "@/lib/usInput";
 
 export type UsAcs1YearIncome = {
   year: number;
@@ -49,20 +57,13 @@ export type UsStateIncome = {
 export const acs5YearRange = stateIncomeData.meta.acs5YearRange as string;
 export const acs1Vintage = stateIncomeData.meta.acs1Vintage as number;
 
-export type UsCountyIncome = {
-  fips: string;
-  stateFips: string;
-  name: string;
-  medianHouseholdIncome: number | null;
-  percentileAnchors: PercentileAnchor[];
-  byGender: UsByGenderIncome;
-  byMaritalStatus: UsByMaritalStatusIncome;
-};
+// County/place types and their fips -> object lookups live in
+// lib/usCountyPlaceData.ts (server-only) — re-exported here as types only
+// (zero runtime cost) so existing imports of `UsCountyIncome`/`UsPlaceIncome`
+// from this module keep working.
+export type { UsCountyIncome, UsPlaceIncome } from "@/lib/usCountyPlaceData";
 
 const stateByFips = new Map<string, UsStateIncome>((stateIncomeData.states as UsStateIncome[]).map((s) => [s.fips, s]));
-const countyByFips = new Map<string, UsCountyIncome>(
-  (countyIncomeData.counties as UsCountyIncome[]).map((c) => [c.fips, c])
-);
 
 export function getStateIncome(stateFips: string): UsStateIncome | null {
   return stateByFips.get(stateFips) ?? null;
@@ -72,85 +73,46 @@ export function getAllStateIncomes(): UsStateIncome[] {
   return stateIncomeData.states as UsStateIncome[];
 }
 
-export function getCountyIncome(countyFips: string): UsCountyIncome | null {
-  return countyByFips.get(countyFips) ?? null;
-}
-
-export function getCountiesForState(stateFips: string): UsCountyIncome[] {
-  return (countyIncomeData.counties as UsCountyIncome[]).filter((c) => c.stateFips === stateFips);
-}
-
-// Places (cities/towns/CDPs) — unlike state/county, no percentileAnchors here:
-// see scripts/fetchCensusData.ts's meta.note on placeIncome.json for why (a
-// 16-point curve per place, times 32,000+ places, would have bloated this
-// client-bundled file to ~45MB). getPlaceIncomePercentile below rescales
-// against the parent county's curve instead, same technique as
-// getNationalIncomePercentileForAgeBand further down.
-export type UsPlaceIncome = {
-  fips: string;
-  stateFips: string;
-  countyFips: string;
-  name: string;
-  medianHouseholdIncome: number | null;
-  lat: number;
-  lng: number;
-};
-
-const placeByFips = new Map<string, UsPlaceIncome>((placeIncomeData.places as UsPlaceIncome[]).map((p) => [p.fips, p]));
-
-export function getPlaceIncome(placeFips: string): UsPlaceIncome | null {
-  return placeByFips.get(placeFips) ?? null;
-}
-
-export function getPlacesForCounty(countyFips: string): UsPlaceIncome[] {
-  return (placeIncomeData.places as UsPlaceIncome[]).filter((p) => p.countyFips === countyFips);
-}
-
 // The "reference value" shown alongside a county's overall median — prefers
 // the gender/marital-status-specific figure, and falls back to the overall
 // household median (with usedFallback: true) when this county never
 // published (or couldn't reliably estimate) that breakdown. Never guesses.
+// Pure — takes the detail/overall numbers directly rather than looking a
+// county up by fips, so it works equally from an already-resolved county
+// object (client-side) or a fips-based lookup (server-side, see
+// lib/usCountyPlaceData.ts).
 export type UsIncomeReference = { value: number | null; usedFallback: boolean };
 
-function resolveReference(detail: number | null, overallMedian: number | null): UsIncomeReference {
+export function resolveIncomeReference(detail: number | null, overallMedian: number | null): UsIncomeReference {
   if (detail != null) return { value: detail, usedFallback: false };
   return { value: overallMedian, usedFallback: overallMedian != null };
 }
 
-export function getCountyGenderIncomeReference(countyFips: string, gender: UsGenderId): UsIncomeReference | null {
-  const county = getCountyIncome(countyFips);
-  if (!county) return null;
-  return resolveReference(county.byGender[gender], county.medianHouseholdIncome);
+// Percentile-from-anchors, exposed as a pure function so a client component
+// holding an already-resolved county/place object (passed down as a prop
+// from a server component) can compute a percentile without importing the
+// fips -> object lookup itself (see getCountyIncomePercentile's fips-based
+// equivalent in lib/usCountyPlaceData.ts).
+export function getIncomePercentileFromAnchors(anchors: PercentileAnchor[], annualIncome: number): number | null {
+  if (anchors.length < 2) return null;
+  return clampDisplayPercent(getPercentileRankFromTable(anchors, annualIncome));
 }
 
-export function getCountyMaritalIncomeReference(countyFips: string, maritalStatus: UsMaritalStatusId): UsIncomeReference | null {
-  const county = getCountyIncome(countyFips);
-  if (!county) return null;
-  return resolveReference(county.byMaritalStatus[maritalStatus], county.medianHouseholdIncome);
-}
-
-// null = no data yet (data/us/countyIncome.json still a placeholder, or this
-// county's ACS sample was too small to compute a distribution) — callers
-// must render a "data not loaded yet" state rather than a 0%/100% guess.
-export function getCountyIncomePercentile(countyFips: string, annualIncome: number): number | null {
-  const county = getCountyIncome(countyFips);
-  if (!county || county.percentileAnchors.length < 2) return null;
-  return clampDisplayPercent(getPercentileRankFromTable(county.percentileAnchors, annualIncome));
-}
-
-// "Top X% in this specific city" — the county's real B19001-derived curve,
-// re-centered on the place's own median (place / county median ratio) rather
-// than a distribution unique to the place itself, since we don't store one
-// (see getPlacesForCounty above). Falls back to null wherever either median
-// is missing/unreliable, same as every other percentile function here — no
-// guessing when the underlying Census estimate wasn't trustworthy.
-export function getPlaceIncomePercentile(placeFips: string, annualIncome: number): number | null {
-  const place = getPlaceIncome(placeFips);
-  if (!place || place.medianHouseholdIncome == null) return null;
-  const county = getCountyIncome(place.countyFips);
-  if (!county || county.medianHouseholdIncome == null || county.percentileAnchors.length < 2) return null;
+// Place-level equivalent — "top X% in this specific city", the parent
+// county's real B19001-derived curve re-centered on the place's own median
+// (place / county median ratio) rather than a distribution unique to the
+// place itself, since we don't store one (see scripts/fetchCensusData.ts's
+// meta.note on placeIncome.json for why). Takes the county's numbers and the
+// place's median directly rather than fips, for the same reason as above.
+export function getPlaceIncomePercentileFromCounty(
+  countyMedianHouseholdIncome: number | null,
+  countyPercentileAnchors: PercentileAnchor[],
+  placeMedianHouseholdIncome: number | null,
+  annualIncome: number
+): number | null {
+  if (placeMedianHouseholdIncome == null || countyMedianHouseholdIncome == null || countyPercentileAnchors.length < 2) return null;
   return clampDisplayPercent(
-    getPercentileRankRelativeTo(county.percentileAnchors, county.medianHouseholdIncome, place.medianHouseholdIncome, annualIncome)
+    getPercentileRankRelativeTo(countyPercentileAnchors, countyMedianHouseholdIncome, placeMedianHouseholdIncome, annualIncome)
   );
 }
 
@@ -206,8 +168,8 @@ const netWorthAverageByAgeBand = new Map<UsAgeBandId, number>(
 
 // "Top X% nationwide among people your age" — rescales the user's income by
 // (national median / same-age median) and re-checks it against the same
-// national percentile curve, exactly like getCountyIncomePercentile above.
-// Median-based (not mean) because that's the real figure the Census API
+// national percentile curve, exactly like getIncomePercentileFromAnchors
+// above. Median-based (not mean) because that's the real figure the Census API
 // publishes by age band — see data/us/incomeByAge.json's meta.note for the
 // age-bracket caveats.
 export function getNationalIncomePercentileForAgeBand(ageBand: UsAgeBandId, annualIncome: number): number | null {

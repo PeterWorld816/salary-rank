@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { absoluteUrl } from "@/lib/site-url";
 import { getAllInsights } from "@/lib/insights";
 import { US_STATES } from "@/data/us/stateMeta";
-import { getCountiesForState } from "@/lib/usIncomeCalc";
+import { getCountiesForState } from "@/lib/usCountyPlaceData";
 
 // /us and /kr are two locale-prefixed mirrors of the same app/us/** route
 // tree (see middleware.ts) — each gets its own entry here since they're

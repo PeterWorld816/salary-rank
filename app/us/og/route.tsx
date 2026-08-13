@@ -26,8 +26,8 @@ const COPY = {
 } as const;
 
 // Only the national anchor table (~1.5KB) — deliberately not importing
-// lib/usIncomeCalc.ts, which eagerly builds a Map from data/us/countyIncome.json
-// (~5.7MB) at module scope for exports this route never touches.
+// lib/usIncomeCalc.ts for exports (state/net-worth/401k tables) this edge
+// route never touches, to keep its cold start minimal.
 function getNationalPercentile(annualIncome: number): number | null {
   const anchors = nationalIncomeData.percentileAnchors as PercentileAnchor[];
   if (anchors.length < 2) return null;
