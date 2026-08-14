@@ -86,6 +86,6 @@ vercel
 
 - `NEXT_PUBLIC_ADSENSE_CLIENT_ID` env var — the AdSense publisher ID ads actually load with
   (see `lib/ads.ts`; ads only render on the exact host `NEXT_PUBLIC_SITE_URL` points at).
-- `public/ads.txt` — has a placeholder publisher ID (`pub-0000000000000000`). Replace it with
-  your real AdSense publisher ID (same value as `NEXT_PUBLIC_ADSENSE_CLIENT_ID` above) before
-  going live — AdSense won't serve ads on the domain without a matching `ads.txt` entry.
+- `public/ads.txt` — 완료됨: the real publisher ID (`pub-7379794980536826`) is in place, no
+  longer a placeholder. Keep it in sync with `NEXT_PUBLIC_ADSENSE_CLIENT_ID` above — AdSense
+  won't serve ads on the domain without a matching `ads.txt` entry.
