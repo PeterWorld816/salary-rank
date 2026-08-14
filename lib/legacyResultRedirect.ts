@@ -8,8 +8,9 @@
 // shared links and bookmarks may still point at them, so each one redirects
 // to the dashboard instead of 404ing, carrying every query param along.
 import { permanentRedirect } from "next/navigation";
-import { getAppLocale } from "@/lib/serverLocale";
+import { localeFromParams, localeBase } from "@/lib/serverLocale";
 
+export type LegacyResultParams = { locale: string };
 export type LegacyResultSearchParams = Record<string, string | string[] | undefined>;
 
 function toQueryString(searchParams: LegacyResultSearchParams): string {
@@ -21,8 +22,8 @@ function toQueryString(searchParams: LegacyResultSearchParams): string {
   return params.toString();
 }
 
-export function redirectToResultDashboard(searchParams: LegacyResultSearchParams): never {
-  const base = getAppLocale() === "kr" ? "/kr" : "/us";
+export function redirectToResultDashboard(params: LegacyResultParams, searchParams: LegacyResultSearchParams): never {
+  const base = localeBase(localeFromParams(params));
   const qs = toQueryString(searchParams);
   permanentRedirect(qs ? `${base}/result?${qs}` : `${base}/result`);
 }

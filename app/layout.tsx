@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { translations } from "@/lib/i18n";
-import { getAppLocale, getLangForLocale } from "@/lib/serverLocale";
 import { getSiteUrl } from "@/lib/site-url";
 import RootBody from "@/components/RootBody";
 import AdSenseScript from "@/components/ads/AdSenseScript";
@@ -29,12 +28,16 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+// Deliberately reads nothing request-scoped (no headers()/cookies()): this
+// layout wraps EVERY route, so a single dynamic API call here would force
+// per-request rendering site-wide and disable ISR on the county/place pages.
+// The locale-dependent bits are handled below the layout instead — RootBody
+// derives the language from the pathname, and LanguageProvider corrects
+// <html lang> on mount (lib/LanguageProvider.tsx).
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const lang = getLangForLocale(getAppLocale());
-
   return (
-    <html lang={lang}>
-      <RootBody initialLang={lang}>{children}</RootBody>
+    <html lang="en">
+      <RootBody>{children}</RootBody>
       <AdSenseScript />
     </html>
   );

@@ -6,13 +6,15 @@
 // (CompactInsightSection) that continues the drill-down into
 // /us/[state]/[county]/[place], which is where the full personalized result
 // lives. Both compact pieces share their calculation via useCompactResult.ts
-// — see that file. No generateStaticParams (3,144 counties is too slow to
-// prerender at build time); instead this ISR-caches each county's HTML for a
-// day after its first real visit. That only works if THIS SERVER COMPONENT
-// never reads searchParams itself (reading it anywhere forces Next.js to
-// render fully per-request, bypassing the ISR cache) — CompactResultCard and
-// CompactInsightSection read them client-side instead, each inside its own
-// Suspense boundary, so only those subtrees opt out of the static render.
+// — see that file. Nothing is prerendered at build time (see
+// generateStaticParams below); instead this ISR-caches each county's HTML for
+// a day after its first real visit. That only works if THIS SERVER COMPONENT
+// never reads searchParams itself, and if nothing in its tree reads
+// headers()/cookies() — either one forces Next.js to render fully
+// per-request, bypassing the ISR cache. CompactResultCard and
+// CompactInsightSection read the query string client-side instead, each
+// inside its own Suspense boundary, so only those subtrees opt out of the
+// static render.
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -22,7 +24,7 @@ import { getCountyIncome, getPlacesForCounty } from "@/lib/usCountyPlaceData";
 import { getStateIncomePercentile, getNationalIncomePercentile, acs5YearRange } from "@/lib/usIncomeCalc";
 import { getValueAtPercentile } from "@/lib/percentileTable";
 import { getUsCountiesGeoForState } from "@/lib/usGeo";
-import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serverLocale";
+import { localeFromParams, localeBase, getLangForLocale } from "@/lib/serverLocale";
 import { pageMetadata, siteTitle, siteDescription, locationOgImage } from "@/lib/seo";
 import { translations, formatTemplate } from "@/lib/i18n";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
@@ -37,7 +39,17 @@ import AdSlot from "@/components/ads/AdSlot";
 
 export const revalidate = 86400;
 
-type Params = { state: string; county: string };
+type Params = { locale: string; state: string; county: string };
+
+// 3,144 counties x 2 locales is too slow to prerender at build time, so this
+// returns nothing — but exporting it at all is what opts the route into
+// static generation with on-demand params: the first visit to a county
+// renders it, and `revalidate` above then caches that HTML for a day
+// (ISR). Without it Next.js treats the route as fully dynamic and the
+// revalidate export is ignored.
+export function generateStaticParams() {
+  return [];
+}
 
 function resolve(params: Params) {
   const state = getStateByAbbr(params.state);
@@ -47,10 +59,10 @@ function resolve(params: Params) {
 }
 
 export function generateMetadata({ params }: { params: Params }): Metadata {
-  // EXPERIMENT: hardcoded, no headers() call
-  const locale: "us" | "kr" = "us";
+  const locale = localeFromParams(params);
+  const path = `${localeBase(locale)}/${params.state.toLowerCase()}/${params.county}`;
   const resolved = resolve(params);
-  if (!resolved) return pageMetadata(locale, `/us/${params.state}/${params.county}`, siteTitle(locale), siteDescription(locale));
+  if (!resolved) return pageMetadata(locale, path, siteTitle(locale), siteDescription(locale));
 
   const { county } = resolved;
   const t = translations[getLangForLocale(locale)];
@@ -67,7 +79,7 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
     percentile: median != null ? getNationalIncomePercentile(median) : null,
   });
 
-  return pageMetadata(locale, `/us/${params.state}/${params.county}`, title, description, { image });
+  return pageMetadata(locale, path, title, description, { image });
 }
 
 export default function UsCountyPage({ params }: { params: Params }) {
@@ -75,10 +87,10 @@ export default function UsCountyPage({ params }: { params: Params }) {
   if (!resolved) notFound();
   const { state, county } = resolved;
 
-  // EXPERIMENT: hardcoded, no headers() call
-  const lang = getLangForLocale("us");
+  const locale = localeFromParams(params);
+  const lang = getLangForLocale(locale);
   const t = translations[lang];
-  const base = "/us";
+  const base = localeBase(locale);
 
   const median = county.medianHouseholdIncome;
   const statePercentile = median != null ? getStateIncomePercentile(state.fips, median) : null;

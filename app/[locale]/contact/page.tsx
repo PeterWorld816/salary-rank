@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getAppLocale, getOriginalPathname } from "@/lib/serverLocale";
+import { localeFromParams, localeBase } from "@/lib/serverLocale";
 import { pageMetadata } from "@/lib/seo";
 import { LegalPage, LegalSection } from "@/components/us/LegalPage";
 
@@ -24,16 +24,18 @@ const COPY = {
   },
 } as const;
 
-export function generateMetadata(): Metadata {
-  const locale = getAppLocale();
+type Params = { locale: string };
+
+export function generateMetadata({ params }: { params: Params }): Metadata {
+  const locale = localeFromParams(params);
   const c = COPY[locale];
-  return pageMetadata(locale, getOriginalPathname(), c.metaTitle, c.metaDescription);
+  return pageMetadata(locale, `${localeBase(locale)}/contact`, c.metaTitle, c.metaDescription);
 }
 
-export default function ContactPage() {
-  const locale = getAppLocale();
+export default function ContactPage({ params }: { params: Params }) {
+  const locale = localeFromParams(params);
   const c = COPY[locale];
-  const backHref = locale === "kr" ? "/kr" : "/us";
+  const backHref = localeBase(locale);
 
   return (
     <LegalPage title={c.title} backLabel={c.backLabel} backHref={backHref}>

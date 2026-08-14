@@ -17,7 +17,7 @@ import { ChevronLeft } from "lucide-react";
 import { getStateByAbbr } from "@/data/us/stateMeta";
 import { getCountyIncome, getPlaceIncome, getPlacesForCounty, type UsCountyIncome } from "@/lib/usCountyPlaceData";
 import { getStateIncomePercentile, getNationalIncomePercentile, getPlaceIncomePercentileFromCounty, acs5YearRange } from "@/lib/usIncomeCalc";
-import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serverLocale";
+import { localeFromParams, localeBase, getLangForLocale } from "@/lib/serverLocale";
 import { pageMetadata, siteTitle, siteDescription, locationOgImage } from "@/lib/seo";
 import { translations, formatTemplate } from "@/lib/i18n";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
@@ -29,7 +29,15 @@ import AdSlot from "@/components/ads/AdSlot";
 
 export const revalidate = 86400;
 
-type Params = { state: string; county: string; place: string };
+type Params = { locale: string; state: string; county: string; place: string };
+
+// Empty on purpose — 32,000+ places x 2 locales can't be prerendered at build
+// time, but exporting generateStaticParams is what opts the route into static
+// generation with on-demand params, which is what makes `revalidate` above
+// mean anything. See the county page for the same pattern.
+export function generateStaticParams() {
+  return [];
+}
 
 function resolveStateCounty(params: Params) {
   const state = getStateByAbbr(params.state);
@@ -47,9 +55,8 @@ function resolvePlace(params: Params, county: UsCountyIncome) {
 }
 
 export function generateMetadata({ params }: { params: Params }): Metadata {
-  // EXPERIMENT: hardcoded, no headers() call (matches the county page)
-  const locale: "us" | "kr" = "us";
-  const path = `/us/${params.state}/${params.county}/${params.place}`;
+  const locale = localeFromParams(params);
+  const path = `${localeBase(locale)}/${params.state.toLowerCase()}/${params.county}/${params.place}`;
   const stateCounty = resolveStateCounty(params);
   if (!stateCounty) return pageMetadata(locale, path, siteTitle(locale), siteDescription(locale));
 
@@ -88,10 +95,10 @@ export default function UsPlacePage({ params }: { params: Params }) {
   const { state, county } = stateCounty;
   const place = resolvePlace(params, county);
 
-  // EXPERIMENT: hardcoded, no headers() call
-  const lang = getLangForLocale("us");
+  const locale = localeFromParams(params);
+  const lang = getLangForLocale(locale);
   const t = translations[lang];
-  const base = "/us";
+  const base = localeBase(locale);
   const countyHref = `${base}/${state.abbr}/${county.fips}`;
 
   if (!place) {

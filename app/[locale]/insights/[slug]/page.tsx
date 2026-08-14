@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { translations } from "@/lib/i18n";
-import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serverLocale";
+import { localeFromParams, localeBase, getLangForLocale } from "@/lib/serverLocale";
 import { pageMetadata } from "@/lib/seo";
 import { getInsightBySlug } from "@/lib/insights";
 import UsShell from "@/components/us/UsShell";
@@ -34,22 +34,24 @@ function splitAtMidHeading(html: string): [string, string] | null {
   return [html.slice(0, mid), html.slice(mid)];
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const locale = getAppLocale();
+type Params = { locale: string; slug: string };
+
+export function generateMetadata({ params }: { params: Params }): Metadata {
+  const locale = localeFromParams(params);
   const article = getInsightBySlug(getLangForLocale(locale), params.slug);
   if (!article) return {};
-  return pageMetadata(locale, getOriginalPathname(), article.title, article.description, {
+  return pageMetadata(locale, `${localeBase(locale)}/insights/${params.slug}`, article.title, article.description, {
     image: article.ogImage,
     type: "article",
     publishedTime: article.date,
   });
 }
 
-export default function InsightArticlePage({ params }: { params: { slug: string } }) {
-  const locale = getAppLocale();
+export default function InsightArticlePage({ params }: { params: Params }) {
+  const locale = localeFromParams(params);
   const lang = getLangForLocale(locale);
   const t = translations[lang];
-  const base = locale === "kr" ? "/kr" : "/us";
+  const base = localeBase(locale);
   const article = getInsightBySlug(lang, params.slug);
   if (!article) notFound();
 

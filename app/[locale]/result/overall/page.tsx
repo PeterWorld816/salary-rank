@@ -1,5 +1,11 @@
-import { redirectToResultDashboard, type LegacyResultSearchParams } from "@/lib/legacyResultRedirect";
+import { redirectToResultDashboard, type LegacyResultParams, type LegacyResultSearchParams } from "@/lib/legacyResultRedirect";
 
-export default function OverallResultRedirectPage({ searchParams }: { searchParams: LegacyResultSearchParams }) {
-  redirectToResultDashboard(searchParams);
+export default function OverallResultRedirectPage({
+  params,
+  searchParams,
+}: {
+  params: LegacyResultParams;
+  searchParams: LegacyResultSearchParams;
+}) {
+  redirectToResultDashboard(params, searchParams);
 }

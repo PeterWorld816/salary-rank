@@ -11,7 +11,7 @@ import { ChevronLeft } from "lucide-react";
 import { getStateByAbbr } from "@/data/us/stateMeta";
 import { getCountyIncome, getPlaceIncome } from "@/lib/usCountyPlaceData";
 import { decodeUsInput } from "@/lib/usInput";
-import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serverLocale";
+import { localeFromParams, localeBase, getLangForLocale } from "@/lib/serverLocale";
 import { pageMetadata, siteTitle, siteDescription } from "@/lib/seo";
 import { translations } from "@/lib/i18n";
 import { stripStateSuffix } from "@/lib/usFormat";
@@ -19,20 +19,20 @@ import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
 import CompareClient from "@/components/us/compare/CompareClient";
 
-type Params = { inviteId: string };
+type Params = { locale: string; inviteId: string };
 type SearchParams = Record<string, string | string[] | undefined>;
 
 export function generateMetadata({ params }: { params: Params }): Metadata {
-  const locale = getAppLocale();
-  const path = `/us/compare/${params.inviteId}`;
+  const locale = localeFromParams(params);
+  const path = `${localeBase(locale)}/compare/${params.inviteId}`;
   return { ...pageMetadata(locale, path, siteTitle(locale), siteDescription(locale)), robots: { index: false, follow: true } };
 }
 
 export default function ComparePage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
-  const locale = getAppLocale();
+  const locale = localeFromParams(params);
   const lang = getLangForLocale(locale);
   const t = translations[lang];
-  const base = locale === "kr" ? "/kr" : "/us";
+  const base = localeBase(locale);
 
   const stAbbr = typeof searchParams.st === "string" ? searchParams.st : undefined;
   const coFips = typeof searchParams.co === "string" ? searchParams.co : undefined;

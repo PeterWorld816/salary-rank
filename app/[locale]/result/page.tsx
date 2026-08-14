@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { permanentRedirect } from "next/navigation";
-import { getAppLocale, getOriginalPathname } from "@/lib/serverLocale";
+import { localeFromParams, localeBase } from "@/lib/serverLocale";
 import { pageMetadata, resultOgImage } from "@/lib/seo";
 import AdSlot from "@/components/ads/AdSlot";
 import PersonalizedResult from "@/components/us/result/PersonalizedResult";
@@ -16,10 +16,13 @@ const META = {
   },
 } as const;
 
-export function generateMetadata({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }): Metadata {
-  const locale = getAppLocale();
+type Params = { locale: string };
+type SearchParams = Record<string, string | string[] | undefined>;
+
+export function generateMetadata({ params, searchParams }: { params: Params; searchParams: SearchParams }): Metadata {
+  const locale = localeFromParams(params);
   const m = META[locale];
-  return pageMetadata(locale, getOriginalPathname(), m.title, m.description, { image: resultOgImage(locale, searchParams) });
+  return pageMetadata(locale, `${localeBase(locale)}/result`, m.title, m.description, { image: resultOgImage(locale, searchParams) });
 }
 
 // /us/result?st=&co=(&pl=) used to be the whole dashboard; that content now
@@ -30,12 +33,13 @@ export function generateMetadata({ searchParams }: { searchParams: Record<string
 // result for a visitor who skipped the map entirely via UsInputPanel's "See
 // national result" CTA has no state/county page to redirect to.
 export default function ResultDashboardPage({
+  params,
   searchParams,
 }: {
-  searchParams: Record<string, string | string[] | undefined>;
+  params: Params;
+  searchParams: SearchParams;
 }) {
-  const locale = getAppLocale();
-  const prefix = locale === "kr" ? "/kr" : "/us";
+  const prefix = localeBase(localeFromParams(params));
   const st = typeof searchParams.st === "string" ? searchParams.st : undefined;
   const co = typeof searchParams.co === "string" ? searchParams.co : undefined;
   const pl = typeof searchParams.pl === "string" ? searchParams.pl : undefined;

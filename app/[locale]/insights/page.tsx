@@ -2,24 +2,26 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { translations } from "@/lib/i18n";
-import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serverLocale";
+import { localeFromParams, localeBase, getLangForLocale } from "@/lib/serverLocale";
 import { pageMetadata } from "@/lib/seo";
 import { getAllInsights } from "@/lib/insights";
 import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
 import AdSlot from "@/components/ads/AdSlot";
 
-export function generateMetadata(): Metadata {
-  const locale = getAppLocale();
+type Params = { locale: string };
+
+export function generateMetadata({ params }: { params: Params }): Metadata {
+  const locale = localeFromParams(params);
   const t = translations[getLangForLocale(locale)];
-  return pageMetadata(locale, getOriginalPathname(), t.usInsightsTitle, t.usInsightsIntro);
+  return pageMetadata(locale, `${localeBase(locale)}/insights`, t.usInsightsTitle, t.usInsightsIntro);
 }
 
-export default function InsightsListPage() {
-  const locale = getAppLocale();
+export default function InsightsListPage({ params }: { params: Params }) {
+  const locale = localeFromParams(params);
   const lang = getLangForLocale(locale);
   const t = translations[lang];
-  const base = locale === "kr" ? "/kr" : "/us";
+  const base = localeBase(locale);
   const articles = getAllInsights(lang);
   const dateFormatter = new Intl.DateTimeFormat(lang === "ko" ? "ko-KR" : "en-US", {
     year: "numeric",

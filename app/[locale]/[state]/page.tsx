@@ -4,26 +4,32 @@ import { getStateByAbbr, US_STATES } from "@/data/us/stateMeta";
 import { getUsCountiesGeoForState } from "@/lib/usGeo";
 import { getCountiesForState } from "@/lib/usCountyPlaceData";
 import { getStateIncome, getNationalIncomePercentile } from "@/lib/usIncomeCalc";
-import { getAppLocale, getLangForLocale, getOriginalPathname } from "@/lib/serverLocale";
+import { localeFromParams, localeBase, getLangForLocale } from "@/lib/serverLocale";
 import { pageMetadata, siteTitle, siteDescription, locationOgImage } from "@/lib/seo";
 import { formatTemplate, translations } from "@/lib/i18n";
 import { formatUsd } from "@/lib/usFormat";
 import UsStateClient from "./UsStateClient";
 import AdSlot from "@/components/ads/AdSlot";
 
-// Prerenders all 51 states at build time (confirmed via `next build`'s "●"
-// SSG marker) and, along with getStateByAbbr's notFound() below, keeps
-// unknown slugs 404ing instead of being treated as arbitrary dynamic params.
-// Server-only calls further down the tree that read headers()/cookies()
-// (getAppLocale() in generateMetadata, AdSlot's production-host check) still
-// run per-request on top of that prerendered shell — verified by curling
-// this route with different Host headers and seeing the ad gate correctly.
+// Prerenders all 51 states, per locale, at build time — the [locale] segment
+// above supplies { locale } and Next.js crosses it with these state slugs
+// (102 paths total; see app/[locale]/layout.tsx). Along with getStateByAbbr's
+// notFound() below, this also keeps unknown slugs 404ing instead of being
+// treated as arbitrary dynamic params.
+//
+// Nothing in this route's tree may read headers()/cookies(): a single dynamic
+// API call anywhere below (page, metadata, or a shared component like AdSlot)
+// silently turns these prerenders back into per-request renders. Verify with
+// `next build` AND a `curl -I` for Cache-Control — the "●" marker alone is
+// NOT proof, it still prints for routes that bailed out to dynamic.
 export function generateStaticParams() {
   return US_STATES.map((s) => ({ state: s.abbr }));
 }
 
-export function generateMetadata({ params }: { params: { state: string } }): Metadata {
-  const locale = getAppLocale();
+type Params = { locale: string; state: string };
+
+export function generateMetadata({ params }: { params: Params }): Metadata {
+  const locale = localeFromParams(params);
   const state = getStateByAbbr(params.state);
   const title = state ? `${state.name} — ${siteTitle(locale)}` : siteTitle(locale);
   const median = state ? getStateIncome(state.fips)?.medianHouseholdIncome ?? null : null;
@@ -43,10 +49,13 @@ export function generateMetadata({ params }: { params: { state: string } }): Met
   // "location mode".
   const image = state ? locationOgImage(locale, { locationName: state.name, medianHouseholdIncome: median, percentile }) : undefined;
 
-  return pageMetadata(locale, getOriginalPathname(), title, description, { image });
+  // Canonical uses the state's own (lowercase) slug rather than the raw param,
+  // so an uppercase /us/CA hit still points at the /us/ca the sitemap lists.
+  const path = `${localeBase(locale)}/${state ? state.abbr : params.state}`;
+  return pageMetadata(locale, path, title, description, { image });
 }
 
-export default function UsStatePage({ params }: { params: { state: string } }) {
+export default function UsStatePage({ params }: { params: Params }) {
   const state = getStateByAbbr(params.state);
   if (!state) notFound();
 

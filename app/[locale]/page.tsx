@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import { getUsStatesGeo } from "@/lib/usGeo";
-import { getAppLocale, getOriginalPathname } from "@/lib/serverLocale";
+import { localeFromParams, localeBase } from "@/lib/serverLocale";
 import { homeMetadata } from "@/lib/seo";
 import UsHomeClient from "./UsHomeClient";
 import AdSlot from "@/components/ads/AdSlot";
 
-export function generateMetadata(): Metadata {
-  return homeMetadata(getAppLocale(), getOriginalPathname());
+type Params = { locale: string };
+
+export function generateMetadata({ params }: { params: Params }): Metadata {
+  const locale = localeFromParams(params);
+  return homeMetadata(locale, localeBase(locale));
 }
 
 export default function UsPage() {
