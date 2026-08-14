@@ -33,6 +33,55 @@ The median — the midpoint, where half of households have more and half have
 less — is the more honest answer to "what's normal for my age," which is why
 it's worth quoting over the average whenever you can.
 
+## The national net worth thresholds
+
+Age aside, here's where the lines fall across all US households. Unlike
+income — where the Census's top bracket is open-ended at "$200,000 or more"
+— the Fed's SCF publishes actual figures all the way to the top:
+
+| Percentile | Household net worth |
+|---|---|
+| Top 1% | $13,666,778 |
+| Top 5% | $3,779,600 |
+| Top 10% | $1,920,758 |
+| Top 25% | $658,340 |
+| Median (top 50%) | $192,084 |
+| Top 75% | $27,016 |
+
+The spread here is far more extreme than anything in the income data. The
+top 1% threshold is roughly **71 times** the median, and roughly **7 times**
+the top-10% line. Income simply doesn't stretch like that — which is part of
+why wealth concentration and income concentration are separate
+conversations, and why the [top 1% income
+question](/us/insights/top-1-percent-income-threshold) can't be answered
+with the same confidence this table allows.
+
+Look at the bottom row too. A household with $27,016 to its name is still
+ahead of a quarter of the country. A meaningful share of US households
+report zero or negative net worth, which is why the lower percentiles
+collapse toward nothing so quickly.
+
+## Why net worth has no state or county breakdown
+
+Everywhere else on this site, you can narrow a comparison down to your state
+and county. Net worth is the exception: it's always compared against the
+whole US, and the pages say so explicitly.
+
+The reason is the data source. The Survey of Consumer Finances is a detailed
+national survey — it asks households about assets and debts in a depth the
+Census's income tables never attempt — but its sample isn't large enough to
+produce reliable estimates for individual states, let alone counties.
+Publishing a "median net worth in your county" figure would mean inventing
+one, so we don't.
+
+That's a real asymmetry worth remembering when you compare your two results.
+Your income percentile can be local; your net worth percentile can't. If you
+live somewhere with unusually high housing costs, your income ranking
+already reflects local conditions while your net worth ranking is measured
+against the entire country — see [why a high income doesn't always mean
+you're ahead](/us/insights/cost-of-living-vs-income) for why that
+distinction matters more than it sounds.
+
 ## The under-35 caveat
 
 The Fed's own published brackets start at "under 35," not "under 25" — so
@@ -47,3 +96,17 @@ investments — minus total debt. It's a broader number than a 401(k) balance
 alone (see your own [401(k) comparison](/us) for that specific figure) or
 take-home income; someone can have a modest salary and a large net worth
 built up over decades, or the reverse.
+
+Income follows a very different age curve from the one above — it peaks in
+middle age and falls after 65, exactly when net worth is at its highest.
+See [how income changes by age](/us/insights/income-by-age-curve) for that
+side of the picture.
+
+One last framing note: like the income figures on this site, these are
+*household* numbers. A couple's combined assets and debts count as one
+household, not two — the same convention that trips people up on the income
+side, explained in [household income vs. individual
+income](/us/insights/household-vs-individual-income).
+
+Want to see where your own balance sheet lands, overall and against your age
+group? [Check your net worth percentile](/us).
