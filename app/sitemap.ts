@@ -4,12 +4,13 @@ import { getAllInsights } from "@/lib/insights";
 import { US_STATES } from "@/data/us/stateMeta";
 import { getCountiesForState } from "@/lib/usCountyPlaceData";
 
-// /us and /kr are two locale-prefixed mirrors of the same app/us/** route
-// tree (see middleware.ts) — each gets its own entry here since they're
-// distinct indexable URLs. /us/result/** and /kr/result/** are intentionally
-// left out: they're disallowed in app/robots.ts (unbounded query combos).
-const LOCALE_BASES = ["/us", "/kr"] as const;
-const INSIGHT_LANGS = { "/us": "en", "/kr": "ko" } as const;
+// Only /us is listed. /kr is the same app/us/** route tree served in Korean
+// (see middleware.ts) but it's noindex,follow (lib/seo.ts) and disallowed in
+// app/robots.ts, so listing it would just advertise URLs we don't want
+// crawled; /us pages instead declare the ko-KR alternate in their metadata.
+// /us/result/** is left out for the same reason: unbounded query combos.
+const LOCALE_BASES = ["/us"] as const;
+const INSIGHT_LANGS = { "/us": "en" } as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

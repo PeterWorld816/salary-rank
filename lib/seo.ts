@@ -48,10 +48,20 @@ export function pageMetadata(
   // regardless of metadataBase — see lib/site-url.ts.
   const url = absoluteUrl(pathname);
   const image = absoluteUrl(opts?.image ?? OG_IMAGE[locale]);
+  // Only /us is meant to rank: /kr is the same content in Korean UI for
+  // visitors who switch languages, so it's noindex,follow — links out of it
+  // still pass through, but it never competes with /us in search results.
+  // The /us side still declares the ko-KR alternate (below) so Google
+  // understands the two URLs are one page in two languages.
+  const krUrl = absoluteUrl(`/kr${pathname.replace(/^\/(?:us|kr)(?=\/|$)/, "")}`);
   return {
     title,
     description,
-    alternates: { canonical: url },
+    alternates: {
+      canonical: url,
+      ...(locale === "us" ? { languages: { "ko-KR": krUrl } } : {}),
+    },
+    ...(locale === "kr" ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       title,
       description,
