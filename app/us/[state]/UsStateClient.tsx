@@ -1,7 +1,7 @@
 "use client";
 import { Suspense, useMemo } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import type { FeatureCollection, Geometry } from "geojson";
 import { useLanguage } from "@/lib/LanguageProvider";
@@ -13,6 +13,14 @@ import CompactInsightSection from "@/components/us/result/CompactInsightSection"
 import UsMap, { type UsMapFeatureProps } from "@/components/us/UsMap";
 import UsGeoList from "@/components/us/UsGeoList";
 import IncomeLegend from "@/components/us/IncomeLegend";
+import MapBasisControl from "@/components/us/MapBasisControl";
+import {
+  basisForLens,
+  readMapBasisLensFromSearch,
+  withMapBasisLens,
+  type UsMapBasisLens,
+} from "@/components/us/mapBasisLens";
+import { readUsInputFromSearch } from "@/components/us/UsInputPanel";
 import Footer from "@/components/us/Footer";
 import Spinner from "@/components/Spinner";
 import { getStateByFips, type StateMeta } from "@/data/us/stateMeta";
@@ -21,6 +29,7 @@ import {
   getNationalIncomePercentile,
   getStateIncomeRank,
   getNearbyRankedStates,
+  resolveBasisIncome,
   acs5YearRange,
   acs1Vintage,
   type UsCountyIncome,
@@ -45,23 +54,65 @@ function UsStateContent({
 }) {
   const { t } = useLanguage();
   const router = useRouter();
+  const pathname = usePathname();
   const sp = useSearchParams();
   const qs = sp.toString();
   const base = useLocaleBase();
 
-  const countyByFips = useMemo(() => new Map(counties.map((c) => [c.fips, c])), [counties]);
-  const values = counties.map((c) => c.medianHouseholdIncome).filter((v): v is number => v != null);
-  const min = values.length ? Math.min(...values) : 0;
-  const max = values.length ? Math.max(...values) : 1;
+  // Which median the map shades by, and the visitor's own answers — both read
+  // from the query string *client-side* (useSearchParams), never from a server
+  // `searchParams` prop. This page is prerendered (generateStaticParams in
+  // page.tsx) and the county page it links into is ISR'd; a server-side
+  // searchParams read anywhere in either tree would force per-request
+  // rendering and drop both caches. This whole subtree already sits inside the
+  // Suspense boundary in UsStateClient below, which is what keeps the useSearchParams
+  // call from opting the route out of static generation.
+  const basisLens = readMapBasisLensFromSearch(sp);
+  // Changing gender/marital status in the input panel rewrites "?d=", which
+  // re-renders this subtree with a new basis; nothing remounts, so the
+  // choropleth just transitions its fills (see UsMap's `transition: fill
+  // 150ms`). Flipping the lens below goes through the same path.
+  const input = useMemo(() => readUsInputFromSearch(sp), [sp]);
+  const basis = useMemo(
+    () => basisForLens(basisLens, input.gender, input.maritalStatus),
+    [basisLens, input.gender, input.maritalStatus]
+  );
 
-  const countyItems = counties
-    .slice()
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map((c) => ({
-      id: c.fips,
-      name: stripStateSuffix(c.name, state.name),
-      sub: c.medianHouseholdIncome != null ? formatUsd(c.medianHouseholdIncome) : undefined,
-    }));
+  // Every county's figure under the current basis, resolved once per basis
+  // change rather than per repaint — the fill callback runs for all ~254
+  // geographies (TX) on every hover-driven re-render of UsMap.
+  const referenceByFips = useMemo(
+    () => new Map(counties.map((c) => [c.fips, resolveBasisIncome(c, basis)])),
+    [counties, basis]
+  );
+
+  // Recomputed from the basis values, not from medianHouseholdIncome: the
+  // gender and marital breakdowns sit at different levels (individual
+  // earnings run well below household income), so reusing the household
+  // min/max would flatten the whole map into the bottom band or two.
+  const { min, max } = useMemo(() => {
+    const values = [...referenceByFips.values()].map((r) => r.value).filter((v): v is number => v != null);
+    return values.length ? { min: Math.min(...values), max: Math.max(...values) } : { min: 0, max: 1 };
+  }, [referenceByFips]);
+
+  // Same basis as the map beside it — a sidebar quoting household medians next
+  // to a map shaded by individual earnings would read as two contradictory
+  // numbers for the same county.
+  const countyItems = useMemo(
+    () =>
+      counties
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((c) => {
+          const value = referenceByFips.get(c.fips)?.value ?? null;
+          return {
+            id: c.fips,
+            name: stripStateSuffix(c.name, state.name),
+            sub: value != null ? formatUsd(value) : undefined,
+          };
+        }),
+    [counties, referenceByFips, state.name]
+  );
 
   const stateIncome = getStateIncome(state.fips);
 
@@ -93,18 +144,36 @@ function UsStateContent({
   function getLabel(fips: string) {
     const feature = geo.features.find((f) => String(f.id) === fips);
     const name = feature?.properties?.name ?? fips;
-    const income = countyByFips.get(fips);
-    return income?.medianHouseholdIncome ? `${name} — $${income.medianHouseholdIncome.toLocaleString("en-US")}` : name;
+    const reference = referenceByFips.get(fips);
+    if (reference?.value == null) return name;
+    const amount = `$${reference.value.toLocaleString("en-US")}`;
+    // Says so out loud when this county's shade came from the overall
+    // household median because the Census never published the selected
+    // breakdown for it — otherwise it would look like a real, comparable
+    // "single households" (or "female earnings") figure.
+    return reference.usedFallback ? `${name} — ${amount} · ${t.usMapBasisFallbackTooltip}` : `${name} — ${amount}`;
   }
 
   function getFill(fips: string) {
-    return incomeFill(countyByFips.get(fips)?.medianHouseholdIncome ?? null, min, max);
+    return incomeFill(referenceByFips.get(fips)?.value ?? null, min, max);
   }
 
   // Single navigation entry point shared by both the map (Geography onClick)
   // and the search list (row onClick) — see step 4 of the mobile UX rework.
+  // getHref copies the whole current query string, so "?lens=" rides along to
+  // the county page for free, same as "?d=" and "?lang=" already do.
   function handleSelect(fips: string) {
     router.push(getHref(fips));
+  }
+
+  // replace(), not push(): the lens is a view toggle on the page you're
+  // already on, so each flip must overwrite the current history entry rather
+  // than stack a new one. Otherwise Back would walk the visitor through every
+  // shading they tried instead of returning them to the nationwide map. Same
+  // reasoning (and the same { scroll: false }) as UsInputPanel's apply().
+  // usePathname() rather than the /us|/kr `base` so /kr visitors stay on /kr.
+  function handleLensChange(next: UsMapBasisLens) {
+    router.replace(`${pathname}?${withMapBasisLens(sp, next).toString()}`, { scroll: false });
   }
 
   return (
@@ -222,6 +291,13 @@ function UsStateContent({
           </div>
         ) : (
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-2 sm:p-4">
+            <MapBasisControl
+              lens={basisLens}
+              onLensChange={handleLensChange}
+              basis={basis}
+              gender={input.gender}
+              maritalStatus={input.maritalStatus}
+            />
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
               <div className="min-w-0 flex-1">
                 <UsMap geo={geo} fit onSelect={handleSelect} getFill={getFill} getLabel={getLabel} height={520} zoomable />

@@ -87,6 +87,16 @@ export interface Translations {
   usSearchPlacePlaceholder: string;
   usListNoResults: string;
   usZoomHint: string;
+  // ── County-map shading basis (components/us/MapBasisControl.tsx)
+  usMapBasisHeading: string;
+  usMapBasisOptionHousehold: string;
+  usMapBasisOptionMaritalTemplate: string; // template: {status}
+  usMapBasisOptionGenderTemplate: string; // template: {gender}
+  usMapBasisMetricHousehold: string;
+  usMapBasisMetricIndividual: string;
+  usMapBasisIndividualNote: string;
+  usMapBasisIndividualNoteLink: string;
+  usMapBasisFallbackTooltip: string;
   usBackToUsMap: string;
   usBackToStateMap: string;
   usCountyNoDataTitle: string;
@@ -275,6 +285,15 @@ export const translations: Record<LangCode, Translations> = {
     usSearchPlacePlaceholder: "도시 이름 검색...",
     usListNoResults: "검색 결과가 없어요",
     usZoomHint: "손가락으로 확대·이동하거나 더블탭으로 확대/축소하세요",
+    usMapBasisHeading: "지도 기준",
+    usMapBasisOptionHousehold: "전체 가구",
+    usMapBasisOptionMaritalTemplate: "{status} 가구",
+    usMapBasisOptionGenderTemplate: "{gender} (개인)",
+    usMapBasisMetricHousehold: "가구 중위소득",
+    usMapBasisMetricIndividual: "개인 근로소득 중앙값",
+    usMapBasisIndividualNote: "성별 수치는 가구소득이 아니라 개인 근로소득이에요.",
+    usMapBasisIndividualNoteLink: "무엇이 다른가요?",
+    usMapBasisFallbackTooltip: "카운티 전체 중앙값 (세부 데이터 미공표)",
     usBackToUsMap: "미국 지도로",
     usBackToStateMap: "주 지도로",
     usCountyNoDataTitle: "이 지역 데이터는 아직 준비 중이에요",
@@ -455,6 +474,15 @@ export const translations: Record<LangCode, Translations> = {
     usSearchPlacePlaceholder: "Search cities...",
     usListNoResults: "No results found",
     usZoomHint: "Pinch or drag to pan/zoom, double-tap to toggle zoom",
+    usMapBasisHeading: "Shading",
+    usMapBasisOptionHousehold: "All households",
+    usMapBasisOptionMaritalTemplate: "{status} households",
+    usMapBasisOptionGenderTemplate: "{gender} (individual)",
+    usMapBasisMetricHousehold: "Median income",
+    usMapBasisMetricIndividual: "Median earnings",
+    usMapBasisIndividualNote: "Gender figures are individual earnings, not household income.",
+    usMapBasisIndividualNoteLink: "What's the difference?",
+    usMapBasisFallbackTooltip: "county-wide median (no breakdown published)",
     usBackToUsMap: "US map",
     usBackToStateMap: "State map",
     usCountyNoDataTitle: "Data for this area isn't loaded yet",

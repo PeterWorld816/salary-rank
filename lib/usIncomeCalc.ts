@@ -24,7 +24,7 @@ import {
   clampDisplayPercent,
   type PercentileAnchor,
 } from "@/lib/percentileTable";
-import type { UsAgeBandId } from "@/lib/usInput";
+import type { UsAgeBandId, UsGenderId, UsMaritalStatusId } from "@/lib/usInput";
 import { US_STATES } from "@/data/us/stateMeta";
 // Type-only — zero runtime cost, same reasoning as the `export type { ... }`
 // re-export a few lines down: erased entirely at compile time, so it never
@@ -125,6 +125,71 @@ export type UsIncomeReference = { value: number | null; usedFallback: boolean };
 export function resolveIncomeReference(detail: number | null, overallMedian: number | null): UsIncomeReference {
   if (detail != null) return { value: detail, usedFallback: false };
   return { value: overallMedian, usedFallback: overallMedian != null };
+}
+
+// ── "Which median is this view showing?" ──────────────────────────────────
+// The choropleth used to always paint medianHouseholdIncome; it now paints
+// whichever breakdown the visitor's answers select. A basis is the resolved
+// answer to that question — one axis, plus the unit that axis is measured in,
+// so callers never have to re-derive "is this household or individual money?"
+// from the axis name.
+//
+// `unit` matters because the two breakdowns are NOT the same quantity:
+// byMaritalStatus (and medianHouseholdIncome) are *household* income, while
+// byGender is *individual* median earnings — see the UsByGenderIncome note
+// above. Anything that renders a basis has to say which one it's showing, or
+// it's silently comparing two different things.
+export type UsIncomeBasis =
+  | { axis: "household"; unit: "household" }
+  | { axis: "maritalStatus"; maritalStatus: UsMaritalStatusId; unit: "household" }
+  | { axis: "gender"; gender: UsGenderId; unit: "individual" };
+
+// Turns the visitor's (possibly partial) demographic selection into exactly
+// one basis.
+//
+// Marital status wins when both axes are selected. That's not a preference —
+// it's forced by the data: the Census publishes each breakdown as its own
+// *marginal* table (B20017 by sex, B19126/B19215 by household type) and never
+// their cross-tabulation, so no "median income of single women in this county"
+// figure exists to show. One axis has to be dropped, and dropping gender is
+// the safer drop: byMaritalStatus is household income, the same unit as the
+// medianHouseholdIncome fallback and the same unit every other number on the
+// page is quoted in, so the map stays internally comparable. Preferring
+// byGender instead would mix individual earnings into a household-income
+// scale (and into the household-income fallback for counties missing the
+// breakdown), which would be a genuinely wrong number rather than a coarser one.
+export function resolveIncomeBasis(
+  gender: UsGenderId | null,
+  maritalStatus: UsMaritalStatusId | null
+): UsIncomeBasis {
+  if (maritalStatus != null) return { axis: "maritalStatus", maritalStatus, unit: "household" };
+  if (gender != null) return { axis: "gender", gender, unit: "individual" };
+  return { axis: "household", unit: "household" };
+}
+
+// Anything carrying the two breakdowns plus the overall median — structural
+// rather than `UsCountyIncome` so a state row (which has the same three
+// fields) works too, and so this stays usable from a client component holding
+// an already-resolved object.
+export type UsIncomeBreakdownSource = {
+  medianHouseholdIncome: number | null;
+  byGender: UsByGenderIncome;
+  byMaritalStatus: UsByMaritalStatusIncome;
+};
+
+// The one number a given basis picks out of a county/state, with the same
+// never-guess fallback contract as resolveIncomeReference above: when this
+// geography never published (or couldn't reliably estimate) the selected
+// breakdown, it falls back to the overall household median and flags it with
+// usedFallback so the UI can label that geography honestly.
+export function resolveBasisIncome(source: UsIncomeBreakdownSource, basis: UsIncomeBasis): UsIncomeReference {
+  // The plain household basis IS the fallback target, so it can never be a
+  // fallback *from* anything — returning usedFallback: true here (which
+  // resolveIncomeReference(null, median) would) would label all 3,144
+  // counties as "no breakdown published" on the default view.
+  if (basis.axis === "household") return { value: source.medianHouseholdIncome, usedFallback: false };
+  const detail = basis.axis === "maritalStatus" ? source.byMaritalStatus[basis.maritalStatus] : source.byGender[basis.gender];
+  return resolveIncomeReference(detail, source.medianHouseholdIncome);
 }
 
 // Percentile-from-anchors, exposed as a pure function so a client component

@@ -130,7 +130,11 @@ export default function UsMap({
   // purely decorative — omit to keep markers as plain, non-interactive pins.
   onMarkerSelect?: (id: string) => void;
 }) {
-  const [hovered, setHovered] = useState<{ label: string; x: number; y: number } | null>(null);
+  // Stores the hovered feature's id, not its resolved label — getLabel's
+  // output can change while the pointer sits still (the state page re-cuts it
+  // by gender/marital status, see MapBasisControl), and a snapshotted string
+  // would keep showing the previous basis' number until the next mousemove.
+  const [hovered, setHovered] = useState<{ id: string; x: number; y: number } | null>(null);
   const [hoveredMarker, setHoveredMarker] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
   const [center, setCenter] = useState<[number, number]>([0, 0]);
@@ -242,7 +246,7 @@ export default function UsMap({
                 key={g.rsmKey}
                 geography={g}
                 onClick={() => handleFeatureClick(id)}
-                onMouseEnter={(e) => setHovered({ label: getLabel(id), x: e.clientX, y: e.clientY })}
+                onMouseEnter={(e) => setHovered({ id, x: e.clientX, y: e.clientY })}
                 onMouseMove={(e) => setHovered((h) => (h ? { ...h, x: e.clientX, y: e.clientY } : h))}
                 onMouseLeave={() => setHovered(null)}
                 style={{
@@ -392,7 +396,7 @@ export default function UsMap({
           className="pointer-events-none fixed z-50 whitespace-nowrap rounded-md px-3 py-1.5 text-[13px] font-semibold text-white shadow-lg"
           style={{ left: hovered.x + 14, top: hovered.y + 14, background: "rgba(5,6,7,0.95)", border: `1px solid ${ACCENT}` }}
         >
-          {hovered.label}
+          {getLabel(hovered.id)}
         </div>
       )}
     </div>

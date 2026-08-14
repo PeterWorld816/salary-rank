@@ -32,6 +32,7 @@ import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
 import CompactResultCard from "@/components/us/result/CompactResultCard";
 import CompactInsightSection from "@/components/us/result/CompactInsightSection";
+import CountyBasisFigure from "@/components/us/CountyBasisFigure";
 import AdSlot from "@/components/ads/AdSlot";
 
 export const revalidate = 86400;
@@ -130,6 +131,12 @@ export default function UsCountyPage({ params }: { params: Params }) {
                 <span className="text-[13px] text-white/55">{t.usCountyMedianLabel}</span>
                 <span className="text-[18px] font-bold tabular-nums text-white">{formatUsd(median)}</span>
               </div>
+              {/* The same figure the visitor was hovering on the state map,
+                  under whatever ?lens= they had selected there — client-side
+                  only (its own Suspense boundary), so this page keeps its ISR
+                  cache. Renders nothing on the household lens, since the row
+                  directly above already is that number. */}
+              <CountyBasisFigure county={county} />
               <div className="space-y-1.5 pt-3 text-[13px] leading-relaxed text-white/70">
                 {statePercentile != null && (
                   <p>{formatTemplate(t.usCountyVsStateTemplate, { percent: statePercentile, state: state.name })}</p>
