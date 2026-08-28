@@ -13,6 +13,7 @@ import { ChevronDown, Home } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { formatUsdCompact } from "@/lib/usFormat";
 import { US_AGE_BANDS, US_GENDERS, US_MARITAL_STATUSES, buildUsSearchParams, decodeUsInput, encodeUsInput, type UsInput } from "@/lib/usInput";
+import OccupationField from "@/components/us/OccupationField";
 
 // Height of the fixed slim bar (collapsed state) — the spacer below it must
 // match exactly, or page content would either gap or slide under the bar.
@@ -28,6 +29,7 @@ const DEFAULT_INPUT: UsInput = {
   // them in.
   netWorth: null,
   k401: null,
+  occupation: null,
 };
 
 export function readUsInputFromSearch(sp: URLSearchParams | { get(k: string): string | null }): UsInput {
@@ -249,6 +251,17 @@ export default function UsInputPanel() {
                     value={form.ageBand}
                     options={US_AGE_BANDS.map((b) => ({ id: b.id, label: tr(b.label) }))}
                     onChange={(v) => apply({ ...form, ageBand: v as UsInput["ageBand"] })}
+                  />
+                </div>
+                <div className="mt-3 max-w-xs">
+                  <OccupationField
+                    label={t.usFieldOccupation}
+                    overallLabel={t.usOccupationOverall}
+                    searchPlaceholder={t.usOccupationSearchPlaceholder}
+                    emptyText={t.usListNoResults}
+                    value={form.occupation}
+                    onChange={(occupation) => apply({ ...form, occupation })}
+                    tr={tr}
                   />
                 </div>
               </div>

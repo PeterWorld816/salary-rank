@@ -32,6 +32,10 @@ export type UsInput = {
   annualIncome: number; // USD, pre-tax — the one field required to see a result
   netWorth: number | null; // USD, excludes 401k — optional, behind the "more accurate result" section
   k401: number | null; // USD, 401k balance only — optional, same section
+  // Occupation major-group id (data/us/occupationCategories.json), or null
+  // for "Overall" (no occupation filter) — optional, adds the state-level-
+  // only "occupation" card to the result page. See lib/usOccupationIncome.ts.
+  occupation: string | null;
 };
 
 const GENDER_IDS: UsGenderId[] = ["male", "female"];
@@ -58,13 +62,17 @@ export function encodeUsInput(input: UsInput): string {
     input.annualIncome,
     encodeOptional(input.netWorth),
     encodeOptional(input.k401),
+    // 7th segment, added after occupation shipped — decodeUsInput below
+    // still accepts the old 6-part form (occupation just comes back null),
+    // so links shared before this existed keep working.
+    input.occupation ?? "",
   ].join(".");
 }
 
 export function decodeUsInput(raw: string): UsInput | null {
   const parts = raw.split(".");
-  if (parts.length !== 6) return null;
-  const [gender, maritalStatus, ageBand, incomeRaw, netWorthRaw, k401Raw] = parts;
+  if (parts.length !== 6 && parts.length !== 7) return null;
+  const [gender, maritalStatus, ageBand, incomeRaw, netWorthRaw, k401Raw, occupationRaw] = parts;
 
   const annualIncome = Number(incomeRaw);
   const netWorth = decodeOptional(netWorthRaw);
@@ -89,6 +97,7 @@ export function decodeUsInput(raw: string): UsInput | null {
     annualIncome,
     netWorth: netWorth.value,
     k401: k401.value,
+    occupation: occupationRaw ? occupationRaw : null,
   };
 }
 

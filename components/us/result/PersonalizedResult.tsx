@@ -25,7 +25,7 @@
 // of the drill-down and both need the bell curve and insight card at
 // different points around their own map/next-step section, not bundled
 // together the way this component's "full" dashboard is.
-import { Suspense, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Link2, X, ChevronLeft } from "lucide-react";
@@ -55,6 +55,14 @@ import {
   type UsPlaceIncome,
 } from "@/lib/usIncomeCalc";
 import { estimateBandPopulation, type PercentileAnchor } from "@/lib/percentileTable";
+import {
+  getOccupationCategory,
+  occupationAgeBucket,
+  occupationSexCode,
+  getOccupationIncomePercentile,
+  fetchStateOccupationData,
+  type StateOccupationFile,
+} from "@/lib/usOccupationIncome";
 import { buildPercentileGapNote } from "@/lib/percentileGap";
 import { useCountUp } from "@/lib/useCountUp";
 import { US_TOTAL_HOUSEHOLDS_2024 } from "@/lib/usPopulation";
@@ -232,6 +240,41 @@ function PersonalizedResultContent({
   const genderLabel = tr(US_GENDERS.find((g) => g.id === input.gender)?.label ?? { ko: "", en: "" });
   const maritalLabel = tr(US_MARITAL_STATUSES.find((m) => m.id === input.maritalStatus)?.label ?? { ko: "", en: "" });
 
+  // ── Occupation card — deliberately state-level only, never county/place
+  // (see lib/usOccupationIncome.ts's header comment: PUMS sample sizes don't
+  // support anything finer). The per-state file is a static asset fetched on
+  // demand, not bundled — see scripts/buildOccupationIncome.ts. ──
+  const occupationCategory = getOccupationCategory(input.occupation);
+  const occAgeBucket = occupationAgeBucket(input.ageBand);
+  const [occupationStateData, setOccupationStateData] = useState<StateOccupationFile | null>(null);
+  const [occupationLoaded, setOccupationLoaded] = useState(false);
+  useEffect(() => {
+    setOccupationLoaded(false);
+    setOccupationStateData(null);
+    if (!occupationCategory || !state) return;
+    let cancelled = false;
+    fetchStateOccupationData(state.abbr).then((data) => {
+      if (cancelled) return;
+      setOccupationStateData(data);
+      setOccupationLoaded(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [occupationCategory, state?.abbr]);
+  const occupationResult =
+    occupationCategory && occAgeBucket && state && occupationLoaded
+      ? getOccupationIncomePercentile(
+          input.annualIncome,
+          occupationCategory.id,
+          occAgeBucket,
+          occupationSexCode(input.gender),
+          occupationStateData
+        )
+      : null;
+  const occupationPercentile = occupationResult?.percentile ?? null;
+  const occupationLabel = occupationCategory ? tr(occupationCategory.label) : "";
+
   // ── Auto-narrative headline: find the metric with the best (lowest "top
   // X%") standing and, if it beats the income baseline by 10+ points,
   // contrast the two; otherwise just call out the single best one. ──
@@ -243,6 +286,7 @@ function PersonalizedResultContent({
     ageIncome: formatTemplate(t.usDashboardAgeIncomeLabelTemplate, { age: ageBandLabel }),
     netWorth: t.usDashboardNetWorthLabel,
     ageNetWorth: formatTemplate(t.usDashboardAgeNetWorthLabelTemplate, { age: ageBandLabel }),
+    occupation: formatTemplate(t.usDashboardOccupationIncomeLabelTemplate, { occupation: occupationLabel }),
   };
   const metrics: Metric[] = [
     placePercentile != null && { key: "place", percent: placePercentile },
@@ -252,6 +296,7 @@ function PersonalizedResultContent({
     ageIncomePercentile != null && { key: "ageIncome", percent: ageIncomePercentile },
     netWorthPercentile != null && { key: "netWorth", percent: netWorthPercentile },
     ageNetWorthPercentile != null && { key: "ageNetWorth", percent: ageNetWorthPercentile },
+    occupationPercentile != null && { key: "occupation", percent: occupationPercentile },
   ].filter((m): m is Metric => Boolean(m));
 
   // Place outranks county as the "income basis" reference when selected —
@@ -371,6 +416,19 @@ function PersonalizedResultContent({
       sub: `median ${formatUsd(k401.median)}`,
       highlight: false,
     },
+    // Deliberately state-level only — see lib/usOccupationIncome.ts. `sub`
+    // doubles as the small-sample disclosure: when this state's own combo
+    // didn't clear the raw-count threshold, occupationResult.usedFallback is
+    // true and the real distribution behind this number is the *national*
+    // one, not this state's — said outright here rather than left implicit.
+    occupationPercentile != null && {
+      key: "occupation",
+      label: formatTemplate(t.usOccupationPercentileHeroLabel, { occupation: occupationLabel }),
+      displayValue: formatTemplate(t.topPercentTemplate, { percent: occupationPercentile }),
+      fillPercent: 100 - occupationPercentile,
+      sub: occupationResult?.usedFallback ? t.usOccupationFallbackNotice : undefined,
+      highlight: best?.key === "occupation",
+    },
   ].filter((c): c is GridCard => Boolean(c));
 
   // ── Compare chart rows (percentile metrics only — 401k is a ratio, not a
@@ -392,6 +450,12 @@ function PersonalizedResultContent({
       label: formatTemplate(t.usAgeNetWorthPercentileHeroLabel, { age: ageBandLabel }),
       percent: ageNetWorthPercentile,
       valueLabel: formatTemplate(t.topPercentTemplate, { percent: ageNetWorthPercentile }),
+    },
+    occupationPercentile != null && {
+      key: "occupation",
+      label: formatTemplate(t.usOccupationPercentileHeroLabel, { occupation: occupationLabel }),
+      percent: occupationPercentile,
+      valueLabel: formatTemplate(t.topPercentTemplate, { percent: occupationPercentile }),
     },
   ].filter((m): m is CompareBarItem => Boolean(m));
 

@@ -46,7 +46,7 @@ export default function CompareFriendForm({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!income || income <= 0) return;
-    onSubmit({ gender, maritalStatus, ageBand, annualIncome: income, netWorth: null, k401: null });
+    onSubmit({ gender, maritalStatus, ageBand, annualIncome: income, netWorth: null, k401: null, occupation: null });
   }
 
   return (

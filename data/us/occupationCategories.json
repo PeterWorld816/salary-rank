@@ -1,0 +1,286 @@
+{
+  "meta": {
+    "source": "US Census Bureau, 2018 ACS PUMS and 2018 SIPP Public Use Occupation Code List (SOC 2018 major groups)",
+    "sourceUrl": "https://www.census.gov/topics/employment/industry-occupation/guidance/code-lists.html",
+    "note": "OCCP code ranges are the official SOC-2018 major-group boundaries used by the Census 'Occupation recode for 2018 and later' (OCCP) variable — verified against PUMS_Data_Dictionary_2020-2024. 'military' is kept in this list for completeness but excluded from the UI picker (selectable:false) — ACS civilian-population sampling makes it too sparse to be a meaningful occupation filter."
+  },
+  "categories": [
+    {
+      "id": "management",
+      "soc": "11-0000",
+      "occpRange": [
+        10,
+        440
+      ],
+      "label": {
+        "en": "Management",
+        "ko": "경영/관리직"
+      }
+    },
+    {
+      "id": "business_financial",
+      "soc": "13-0000",
+      "occpRange": [
+        500,
+        960
+      ],
+      "label": {
+        "en": "Business & Financial Operations",
+        "ko": "경영지원·재무직"
+      }
+    },
+    {
+      "id": "computer_math",
+      "soc": "15-0000",
+      "occpRange": [
+        1005,
+        1240
+      ],
+      "label": {
+        "en": "Computer & Mathematical",
+        "ko": "컴퓨터·수학직 (IT/개발)"
+      }
+    },
+    {
+      "id": "architecture_engineering",
+      "soc": "17-0000",
+      "occpRange": [
+        1305,
+        1560
+      ],
+      "label": {
+        "en": "Architecture & Engineering",
+        "ko": "건축·공학직"
+      }
+    },
+    {
+      "id": "life_physical_social_science",
+      "soc": "19-0000",
+      "occpRange": [
+        1600,
+        1980
+      ],
+      "label": {
+        "en": "Life, Physical & Social Science",
+        "ko": "자연·사회과학직"
+      }
+    },
+    {
+      "id": "community_social_service",
+      "soc": "21-0000",
+      "occpRange": [
+        2001,
+        2060
+      ],
+      "label": {
+        "en": "Community & Social Service",
+        "ko": "사회복지직"
+      }
+    },
+    {
+      "id": "legal",
+      "soc": "23-0000",
+      "occpRange": [
+        2100,
+        2180
+      ],
+      "label": {
+        "en": "Legal",
+        "ko": "법률직"
+      }
+    },
+    {
+      "id": "education",
+      "soc": "25-0000",
+      "occpRange": [
+        2205,
+        2555
+      ],
+      "label": {
+        "en": "Educational Instruction & Library",
+        "ko": "교육직"
+      }
+    },
+    {
+      "id": "arts_entertainment_media",
+      "soc": "27-0000",
+      "occpRange": [
+        2600,
+        2920
+      ],
+      "label": {
+        "en": "Arts, Design, Entertainment, Sports & Media",
+        "ko": "예술·엔터테인먼트·미디어직"
+      }
+    },
+    {
+      "id": "healthcare_practitioner",
+      "soc": "29-0000",
+      "occpRange": [
+        3000,
+        3550
+      ],
+      "label": {
+        "en": "Healthcare Practitioners & Technical",
+        "ko": "의료 전문직 (의사·간호사 등)"
+      }
+    },
+    {
+      "id": "healthcare_support",
+      "soc": "31-0000",
+      "occpRange": [
+        3601,
+        3655
+      ],
+      "label": {
+        "en": "Healthcare Support",
+        "ko": "의료 보조직"
+      }
+    },
+    {
+      "id": "protective_service",
+      "soc": "33-0000",
+      "occpRange": [
+        3700,
+        3960
+      ],
+      "label": {
+        "en": "Protective Service",
+        "ko": "공공안전직 (경찰·소방 등)"
+      }
+    },
+    {
+      "id": "food_service",
+      "soc": "35-0000",
+      "occpRange": [
+        4000,
+        4160
+      ],
+      "label": {
+        "en": "Food Preparation & Serving",
+        "ko": "외식·조리직"
+      }
+    },
+    {
+      "id": "building_grounds_maintenance",
+      "soc": "37-0000",
+      "occpRange": [
+        4200,
+        4255
+      ],
+      "label": {
+        "en": "Building & Grounds Cleaning & Maintenance",
+        "ko": "건물·시설 관리직"
+      }
+    },
+    {
+      "id": "personal_care_service",
+      "soc": "39-0000",
+      "occpRange": [
+        4330,
+        4655
+      ],
+      "label": {
+        "en": "Personal Care & Service",
+        "ko": "돌봄·개인서비스직"
+      }
+    },
+    {
+      "id": "sales",
+      "soc": "41-0000",
+      "occpRange": [
+        4700,
+        4965
+      ],
+      "label": {
+        "en": "Sales & Related",
+        "ko": "영업·판매직"
+      }
+    },
+    {
+      "id": "office_admin_support",
+      "soc": "43-0000",
+      "occpRange": [
+        5000,
+        5940
+      ],
+      "label": {
+        "en": "Office & Administrative Support",
+        "ko": "사무·행정직"
+      }
+    },
+    {
+      "id": "farming_fishing_forestry",
+      "soc": "45-0000",
+      "occpRange": [
+        6005,
+        6130
+      ],
+      "label": {
+        "en": "Farming, Fishing & Forestry",
+        "ko": "농림축산·수산직"
+      }
+    },
+    {
+      "id": "construction_extraction",
+      "soc": "47-0000",
+      "occpRange": [
+        6200,
+        6950
+      ],
+      "label": {
+        "en": "Construction & Extraction",
+        "ko": "건설·채굴직"
+      }
+    },
+    {
+      "id": "installation_maintenance_repair",
+      "soc": "49-0000",
+      "occpRange": [
+        7000,
+        7640
+      ],
+      "label": {
+        "en": "Installation, Maintenance & Repair",
+        "ko": "설치·정비·수리직"
+      }
+    },
+    {
+      "id": "production",
+      "soc": "51-0000",
+      "occpRange": [
+        7700,
+        8990
+      ],
+      "label": {
+        "en": "Production",
+        "ko": "생산직"
+      }
+    },
+    {
+      "id": "transportation_material_moving",
+      "soc": "53-0000",
+      "occpRange": [
+        9005,
+        9760
+      ],
+      "label": {
+        "en": "Transportation & Material Moving",
+        "ko": "운송직"
+      }
+    },
+    {
+      "id": "military",
+      "soc": "55-0000",
+      "occpRange": [
+        9800,
+        9830
+      ],
+      "label": {
+        "en": "Military Specific Occupations",
+        "ko": "군인"
+      },
+      "selectable": false
+    }
+  ]
+}

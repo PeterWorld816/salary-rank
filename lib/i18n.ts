@@ -119,6 +119,11 @@ export interface Translations {
   usNetWorthNationalBadge: string;
   usNetWorthHeroLabel: string;
   usAgeNetWorthPercentileHeroLabel: string; // template: {age}
+  usOccupationPercentileHeroLabel: string; // template: {occupation}
+  usFieldOccupation: string;
+  usOccupationOverall: string;
+  usOccupationSearchPlaceholder: string;
+  usOccupationFallbackNotice: string;
   usNetWorthMissingTitle: string;
   usNetWorthMissingDesc: string;
   usK401SectionTitle: string;
@@ -184,6 +189,7 @@ export interface Translations {
   usDashboardAgeIncomeLabelTemplate: string; // template: {age}
   usDashboardNetWorthLabel: string;
   usDashboardAgeNetWorthLabelTemplate: string; // template: {age}
+  usDashboardOccupationIncomeLabelTemplate: string; // template: {occupation}
   usDashboardHeadlineComboTemplate: string; // template: {baseLabel}, {basePercent}, {bestLabel}, {bestPercent}
   usDashboardHeadlineSingleTemplate: string; // template: {bestLabel}, {bestPercent}
   usDashboardSharePromptTitle: string;
@@ -321,6 +327,11 @@ export const translations: Record<LangCode, Translations> = {
     usNetWorthNationalBadge: "🇺🇸 전국 기준",
     usNetWorthHeroLabel: "당신은 미국 전체 자산 상위",
     usAgeNetWorthPercentileHeroLabel: "전국 동일 연령대({age}) 기준 자산 상위",
+    usOccupationPercentileHeroLabel: "이 주(state)의 {occupation} 종사자 중 소득 상위",
+    usFieldOccupation: "직업 (선택)",
+    usOccupationOverall: "전체 (직업 필터 없음)",
+    usOccupationSearchPlaceholder: "직업 검색...",
+    usOccupationFallbackNotice: "표본이 적어 전국 평균 기준으로 표시됩니다",
     usK401SectionTitle: "401(k) 비교",
     usK401Helper: "지역별 데이터가 없어 같은 연령대 전국 평균·중앙값과만 비교해요",
     usK401VsAverageTemplate: "같은 연령대 평균 대비 {percent}%",
@@ -377,6 +388,7 @@ export const translations: Record<LangCode, Translations> = {
     usDashboardAgeIncomeLabelTemplate: "{age} 소득",
     usDashboardNetWorthLabel: "순자산",
     usDashboardAgeNetWorthLabelTemplate: "{age} 순자산",
+    usDashboardOccupationIncomeLabelTemplate: "{occupation} 소득",
     usDashboardHeadlineComboTemplate: "{baseLabel} 기준으로는 상위 {basePercent}%지만, {bestLabel} 기준으로는 상위 {bestPercent}%까지 올라가요!",
     usDashboardHeadlineSingleTemplate: "{bestLabel} 기준으로 상위 {bestPercent}%예요!",
     usDashboardSharePromptTitle: "공유 카드는 지역을 선택하면 만들어져요",
@@ -510,6 +522,11 @@ export const translations: Record<LangCode, Translations> = {
     usNetWorthNationalBadge: "🇺🇸 Nationwide only",
     usNetWorthHeroLabel: "You're in the nationwide top",
     usAgeNetWorthPercentileHeroLabel: "Top nationwide for your age ({age})",
+    usOccupationPercentileHeroLabel: "Top earner among {occupation} workers in this state",
+    usFieldOccupation: "Occupation (optional)",
+    usOccupationOverall: "Overall (no occupation filter)",
+    usOccupationSearchPlaceholder: "Search occupations...",
+    usOccupationFallbackNotice: "Sample too small here — showing the nationwide average instead",
     usK401SectionTitle: "401(k) comparison",
     usK401Helper: "No regional data exists, so this only compares against the nationwide average/median for your age band",
     usK401VsAverageTemplate: "{percent}% of same-age average",
@@ -566,6 +583,7 @@ export const translations: Record<LangCode, Translations> = {
     usDashboardAgeIncomeLabelTemplate: "{age} income",
     usDashboardNetWorthLabel: "net worth",
     usDashboardAgeNetWorthLabelTemplate: "{age} net worth",
+    usDashboardOccupationIncomeLabelTemplate: "{occupation} income",
     usDashboardHeadlineComboTemplate: "By {baseLabel} you're in the top {basePercent}%, but by {bestLabel} you climb to the top {bestPercent}%!",
     usDashboardHeadlineSingleTemplate: "You're in the top {bestPercent}% by {bestLabel}!",
     usDashboardSharePromptTitle: "Pick a location to unlock your share card",
