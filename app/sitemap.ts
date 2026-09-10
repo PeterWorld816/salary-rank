@@ -2,7 +2,6 @@ import type { MetadataRoute } from "next";
 import { absoluteUrl } from "@/lib/site-url";
 import { getAllInsights } from "@/lib/insights";
 import { US_STATES } from "@/data/us/stateMeta";
-import { getCountiesForState } from "@/lib/usCountyPlaceData";
 
 // Only /us is listed. /kr is the same app/us/** route tree served in Korean
 // (see middleware.ts) but it's noindex,follow (lib/seo.ts) and disallowed in
@@ -42,6 +41,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
       });
     }
 
+    // State pages only (51 per locale) — each has real, distinct content
+    // (its own median/rank/thresholds). County (and place) pages below that
+    // are deliberately left out: thousands of near-identical templated pages
+    // in the sitemap reads as auto-generated thin content to search engines.
+    // Those pages still exist and are still reachable by clicking through
+    // the state map (and still get their own `noindex, follow` — see
+    // app/[locale]/[state]/[county]/page.tsx and .../[place]/page.tsx) —
+    // just not individually submitted for indexing.
     for (const state of US_STATES) {
       entries.push({
         url: absoluteUrl(`${base}/${state.abbr}`),
@@ -49,18 +56,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: "monthly",
         priority: 0.7,
       });
-
-      // Now real per-county content pages (see app/us/[state]/[county]/page.tsx),
-      // not the redirect they used to be — worth listing so they get crawled
-      // rather than discovered only by following links from the state page.
-      for (const county of getCountiesForState(state.fips)) {
-        entries.push({
-          url: absoluteUrl(`${base}/${state.abbr}/${county.fips}`),
-          lastModified: now,
-          changeFrequency: "monthly",
-          priority: 0.6,
-        });
-      }
     }
   }
 

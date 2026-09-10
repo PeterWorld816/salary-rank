@@ -311,6 +311,23 @@ export function getNationalIncomePercentileForAgeBand(ageBand: UsAgeBandId, annu
   return clampDisplayPercent(getPercentileRankRelativeTo(anchors, nationalMedianHouseholdIncome, subgroupMedian, annualIncome));
 }
 
+// Same "rescale by (subgroup median / national median)" idea as the
+// function above, just returning the bare ratio instead of re-checking a
+// percentile — this is what lets the nationwide map's "Personalized" SHADING
+// (UsHomeClient.tsx) react to the visitor's age band even though no
+// state-level income-by-age table exists (data/us/incomeByAge.json is
+// national-only — see that file's meta.note). A state's marital/gender
+// figure times this ratio is an approximation, not a real age-cut state
+// statistic, but it's built entirely from data this app already ships
+// rather than fabricating a new one, and it's the only lever available for
+// age band at the state level. Defaults to 1 (no adjustment) on the rare
+// chance either median is missing, rather than zeroing the map out.
+export function getAgeBandIncomeRatio(ageBand: UsAgeBandId): number {
+  const subgroupMedian = incomeMedianByAgeBand.get(ageBand);
+  if (subgroupMedian == null || nationalMedianHouseholdIncome == null || nationalMedianHouseholdIncome === 0) return 1;
+  return subgroupMedian / nationalMedianHouseholdIncome;
+}
+
 // Same idea for net worth, but mean-based (data/us/netWorthByAge.json), to
 // match overallUsNetWorth.average and the SCF's own reporting.
 export function getUsNetWorthPercentileForAgeBand(ageBand: UsAgeBandId, netWorth: number): number | null {

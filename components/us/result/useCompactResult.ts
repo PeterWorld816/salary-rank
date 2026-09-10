@@ -32,6 +32,7 @@ import netWorthPercentilesUS from "@/data/us/netWorthPercentilesUS.json";
 import type { StateMeta } from "@/data/us/stateMeta";
 import { useResultLocation } from "@/components/us/result/useResultLocation";
 import { buildCoachingInsight, type CoachingInsight } from "@/lib/insightMessages";
+import { stripStateSuffix } from "@/lib/usFormat";
 import type { UsInput } from "@/lib/usInput";
 
 export type CompactLevel = "national" | "state" | "county";
@@ -92,6 +93,13 @@ export function useCompactResult(presetState: StateMeta | null, presetCounty: Us
   const ageIncomePercentile = getNationalIncomePercentileForAgeBand(input.ageBand, input.annualIncome);
   const ageNetWorthPercentile = input.netWorth != null ? getUsNetWorthPercentileForAgeBand(input.ageBand, input.netWorth) : null;
 
+  // Most-specific geography name available — county over state, same
+  // fallback order `level` above already uses — so this paragraph names
+  // whichever place the rest of the page is actually talking about.
+  const locationName = presetCounty
+    ? stripStateSuffix(presetCounty.name, presetState?.name ?? "")
+    : (presetState?.name ?? null);
+
   const coachingInsight = useMemo(
     () =>
       buildCoachingInsight({
@@ -102,8 +110,20 @@ export function useCompactResult(presetState: StateMeta | null, presetCounty: Us
         k401: input.k401,
         incomePercentile: ageIncomePercentile ?? nationalPercentile,
         netWorthPercentile: ageNetWorthPercentile ?? netWorthPercentile,
+        locationName,
       }),
-    [lang, input.ageBand, input.annualIncome, input.netWorth, input.k401, ageIncomePercentile, nationalPercentile, ageNetWorthPercentile, netWorthPercentile]
+    [
+      lang,
+      input.ageBand,
+      input.annualIncome,
+      input.netWorth,
+      input.k401,
+      ageIncomePercentile,
+      nationalPercentile,
+      ageNetWorthPercentile,
+      netWorthPercentile,
+      locationName,
+    ]
   );
 
   // ── Percentile gap — "$X more and you'd reach the top Y%", from this

@@ -97,6 +97,14 @@ export interface Translations {
   usMapBasisIndividualNote: string;
   usMapBasisIndividualNoteLink: string;
   usMapBasisFallbackTooltip: string;
+  usMapBasisOptionOccupationTemplate: string; // template: {occupation}
+  usMapBasisOccupationNote: string;
+  usMapBasisOccupationFallbackTooltip: string;
+  usMapBasisOccupationCountyNotice: string;
+  usMapBasisOccupationLoading: string;
+  usMapBasisOptionPersonalized: string;
+  usMapBasisPersonalizedNote: string;
+  usMapBasisPersonalizedCountyNotice: string;
   usBackToUsMap: string;
   usBackToStateMap: string;
   usCountyNoDataTitle: string;
@@ -300,6 +308,14 @@ export const translations: Record<LangCode, Translations> = {
     usMapBasisIndividualNote: "성별 수치는 가구소득이 아니라 개인 근로소득이에요.",
     usMapBasisIndividualNoteLink: "무엇이 다른가요?",
     usMapBasisFallbackTooltip: "카운티 전체 중앙값 (세부 데이터 미공표)",
+    usMapBasisOptionOccupationTemplate: "{occupation} (주 단위)",
+    usMapBasisOccupationNote: "직업별 소득은 개인 근로소득(PERNP) 기준이며 주 단위로만 제공돼요. 표본이 부족한 주는 전국 평균으로 대체되며, 지도(빗금)와 툴팁에 표시돼요.",
+    usMapBasisOccupationFallbackTooltip: "전국 평균 (표본 부족)",
+    usMapBasisOccupationCountyNotice: "카운티 단위는 직업별 데이터가 충분하지 않아 전체 가구 기준으로 표시돼요.",
+    usMapBasisOccupationLoading: "주별 직업 데이터를 불러오는 중...",
+    usMapBasisOptionPersonalized: "맞춤 (내 조건)",
+    usMapBasisPersonalizedNote: "직업을 선택하면 개인 근로소득(주 단위, 표본 부족 시 전국 평균) 기준으로, 직업 없이는 결혼여부·성별에 나이대별 전국 비율을 반영한 가구소득 기준으로 표시돼요. YOUR INFO를 바꿀 때마다 실시간으로 다시 계산돼요.",
+    usMapBasisPersonalizedCountyNotice: "카운티 단위는 맞춤 조합 데이터가 충분하지 않아 전체 가구 기준으로 표시돼요.",
     usBackToUsMap: "미국 지도로",
     usBackToStateMap: "주 지도로",
     usCountyNoDataTitle: "이 지역 데이터는 아직 준비 중이에요",
@@ -495,6 +511,14 @@ export const translations: Record<LangCode, Translations> = {
     usMapBasisIndividualNote: "Gender figures are individual earnings, not household income.",
     usMapBasisIndividualNoteLink: "What's the difference?",
     usMapBasisFallbackTooltip: "county-wide median (no breakdown published)",
+    usMapBasisOptionOccupationTemplate: "{occupation} (by state)",
+    usMapBasisOccupationNote: "Occupation earnings are personal (PERNP), state-level only. States with too few respondents show the national figure instead, marked with a hatch pattern on the map and in the tooltip.",
+    usMapBasisOccupationFallbackTooltip: "national average — state sample too small",
+    usMapBasisOccupationCountyNotice: "County-level occupation data isn't reliable enough — showing all-households instead.",
+    usMapBasisOccupationLoading: "Loading occupation data by state...",
+    usMapBasisOptionPersonalized: "Personalized (Your filters)",
+    usMapBasisPersonalizedNote: "With an occupation picked, this shows personal earnings by state (falling back to the national figure where a state's sample is too small). Without one, it shows household income for your marital status/gender, adjusted by the national age-band pattern. Recalculates live whenever you change YOUR INFO.",
+    usMapBasisPersonalizedCountyNotice: "County-level personalized data isn't reliable enough — showing all-households instead.",
     usBackToUsMap: "US map",
     usBackToStateMap: "State map",
     usCountyNoDataTitle: "Data for this area isn't loaded yet",

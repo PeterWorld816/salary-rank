@@ -62,7 +62,15 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
   const locale = localeFromParams(params);
   const path = `${localeBase(locale)}/${params.state.toLowerCase()}/${params.county}`;
   const resolved = resolve(params);
-  if (!resolved) return pageMetadata(locale, path, siteTitle(locale), siteDescription(locale));
+  // County pages are deliberately kept out of search results (noindex,
+  // follow) regardless of whether this one resolves to real data — see
+  // app/sitemap.ts's comment: thousands of these share the same template
+  // (and the same fixed "What this means for you" advice paragraph), which
+  // reads as auto-generated thin/duplicate content to search engines. They
+  // stay fully reachable by clicking through the state map (`follow` keeps
+  // the outbound links to town pages crawlable), just not individually
+  // indexed. Only the state pages one level up are meant to rank.
+  if (!resolved) return { ...pageMetadata(locale, path, siteTitle(locale), siteDescription(locale)), robots: { index: false, follow: true } };
 
   const { county } = resolved;
   const t = translations[getLangForLocale(locale)];
@@ -79,7 +87,7 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
     percentile: median != null ? getNationalIncomePercentile(median) : null,
   });
 
-  return pageMetadata(locale, path, title, description, { image });
+  return { ...pageMetadata(locale, path, title, description, { image }), robots: { index: false, follow: true } };
 }
 
 export default function UsCountyPage({ params }: { params: Params }) {

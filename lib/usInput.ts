@@ -38,6 +38,35 @@ export type UsInput = {
   occupation: string | null;
 };
 
+// The answer set a fresh visitor starts from — shared with UsInputPanel.tsx
+// (which reads it back for a missing "d" param) and with the "Personalized"
+// map SHADING (components/us/mapBasisLens.ts / UsInputPanel.tsx's apply()),
+// which needs to know when the visitor has moved away from every default
+// answer so it can switch SHADING on, and back to "All households" when
+// they've moved back.
+export const DEFAULT_US_INPUT: UsInput = {
+  gender: "male",
+  maritalStatus: "single",
+  ageBand: "25-34",
+  annualIncome: 75000,
+  netWorth: null,
+  k401: null,
+  occupation: null,
+};
+
+// True only when every field SHADING's "Personalized" combination cares
+// about (gender/maritalStatus/ageBand/occupation) still matches the
+// out-of-the-box answer — annualIncome/netWorth/k401 never affect the map,
+// so they're deliberately left out of this check.
+export function isDefaultUsInputSelection(input: UsInput): boolean {
+  return (
+    input.gender === DEFAULT_US_INPUT.gender &&
+    input.maritalStatus === DEFAULT_US_INPUT.maritalStatus &&
+    input.ageBand === DEFAULT_US_INPUT.ageBand &&
+    input.occupation === DEFAULT_US_INPUT.occupation
+  );
+}
+
 const GENDER_IDS: UsGenderId[] = ["male", "female"];
 const MARITAL_IDS: UsMaritalStatusId[] = ["single", "married"];
 const AGE_BAND_IDS = US_AGE_BANDS.map((b) => b.id);

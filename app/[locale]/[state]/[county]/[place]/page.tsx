@@ -57,14 +57,18 @@ function resolvePlace(params: Params, county: UsCountyIncome) {
 export function generateMetadata({ params }: { params: Params }): Metadata {
   const locale = localeFromParams(params);
   const path = `${localeBase(locale)}/${params.state.toLowerCase()}/${params.county}/${params.place}`;
+  // Town/place pages are the deepest, most numerous step of the drill-down
+  // (32,000+) and share the county pages' fate: kept out of search results
+  // (noindex, follow) unconditionally, not just for the thin/no-data cases
+  // below — see app/sitemap.ts and the county page's generateMetadata for
+  // why. Still fully reachable by clicking through the town picker map.
+  const noIndex = { robots: { index: false, follow: true } } as const;
   const stateCounty = resolveStateCounty(params);
-  if (!stateCounty) return pageMetadata(locale, path, siteTitle(locale), siteDescription(locale));
+  if (!stateCounty) return { ...pageMetadata(locale, path, siteTitle(locale), siteDescription(locale)), ...noIndex };
 
   const place = resolvePlace(params, stateCounty.county);
   if (!place) {
-    // No real content to index at this URL — same "thin content" bar the
-    // null-median case below already holds every place page to.
-    return { ...pageMetadata(locale, path, siteTitle(locale), siteDescription(locale)), robots: { index: false, follow: true } };
+    return { ...pageMetadata(locale, path, siteTitle(locale), siteDescription(locale)), ...noIndex };
   }
 
   const t = translations[getLangForLocale(locale)];
@@ -82,11 +86,7 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
     percentile: median != null ? getNationalIncomePercentile(median) : null,
   });
 
-  const meta = pageMetadata(locale, path, title, description, { image });
-  // Thin/no-data pages (this place's B19013 estimate was too unreliable to
-  // show, ~12% of places) aren't worth indexing — same bar the rest of /us
-  // holds real content pages to.
-  return median == null ? { ...meta, robots: { index: false, follow: true } } : meta;
+  return { ...pageMetadata(locale, path, title, description, { image }), ...noIndex };
 }
 
 export default function UsPlacePage({ params }: { params: Params }) {

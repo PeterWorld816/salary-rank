@@ -15,20 +15,48 @@
 // cache — see the header comment on app/us/[state]/[county]/page.tsx.
 import { resolveIncomeBasis, type UsIncomeBasis } from "@/lib/usIncomeCalc";
 import { formatTemplate, type Localized, type Translations } from "@/lib/i18n";
-import { US_GENDERS, US_MARITAL_STATUSES, type UsGenderId, type UsMaritalStatusId } from "@/lib/usInput";
+import {
+  US_GENDERS,
+  US_MARITAL_STATUSES,
+  isDefaultUsInputSelection,
+  type UsGenderId,
+  type UsInput,
+  type UsMaritalStatusId,
+} from "@/lib/usInput";
 
 export const MAP_BASIS_LENS_PARAM = "lens";
 
-// The three views offered above the map. NOT the same thing as UsIncomeBasis:
-// a lens is the visitor's request ("shade by my marital status"), a basis is
+// The views offered above the map. NOT the same thing as UsIncomeBasis: a
+// lens is the visitor's request ("shade by my marital status"), a basis is
 // what that request resolves to once resolveIncomeBasis's priority rule and
 // the per-county fallback have had their say.
 //
 // The ids double as the on-the-wire "?lens=" values, so they're kept short and
 // URL-legible ("marital", not the basis axis' "maritalStatus").
-export type UsMapBasisLens = "household" | "marital" | "gender";
+//
+// "occupation" is deliberately NOT a UsIncomeBasis axis — unlike the other
+// three, it isn't resolved through resolveIncomeBasis/resolveBasisIncome at
+// all (its numbers come from a separate, async, state-only fetch — see
+// components/us/useOccupationMapData.ts — not the bundled state/county JSON
+// the other three read synchronously). Pages that offer it (only the
+// nationwide map — see UsHomeClient.tsx) branch on `lens === "occupation"`
+// directly instead of routing it through basisForLens for the fill/label/
+// legend data, though basisForLens still accepts it safely (see below) so
+// existing "resolve whatever lens I got" call sites never have to guard
+// against it themselves.
+//
+// "personalized" is the same kind of exception, one level up: it's the
+// visitor's *whole* answer set (occupation + age band + marital status +
+// gender) folded into one combination, not a single axis, so it can't be
+// resolved through basisForLens either — see UsHomeClient.tsx, the only page
+// that offers it (same state-level-only restriction as "occupation", for the
+// same reason: occupation data never goes below state). Automatically
+// selected by UsInputPanel.tsx's apply() the moment any of those four
+// answers stops matching lib/usInput.ts's DEFAULT_US_INPUT, and dropped back
+// to "household" the moment they all match it again.
+export type UsMapBasisLens = "household" | "marital" | "gender" | "occupation" | "personalized";
 
-const LENS_IDS: UsMapBasisLens[] = ["household", "marital", "gender"];
+const LENS_IDS: UsMapBasisLens[] = ["household", "marital", "gender", "occupation", "personalized"];
 
 // Marital status is the default because the input panel has no "unanswered"
 // state for either axis (see lib/usInput.ts — gender and maritalStatus are
@@ -38,12 +66,30 @@ const LENS_IDS: UsMapBasisLens[] = ["household", "marital", "gender"];
 // answers the visitor just gave.
 export const DEFAULT_MAP_BASIS_LENS: UsMapBasisLens = "marital";
 
-// Missing, misspelled, or hand-edited "?lens=" values all fall back to the
+// Missing, misspelled, or hand-edited "?lens=" values all fall back to a
 // default rather than erroring or blanking the map — a shared link that
 // predates this param is the common case, not an edge case.
-export function readMapBasisLensFromSearch(sp: URLSearchParams | { get(k: string): string | null }): UsMapBasisLens {
+//
+// `input`, when passed, lets that fallback default to "personalized" instead
+// of the plain household-axis default whenever the visitor's answers already
+// differ from DEFAULT_US_INPUT — otherwise a shared "?d=..." result link (or
+// a refresh/back-navigation) would land with the map still shaded by "All
+// households"/"Single households" even though the URL already encodes a
+// combination that Personalized exists to show, and the visitor would have
+// to notice and tap the tab themselves to see their own numbers. Only the
+// nationwide map (the only page that ever offers "personalized" as a real
+// choice) passes `input` here; the state/county call sites omit it and keep
+// resolving to DEFAULT_MAP_BASIS_LENS, since "personalized" reaching them
+// only ever means it rode along from the nationwide map's own "?lens=" and
+// gets forced back off there regardless (see UsStateClient.tsx).
+export function readMapBasisLensFromSearch(
+  sp: URLSearchParams | { get(k: string): string | null },
+  input?: UsInput
+): UsMapBasisLens {
   const raw = sp.get(MAP_BASIS_LENS_PARAM);
-  return LENS_IDS.includes(raw as UsMapBasisLens) ? (raw as UsMapBasisLens) : DEFAULT_MAP_BASIS_LENS;
+  if (raw != null && LENS_IDS.includes(raw as UsMapBasisLens)) return raw as UsMapBasisLens;
+  if (input && !isDefaultUsInputSelection(input)) return "personalized";
+  return DEFAULT_MAP_BASIS_LENS;
 }
 
 // Writes the lens onto a copy of the current query string, preserving
@@ -58,7 +104,11 @@ export function withMapBasisLens(existing: URLSearchParams, lens: UsMapBasisLens
 // Translates a lens + the visitor's answers into the basis actually painted.
 // Deliberately routed through resolveIncomeBasis rather than switching on the
 // lens directly, so the "both axes selected -> marital wins" priority rule
-// lives in exactly one place (lib/usIncomeCalc.ts).
+// lives in exactly one place (lib/usIncomeCalc.ts). "occupation" isn't a real
+// UsIncomeBasis axis (see the type comment above) — it falls through both
+// checks below and resolves to the same plain household basis "household"
+// itself would, which is exactly the fallback callers want while an
+// occupation fetch is in flight or unavailable.
 export function basisForLens(lens: UsMapBasisLens, gender: UsGenderId, maritalStatus: UsMaritalStatusId): UsIncomeBasis {
   return resolveIncomeBasis(lens === "gender" ? gender : null, lens === "marital" ? maritalStatus : null);
 }

@@ -14,7 +14,7 @@
 import occupationCategoriesData from "@/data/us/occupationCategories.json";
 import occupationIncomeNationalData from "@/data/us/occupationIncomeNational.json";
 import { getIncomePercentileFromAnchors } from "@/lib/usIncomeCalc";
-import type { PercentileAnchor } from "@/lib/percentileTable";
+import { getValueAtPercentile, type PercentileAnchor } from "@/lib/percentileTable";
 import type { UsAgeBandId, UsGenderId } from "@/lib/usInput";
 
 export type OccupationCategory = {
@@ -117,6 +117,39 @@ export function getOccupationIncomePercentile(
   if (nationalCombo && nationalCombo.anchors.length > 0) {
     return {
       percentile: getIncomePercentileFromAnchors(nationalCombo.anchors, annualIncome),
+      usedFallback: true,
+      rawCount: stateCombo?.rawCount ?? nationalCombo.rawCount,
+    };
+  }
+  return null;
+}
+
+export type OccupationMedianResult = {
+  value: number | null;
+  usedFallback: boolean;
+  rawCount: number;
+};
+
+// Same combos/fallback rule as getOccupationIncomePercentile above, just
+// reading the p50 anchor value instead of ranking one visitor's income
+// against the curve — this is what shades the nationwide map by occupation
+// (see components/us/useOccupationMapData.ts) instead of computing a
+// percentile for a single person.
+export function getOccupationMedianIncome(
+  occId: string,
+  ageBucket: string,
+  sex: "1" | "2",
+  stateData: StateOccupationFile | null
+): OccupationMedianResult | null {
+  const stateCombo = stateData?.combos.find((c) => c.occId === occId && c.ageBand === ageBucket && c.sex === sex);
+  const nationalCombo = nationalByKey.get(`${occId}|${ageBucket}|${sex}`);
+
+  if (stateCombo && !stateCombo.fallback && stateCombo.anchors && stateCombo.anchors.length > 0) {
+    return { value: getValueAtPercentile(stateCombo.anchors, 50), usedFallback: false, rawCount: stateCombo.rawCount };
+  }
+  if (nationalCombo && nationalCombo.anchors.length > 0) {
+    return {
+      value: getValueAtPercentile(nationalCombo.anchors, 50),
       usedFallback: true,
       rawCount: stateCombo?.rawCount ?? nationalCombo.rawCount,
     };

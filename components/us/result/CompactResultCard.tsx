@@ -53,7 +53,14 @@ function CompactResultCardInner({
             <div className="flex min-w-0 flex-col items-start gap-1">
               <TierBadge tier={result.tier} />
               <div className="text-[32px] font-extrabold leading-none tracking-tight text-[#FBBF24]">
-                {formatTemplate(t.topPercentTemplate, { percent: animatedPercent ?? 0 })}
+                {/* Falls back to the real (unanimated) target, not 0 — the
+                    count-up only replaces this once mounted client-side, so
+                    a literal "Top 0%" would otherwise be what's in the
+                    server-rendered HTML for every single one of these pages
+                    (and what a crawler sees if it doesn't wait out the
+                    animation), which reads as templated placeholder text
+                    rather than a real computed result. */}
+                {formatTemplate(t.topPercentTemplate, { percent: animatedPercent ?? result.incomePercent })}
               </div>
               <p className="text-[12px] font-semibold text-white/60">{t[LEVEL_LABEL_KEY[result.level]]}</p>
             </div>

@@ -28,6 +28,13 @@ export type CoachingInsightInput = {
   // available (age-band-relative preferred, overall national as fallback).
   incomePercentile: number | null;
   netWorthPercentile: number | null;
+  // County (or state, when no county is selected) name, already stripped of
+  // its redundant ", {state}" suffix — null on the nationwide-only steps
+  // (home page, /us/result). Folded into the acknowledgment paragraph below
+  // so that paragraph isn't the exact same string on every one of the
+  // thousands of county/place pages that otherwise share this component —
+  // see CompactInsightSection.tsx/PersonalizedResult.tsx's callers.
+  locationName?: string | null;
 };
 
 export type CoachingInsight = {
@@ -52,7 +59,7 @@ function milestoneAgeForMultiplier(multiplier: number): number | null {
 }
 
 export function buildCoachingInsight(input: CoachingInsightInput): CoachingInsight {
-  const { lang, ageBand, annualIncome, netWorth, k401, incomePercentile, netWorthPercentile } = input;
+  const { lang, ageBand, annualIncome, netWorth, k401, incomePercentile, netWorthPercentile, locationName } = input;
   const ko = lang === "ko";
 
   const bestPercentile = [incomePercentile, netWorthPercentile]
@@ -87,24 +94,42 @@ export function buildCoachingInsight(input: CoachingInsightInput): CoachingInsig
           ? "꾸준히 잘 나아가고 있어요."
           : "You're making steady progress.";
 
-  // ── Acknowledgment ──
+  // ── Acknowledgment — folds in this location's name and the actual
+  // best-percentile figure when available, so this paragraph (unlike the
+  // more templated ones below it) isn't byte-identical across every
+  // county/place page that shares this tone. ──
+  const localePhrase = locationName ? (ko ? `${locationName}에서` : `in ${locationName}, `) : "";
   if (tone === "strong") {
     paragraphs.push(
       ko
-        ? "소득·자산 모두 또래 대비 상위권이에요. 잘 해오신 거 맞아요 — 여기서 조금 더 다듬을 부분만 짚어볼게요."
-        : "Your income and net worth both rank near the top for your age group — you've clearly been doing something right. Here's a bit more to sharpen."
+        ? formatTemplate("{locale}소득·자산 모두 또래 대비 상위권이에요{percentSuffix}. 잘 해오신 거 맞아요 — 여기서 조금 더 다듬을 부분만 짚어볼게요.", {
+            locale: localePhrase,
+            percentSuffix: bestPercentile != null ? ` (상위 ${bestPercentile}%)` : "",
+          })
+        : formatTemplate("{locale}Your income and net worth both rank near the top for your age group{percentSuffix} — you've clearly been doing something right. Here's a bit more to sharpen.", {
+            locale: localePhrase,
+            percentSuffix: bestPercentile != null ? ` (top ${bestPercentile}%)` : "",
+          })
     );
   } else if (tone === "building") {
     paragraphs.push(
       ko
-        ? "지금 숫자가 마음에 안 들 수도 있지만, 부끄러워할 일은 아니에요. 나이나 상황과 상관없이 많은 사람이 비슷한 고민을 해요."
-        : "The numbers right now might not feel great, but there's nothing to be embarrassed about — plenty of people, at every age, are in a similar spot."
+        ? formatTemplate("{locale}지금 숫자가 마음에 안 들 수도 있지만, 부끄러워할 일은 아니에요. 나이나 상황과 상관없이 많은 사람이 비슷한 고민을 해요.", {
+            locale: localePhrase,
+          })
+        : formatTemplate("The numbers right now might not feel great{locale}, but there's nothing to be embarrassed about — plenty of people, at every age, are in a similar spot.", {
+            locale: locationName ? ` in ${locationName}` : "",
+          })
     );
   } else {
     paragraphs.push(
       ko
-        ? "또래 평균 근처에서 착실히 나아가고 있어요. 지금 페이스를 유지하면서 조금씩 더 붙여나가면 돼요."
-        : "You're tracking near the middle of the pack for your age — a solid place to build from with steady, incremental progress."
+        ? formatTemplate("{locale}또래 평균 근처에서 착실히 나아가고 있어요. 지금 페이스를 유지하면서 조금씩 더 붙여나가면 돼요.", {
+            locale: localePhrase,
+          })
+        : formatTemplate("You're tracking near the middle of the pack for your age{locale} — a solid place to build from with steady, incremental progress.", {
+            locale: locationName ? ` in ${locationName}` : "",
+          })
     );
   }
 

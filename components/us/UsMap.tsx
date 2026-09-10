@@ -93,6 +93,12 @@ function MapPinMarker({ label, clickable, hovered }: { label?: string; clickable
   );
 }
 
+// Referenced by both the map's own <defs> below and IncomeLegend.tsx's mini
+// swatch — SVG url(#id) references resolve against the whole document, not
+// just the <svg> that declares the <pattern>, so a single shared id is
+// enough for the legend to show a matching key.
+export const FALLBACK_HATCH_PATTERN_ID = "us-map-fallback-hatch";
+
 export default function UsMap({
   geo,
   fit = false,
@@ -103,6 +109,7 @@ export default function UsMap({
   onSelect,
   getFill,
   getLabel,
+  getFallback,
   markers = [],
   onMarkerSelect,
 }: {
@@ -124,6 +131,12 @@ export default function UsMap({
   onSelect: (id: string) => void;
   getFill: (id: string) => string;
   getLabel: (id: string) => string;
+  // Optional — marks a geography as backed by a fallback figure rather than
+  // its own real data (e.g. a state whose occupation sample was too small,
+  // see useOccupationMapData.ts) with a diagonal hatch overlay on top of its
+  // fill, in addition to whatever getLabel says in the tooltip. Omit (the
+  // default) to never hatch anything, unchanged from before this existed.
+  getFallback?: (id: string) => boolean;
   // Optional pins drawn on top of the geography layer — see UsMapMarker.
   markers?: UsMapMarker[];
   // Makes each marker itself clickable (e.g. picking a town) instead of
@@ -284,6 +297,26 @@ export default function UsMap({
             );
           })}
 
+          {getFallback &&
+            geographies.map((g) => {
+              const id = String(g.id);
+              if (!getFallback(id)) return null;
+              // A second, non-interactive copy of the same shape on top of
+              // the real fill — pointer events stay on the layer below, so
+              // hover/click behavior is untouched by this overlay.
+              return (
+                <Geography
+                  key={`fallback-${g.rsmKey}`}
+                  geography={g}
+                  style={{
+                    default: { fill: `url(#${FALLBACK_HATCH_PATTERN_ID})`, stroke: "none", pointerEvents: "none" },
+                    hover: { fill: `url(#${FALLBACK_HATCH_PATTERN_ID})`, stroke: "none", pointerEvents: "none" },
+                    pressed: { fill: `url(#${FALLBACK_HATCH_PATTERN_ID})`, stroke: "none", pointerEvents: "none" },
+                  }}
+                />
+              );
+            })}
+
           {geographies.map((g) => {
             const label = persistentLabel(g);
             if (!label) return null;
@@ -337,6 +370,12 @@ export default function UsMap({
         style={{ width: "100%", height: "100%" }}
         onDoubleClick={handleDoubleClick}
       >
+        <defs>
+          <pattern id={FALLBACK_HATCH_PATTERN_ID} width={6} height={6} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width={6} height={6} fill="transparent" />
+            <line x1={0} y1={0} x2={0} y2={6} stroke="rgba(255,255,255,0.4)" strokeWidth={2} />
+          </pattern>
+        </defs>
         {zoomable ? (
           <ZoomableGroup
             center={center}

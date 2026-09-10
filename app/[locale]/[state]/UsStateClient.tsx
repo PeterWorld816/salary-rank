@@ -67,7 +67,18 @@ function UsStateContent({
   // rendering and drop both caches. This whole subtree already sits inside the
   // Suspense boundary in UsStateClient below, which is what keeps the useSearchParams
   // call from opting the route out of static generation.
-  const basisLens = readMapBasisLensFromSearch(sp);
+  const rawLens = readMapBasisLensFromSearch(sp);
+  // County-level occupation data doesn't exist (see
+  // lib/usOccupationIncome.ts's header comment), and "Personalized" is the
+  // same restriction one level up (it folds occupation in whenever one's
+  // selected — see mapBasisLens.ts) — a "?lens=occupation" or
+  // "?lens=personalized" that rode along from the nationwide map (which does
+  // offer both) gets forced back to the plain household view here, with a
+  // notice explaining why (rendered below via MapBasisControl's
+  // forcedOffNotice).
+  const occupationForcedOff = rawLens === "occupation";
+  const personalizedForcedOff = rawLens === "personalized";
+  const basisLens: UsMapBasisLens = occupationForcedOff || personalizedForcedOff ? "household" : rawLens;
   // Changing gender/marital status in the input panel rewrites "?d=", which
   // re-renders this subtree with a new basis; nothing remounts, so the
   // choropleth just transitions its fills (see UsMap's `transition: fill
@@ -297,6 +308,13 @@ function UsStateContent({
               basis={basis}
               gender={input.gender}
               maritalStatus={input.maritalStatus}
+              forcedOffNotice={
+                occupationForcedOff
+                  ? t.usMapBasisOccupationCountyNotice
+                  : personalizedForcedOff
+                    ? t.usMapBasisPersonalizedCountyNotice
+                    : null
+              }
             />
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
               <div className="min-w-0 flex-1">

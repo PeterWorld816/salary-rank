@@ -12,28 +12,26 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, Home } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { formatUsdCompact } from "@/lib/usFormat";
-import { US_AGE_BANDS, US_GENDERS, US_MARITAL_STATUSES, buildUsSearchParams, decodeUsInput, encodeUsInput, type UsInput } from "@/lib/usInput";
+import {
+  US_AGE_BANDS,
+  US_GENDERS,
+  US_MARITAL_STATUSES,
+  buildUsSearchParams,
+  decodeUsInput,
+  encodeUsInput,
+  isDefaultUsInputSelection,
+  DEFAULT_US_INPUT,
+  type UsInput,
+} from "@/lib/usInput";
 import OccupationField from "@/components/us/OccupationField";
+import { MAP_BASIS_LENS_PARAM } from "@/components/us/mapBasisLens";
 
 // Height of the fixed slim bar (collapsed state) — the spacer below it must
 // match exactly, or page content would either gap or slide under the bar.
 const HEADER_HEIGHT = 56;
 
-const DEFAULT_INPUT: UsInput = {
-  gender: "male",
-  maritalStatus: "single",
-  ageBand: "25-34",
-  annualIncome: 75000,
-  // Unset by default — net worth/401k are shown alongside income (see the
-  // "Your Assets" section below) but stay optional until the visitor fills
-  // them in.
-  netWorth: null,
-  k401: null,
-  occupation: null,
-};
-
 export function readUsInputFromSearch(sp: URLSearchParams | { get(k: string): string | null }): UsInput {
-  return decodeUsInput(sp.get("d") ?? "") ?? DEFAULT_INPUT;
+  return decodeUsInput(sp.get("d") ?? "") ?? DEFAULT_US_INPUT;
 }
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
@@ -172,6 +170,23 @@ export default function UsInputPanel() {
     const params = new URLSearchParams(sp.toString());
     params.set("d", encodeUsInput(next));
     params.set("lang", lang);
+
+    // Changing ANY of gender/marital status/age band/occupation is the
+    // moment the map's shading should "just follow" what the visitor asked
+    // for — SHADING switches to "Personalized (Your filters)" and stays
+    // there (recomputing live) for as long as at least one answer differs
+    // from the out-of-the-box default; moving every answer back to default
+    // drops it back to "All households". See components/us/mapBasisLens.ts
+    // and the nationwide map's Personalized option (UsHomeClient.tsx).
+    const personalizableChanged =
+      next.gender !== form.gender ||
+      next.maritalStatus !== form.maritalStatus ||
+      next.ageBand !== form.ageBand ||
+      next.occupation !== form.occupation;
+    if (personalizableChanged) {
+      params.set(MAP_BASIS_LENS_PARAM, isDefaultUsInputSelection(next) ? "household" : "personalized");
+    }
+
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
@@ -184,7 +199,15 @@ export default function UsInputPanel() {
   // encoding apply() writes to the URL, just targeting a fixed destination
   // instead of the current pathname.
   const localeBase = pathname.startsWith("/kr") ? "/kr" : "/us";
-  const homeHref = `${localeBase}?${buildUsSearchParams(form, lang, from).toString()}`;
+  // Carries the active SHADING lens along to the home map, same as every
+  // other /us link already does with "?d=" — buildUsSearchParams only knows
+  // about d/lang/from, so without this the logo/title link would silently
+  // drop back to the household view even while the visitor was looking at
+  // "Personalized (Your filters)".
+  const homeParams = buildUsSearchParams(form, lang, from);
+  const currentLens = sp.get(MAP_BASIS_LENS_PARAM);
+  if (currentLens) homeParams.set(MAP_BASIS_LENS_PARAM, currentLens);
+  const homeHref = `${localeBase}?${homeParams.toString()}`;
 
   return (
     <>

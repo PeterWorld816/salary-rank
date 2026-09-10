@@ -172,6 +172,23 @@ function PersonalizedResultContent({
     ? resolveIncomeReference(county.byMaritalStatus[input.maritalStatus], county.medianHouseholdIncome)
     : null;
 
+  // The most specific place name we have — the town's own (stripped of its
+  // redundant ", {state}" suffix — see lib/usFormat.ts) when one is
+  // selected/preset, else the county's, same stripping. Both
+  // countyIncome.json and placeIncome.json names already end in ", {state}",
+  // so appending state.name again below without stripping first is what
+  // produced "Bent County, Colorado, Colorado". Declared up here (rather
+  // than down by its other use, `title`/`shareTitle`) so the coaching
+  // insight below can fold it into its acknowledgment paragraph too.
+  const locationName =
+    ready && state
+      ? place
+        ? stripStateSuffix(place.name, state.name)
+        : county
+          ? stripStateSuffix(county.name, state.name)
+          : null
+      : null;
+
   // ── Coaching insight — age/situation-aware narrative (see
   // lib/insightMessages.ts for the full decision logic and cited sources).
   // Prefers the age-band-relative percentile over the flat national one so
@@ -186,6 +203,7 @@ function PersonalizedResultContent({
         k401: input.k401,
         incomePercentile: ageIncomePercentile ?? nationalPercentile,
         netWorthPercentile: ageNetWorthPercentile ?? netWorthPercentile,
+        locationName,
       }),
     [
       lang,
@@ -197,6 +215,7 @@ function PersonalizedResultContent({
       nationalPercentile,
       ageNetWorthPercentile,
       netWorthPercentile,
+      locationName,
     ]
   );
 
@@ -465,21 +484,6 @@ function PersonalizedResultContent({
   const friendPlaceName = friendChallenge ? friendCountyName ?? friendChallenge.stateAbbr.toUpperCase() : null;
   const friendOutEarnsPercent = friendChallenge ? Math.max(1, Math.min(99, 100 - friendChallenge.percentile)) : null;
 
-  // The most specific place name we have — the town's own (stripped of its
-  // redundant ", {state}" suffix — see lib/usFormat.ts) when one is
-  // selected/preset, else the county's, same stripping. Both
-  // countyIncome.json and placeIncome.json names already end in ", {state}",
-  // so appending state.name again below without stripping first is what
-  // produced "Bent County, Colorado, Colorado".
-  const locationName =
-    ready && state
-      ? place
-        ? stripStateSuffix(place.name, state.name)
-        : county
-          ? stripStateSuffix(county.name, state.name)
-          : null
-      : null;
-
   const title = ready && state && locationName ? `${locationName}, ${state.name}` : t.usAppTitle;
   const backHref = ready && state ? (qs ? `${base}/${state.abbr}?${qs}` : `${base}/${state.abbr}`) : qs ? `${base}?${qs}` : base;
   const backLabel = ready ? t.usBackToStateMap : t.usBackToUsMap;
@@ -583,7 +587,11 @@ function PersonalizedResultContent({
               </div>
             )}
             <div className="text-[56px] font-extrabold leading-none tracking-tight text-[#FBBF24]">
-              {formatTemplate(t.topPercentTemplate, { percent: animatedHeadlinePercent ?? 0 })}
+              {/* Falls back to the real target percent, not 0 — see
+                  CompactResultCard's identical fix: the count-up only takes
+                  over post-mount, so a 0 fallback here is a literal "Top 0%"
+                  baked into the server-rendered HTML of every result page. */}
+              {formatTemplate(t.topPercentTemplate, { percent: animatedHeadlinePercent ?? headlineTierPercent })}
             </div>
             <p className="mt-3 text-[15px] font-semibold leading-snug text-balance text-white/80">{headline}</p>
             {similarIncomePopulation != null && (
