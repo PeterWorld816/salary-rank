@@ -217,8 +217,8 @@ export default function UsInputPanel() {
           fixed; once the fields are showing it's fine for content (and the
           panel itself) to scroll normally. */}
       <div
-        className={`inset-x-0 top-0 z-40 border-b border-white/10 backdrop-blur-md ${expanded ? "relative" : "fixed"}`}
-        style={{ background: "rgba(10,11,13,0.85)" }}
+        className={`inset-x-0 top-0 z-40 border-b border-white/10 ${expanded ? "relative" : "fixed"}`}
+        style={{ background: "rgba(10,11,13,0.97)" }}
       >
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 sm:px-6" style={{ height: HEADER_HEIGHT }}>
           <div className="flex min-w-0 items-center gap-2.5">
