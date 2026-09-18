@@ -28,3 +28,18 @@ export function getTier(topPercent: number): Tier {
   const level = TIER_LEVELS.find((l) => topPercent <= l.max);
   return level ? { emoji: level.emoji, label: level.label, color: level.color } : FALLBACK_TIER;
 }
+
+// Which of the three result-card reveal animations a tier gets (see
+// components/us/result/TierRevealAnimation.tsx) — grouped by label rather
+// than re-deriving from topPercent so this stays correct even if
+// TIER_LEVELS' thresholds ever shift.
+export type TierAnimationGroup = "celebration" | "standard" | "encourage";
+
+const CELEBRATION_LABELS = new Set(["Elite Earner", "High Roller", "Fast Climber"]);
+const STANDARD_LABELS = new Set(["On the Rise", "Steady Grower", "Building Up"]);
+
+export function getTierAnimationGroup(tier: Tier): TierAnimationGroup {
+  if (CELEBRATION_LABELS.has(tier.label)) return "celebration";
+  if (STANDARD_LABELS.has(tier.label)) return "standard";
+  return "encourage";
+}

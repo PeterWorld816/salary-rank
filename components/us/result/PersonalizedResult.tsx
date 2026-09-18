@@ -34,7 +34,7 @@ import { useLocaleBase } from "@/lib/useLocaleBase";
 import { formatTemplate } from "@/lib/i18n";
 import { formatUsd, formatPeopleCount, stripStateSuffix } from "@/lib/usFormat";
 import { US_AGE_BANDS, US_GENDERS, US_MARITAL_STATUSES, decodeFriendChallenge, buildCompareInviteHref } from "@/lib/usInput";
-import { getTier } from "@/lib/tier";
+import { getTier, getTierAnimationGroup } from "@/lib/tier";
 import { getCountyName } from "@/lib/usCountyNames";
 import type { StateMeta } from "@/data/us/stateMeta";
 import {
@@ -64,16 +64,19 @@ import {
   type StateOccupationFile,
 } from "@/lib/usOccupationIncome";
 import { buildPercentileGapNote } from "@/lib/percentileGap";
-import { useCountUp } from "@/lib/useCountUp";
+import { useCountUp, useRevealAfterCountUp } from "@/lib/useCountUp";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { US_TOTAL_HOUSEHOLDS_2024 } from "@/lib/usPopulation";
 import nationalIncomeData from "@/data/us/nationalIncome.json";
 import netWorthPercentilesUS from "@/data/us/netWorthPercentilesUS.json";
 import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
 import UsInputPanel from "@/components/us/UsInputPanel";
-import TierBadge from "@/components/us/TierBadge";
-import UsShareCardWide, { WIDE_WIDTH, WIDE_HEIGHT } from "@/components/us/UsShareCardWide";
+import ResultCardVisual, { WIDE_WIDTH, WIDE_HEIGHT } from "@/components/us/ResultCardVisual";
 import UsShareCardStory, { STORY_WIDTH, STORY_HEIGHT } from "@/components/us/UsShareCardStory";
+import { siteHost } from "@/components/us/ShareCardBits";
+import { filledDotsFromPercent } from "@/lib/decileDots";
+import { pickFeaturedPercentiles, type NamedPercent } from "@/lib/shareCardCandidates";
 import DistributionChart from "@/components/DistributionChart";
 import ShareButtons from "@/components/ShareButtons";
 import Spinner from "@/components/Spinner";
@@ -115,10 +118,6 @@ function PersonalizedResultContent({
   const [compareCopied, setCompareCopied] = useState(false);
   const [compareFallbackUrl, setCompareFallbackUrl] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  // The share card preview stays off-screen (not display:none, so
-  // html-to-image can still capture it) until Share/Save is actually
-  // clicked — see the "Share card" block below.
-  const [shareCardVisible, setShareCardVisible] = useState(false);
 
   const { input, qs, from } = loc;
   const ready = loc.ready;
@@ -347,17 +346,42 @@ function PersonalizedResultContent({
     } else {
       headline = formatTemplate(t.usDashboardHeadlineSingleTemplate, {
         bestLabel: shortLabels[best.key],
-        bestPercent: best.percent,
       });
     }
   }
   const headlineTier = headlineTierPercent != null ? getTier(headlineTierPercent) : null;
+
+  // ── Save Story's secondary pill — the runner-up metric next to the same
+  // `best` this headline already picked (pickFeaturedPercentiles's
+  // "featured" always agrees with `best` above, same lowest-percent-wins
+  // rule; only its `secondary` is new information). ──
+  const namedMetrics: NamedPercent[] = metrics.map((m) => ({ key: m.key, label: shortLabels[m.key], percent: m.percent }));
+  const namedIncomeBaseline: NamedPercent | null = incomeBaseline
+    ? { key: incomeBaseline.key, label: shortLabels[incomeBaseline.key], percent: incomeBaseline.percent }
+    : null;
+  const { secondary } = pickFeaturedPercentiles(namedMetrics, namedIncomeBaseline);
+
+  // ── Values shared verbatim between the on-screen ResultCardVisual and its
+  // two hidden capture instances (Save Image/Save Story) below, so all three
+  // can never show different numbers/text for the same result. ──
+  const resultCardHost = siteHost();
+  const resultCardIncomeValue = `${formatUsd(input.annualIncome)} / yr`;
+  const resultCardBeatText =
+    headlineTierPercent != null ? formatTemplate(t.usShareCardBeatTemplate, { count: filledDotsFromPercent(headlineTierPercent) }) : "";
 
   // ── The "reveal" flourishes — a brief count-up instead of the number just
   // appearing, plus a real "how many people are near you" line right under
   // it. Both keyed off the same headlineTierPercent/annualIncome the number
   // itself already shows, no separate computation path. ──
   const animatedHeadlinePercent = useCountUp(headlineTierPercent);
+  // ── Tier-branched reveal (see lib/tier.ts's getTierAnimationGroup) — the
+  // light-sweep/confetti card effect and the badge-pulse/gap-note-bounce
+  // pair both wait for this same "count-up settled" moment, keyed off the
+  // same headlineTierPercent the number itself animates toward. ──
+  const revealReady = useRevealAfterCountUp(headlineTierPercent);
+  const reducedMotion = usePrefersReducedMotion();
+  const shouldPlayReveal = revealReady && !reducedMotion;
+  const revealGroup = headlineTier ? getTierAnimationGroup(headlineTier) : null;
   const similarIncomePopulation =
     headlineTierPercent != null
       ? estimateBandPopulation(nationalIncomeData.percentileAnchors as PercentileAnchor[], input.annualIncome, US_TOTAL_HOUSEHOLDS_2024)
@@ -571,31 +595,43 @@ function PersonalizedResultContent({
         </>
       )}
 
-      {/* ── Headline: "top X%" + the percent as one big number, count-up
-          animated, plus a real "how many people are near you" line — the
-          actual "reveal" moment this page builds to, so the share buttons
-          right below stay reachable without scrolling past the chart/
-          insight card first (see the moved block right after this one). ── */}
-      <div className="mb-8 rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
-        {headline == null || headlineTierPercent == null ? (
-          <NoDataCard title={t.usCountyNoDataTitle} desc={t.usCountyNoDataDesc} />
+      {/* ── Headline: the same tier-colored card design used for Save Image/
+          Save Story (ResultCardVisual) — one component, shown on screen and
+          rasterized, so what a visitor sees here and what they save are
+          guaranteed to read identically. Responsive: fills the available
+          width up to a max, scales down cleanly on mobile. Below it, the
+          narrative headline sentence + "people near you" line stay as plain
+          text — copy the compact card design itself doesn't carry. ── */}
+      <div className="relative mb-8">
+        {headline == null || headlineTierPercent == null || headlineTier == null ? (
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
+            <NoDataCard title={t.usCountyNoDataTitle} desc={t.usCountyNoDataDesc} />
+          </div>
         ) : (
           <>
-            {headlineTier && (
-              <div className="mb-3 flex justify-center">
-                <TierBadge tier={headlineTier} />
-              </div>
-            )}
-            <div className="text-[56px] font-extrabold leading-none tracking-tight text-[#FBBF24]">
-              {/* Falls back to the real target percent, not 0 — see
-                  CompactResultCard's identical fix: the count-up only takes
-                  over post-mount, so a 0 fallback here is a literal "Top 0%"
-                  baked into the server-rendered HTML of every result page. */}
-              {formatTemplate(t.topPercentTemplate, { percent: animatedHeadlinePercent ?? headlineTierPercent })}
+            <div className="mx-auto w-full" style={{ maxWidth: 480 }}>
+              <ResultCardVisual
+                variant="wide"
+                tier={headlineTier}
+                percent={headlineTierPercent}
+                displayPercent={animatedHeadlinePercent}
+                percentTemplate={t.topPercentTemplate}
+                subLabel={best ? shortLabels[best.key] : null}
+                locationLine={state && locationName ? `${locationName}, ${state.name}` : null}
+                host={resultCardHost}
+                watermarkFallback={t.usAppTitle}
+                incomeLabel={t.usShareCardCurrentIncomeLabel}
+                incomeValue={resultCardIncomeValue}
+                gapLabel={t.usShareCardNextTierLabel}
+                gapNote={gapNote}
+                beatText={resultCardBeatText}
+                play={shouldPlayReveal}
+                pulse={shouldPlayReveal && revealGroup === "encourage"}
+              />
             </div>
-            <p className="mt-3 text-[15px] font-semibold leading-snug text-balance text-white/80">{headline}</p>
+            <p className="mt-4 text-center text-[15px] font-semibold leading-snug text-balance text-white/80">{headline}</p>
             {similarIncomePopulation != null && (
-              <p className="mt-3 text-[12px] leading-relaxed text-white/45">
+              <p className="mt-3 text-center text-[12px] leading-relaxed text-white/45">
                 {formatTemplate(t.usSimilarIncomePopulationTemplate, { count: formatPeopleCount(similarIncomePopulation, lang) })}
               </p>
             )}
@@ -603,64 +639,62 @@ function PersonalizedResultContent({
         )}
       </div>
 
-      {/* ── Share card — off-screen (not display:none, so html-to-image can
-          still capture it) until Share/Save/Save Story is actually clicked,
-          at which point it swaps into view as a preview of what was just
-          shared/saved. Moved up here, right under the headline (rather than
-          after the bell curve/insight card below), so the percentile and a
-          way to act on it both land above the fold. ── */}
-      {ready && state && locationName && (
-        <div
-          className={
-            shareCardVisible
-              ? "mb-6 flex justify-center"
-              : "pointer-events-none absolute left-[-9999px] top-0 overflow-hidden"
-          }
-          aria-hidden={!shareCardVisible}
-        >
-          <div className={shareCardVisible ? "overflow-hidden rounded-3xl shadow-[0_12px_48px_rgba(0,0,0,0.5)]" : ""}>
-            <UsShareCardWide
-              stateName={state.name}
-              locationName={locationName}
-              countyPercentile={countyPercentile}
-              nationalPercentile={nationalPercentile}
-              annualIncome={input.annualIncome}
-              netWorthPercentile={netWorthPercentile}
-              ageBandLabel={ageBandLabel}
-              ageIncomePercentile={ageIncomePercentile}
-              ageNetWorthPercentile={ageNetWorthPercentile}
+      {/* ── Hidden capture instances — same component, same props as the
+          visible card above (never shown on screen, not display:none so
+          html-to-image can still lay them out), pinned to the card's fixed
+          design pixel width so Save Image/Save Story keep producing
+          identical, correctly-scaled 1200x630 / 1080x1920 assets regardless
+          of how the on-screen card is currently scaled. ── */}
+      {headline != null && headlineTierPercent != null && headlineTier != null && (
+        <div className="pointer-events-none absolute left-[-9999px] top-0 overflow-hidden" aria-hidden>
+          <div style={{ width: `${WIDE_WIDTH}px` }}>
+            <ResultCardVisual
+              variant="wide"
               cardRef={cardRef}
-              lang={lang}
+              tier={headlineTier}
+              percent={headlineTierPercent}
+              percentTemplate={t.topPercentTemplate}
+              subLabel={best ? shortLabels[best.key] : null}
+              locationLine={state && locationName ? `${locationName}, ${state.name}` : null}
+              host={resultCardHost}
+              watermarkFallback={t.usAppTitle}
+              incomeLabel={t.usShareCardCurrentIncomeLabel}
+              incomeValue={resultCardIncomeValue}
+              gapLabel={t.usShareCardNextTierLabel}
+              gapNote={gapNote}
+              beatText={resultCardBeatText}
             />
           </div>
         </div>
       )}
 
-      {/* Instagram/Snapchat Story-ratio (9:16) card — rasterized by "Save
-          Story" only, never shown on-screen itself (the card above is the
-          user-facing preview). Off-screen, not display:none, so
-          html-to-image still lays it out. */}
-      {ready && state && locationName && (
+      {headline != null && headlineTierPercent != null && headlineTier != null && (
         <div className="pointer-events-none absolute left-[-9999px] top-0 overflow-hidden" aria-hidden>
-          <UsShareCardStory
-            stateName={state.name}
-            locationName={locationName}
-            countyPercentile={countyPercentile}
-            nationalPercentile={nationalPercentile}
-            annualIncome={input.annualIncome}
-            netWorthPercentile={netWorthPercentile}
-            ageBandLabel={ageBandLabel}
-            ageIncomePercentile={ageIncomePercentile}
-            ageNetWorthPercentile={ageNetWorthPercentile}
-            cardRef={storyCardRef}
-            lang={lang}
-          />
+          <div style={{ width: `${STORY_WIDTH}px` }}>
+            <UsShareCardStory
+              cardRef={storyCardRef}
+              tier={headlineTier}
+              percent={headlineTierPercent}
+              percentTemplate={t.topPercentTemplate}
+              subLabel={best ? shortLabels[best.key] : null}
+              locationLine={state && locationName ? `${locationName}, ${state.name}` : null}
+              watermarkFallback={t.usAppTitle}
+              incomeLabel={t.usShareCardCurrentIncomeLabel}
+              incomeValue={resultCardIncomeValue}
+              gapLabel={t.usShareCardNextTierLabel}
+              gapNote={gapNote}
+              beatText={resultCardBeatText}
+              secondaryLabel={secondary ? secondary.label : null}
+              secondaryValueText={secondary ? formatTemplate(t.topPercentTemplate, { percent: secondary.percent }) : null}
+              sourceText={t.usShareCardSource}
+            />
+          </div>
         </div>
       )}
 
       {/* ── Share/Save buttons + compare-with-a-friend ── */}
       {ready && state && county ? (
-        <div className="mb-10" onClickCapture={() => setShareCardVisible(true)}>
+        <div className="mb-10">
           <div className="mb-3">
             <ShareButtons
               cardRef={cardRef}
@@ -735,7 +769,12 @@ function PersonalizedResultContent({
           effectively always available), placed right after the bell curve
           so it reads as the follow-up takeaway once the headline/share
           moment above has landed. ── */}
-      <CoachingInsightCard insight={coachingInsight} title={t.usCoachingInsightTitle} gapNote={gapNote} />
+      <CoachingInsightCard
+        insight={coachingInsight}
+        title={t.usCoachingInsightTitle}
+        gapNote={gapNote}
+        bounceGapNote={shouldPlayReveal && revealGroup === "encourage"}
+      />
 
       {/* ── See full breakdown — mini stat grid, compare chart,
           gender/marital reference rows, net-worth curve. Everything that

@@ -156,6 +156,13 @@ export default function UsInputPanel() {
   // exists (a shared link, or coming back from the map), start collapsed —
   // the summary chip is enough, and the full form is one tap away.
   const [expanded, setExpanded] = useState(() => !sp.get("d"));
+  // Net worth/401k start hidden behind their own toggle — most visitors
+  // only ever fill in income, so showing two extra optional currency
+  // fields by default just adds clutter. A shared link (or a friend
+  // challenge) that already carries a value for either one starts
+  // expanded instead, so it stays visible rather than hiding data the
+  // visitor already entered.
+  const [assetsExpanded, setAssetsExpanded] = useState(() => form.netWorth != null || form.k401 != null);
 
   // A pending "compare with a friend" challenge (see lib/usInput.ts) lives in
   // its own query param, independent of "d" — apply()/homeHref below rebuild
@@ -301,23 +308,35 @@ export default function UsInputPanel() {
               </div>
 
               <div>
-                <h3 className="mb-2.5 text-[12px] font-semibold text-white/50">{t.usFieldAssetsSectionTitle}</h3>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <CurrencyField
-                    label={t.usFieldNetWorth}
-                    helper={t.usFieldNetWorthHelper}
-                    placeholder={t.usFieldOptionalPlaceholder}
-                    value={form.netWorth}
-                    onCommit={(v) => apply({ ...form, netWorth: v })}
-                  />
-                  <CurrencyField
-                    label={t.usFieldK401}
-                    helper={t.usFieldK401Helper}
-                    placeholder={t.usFieldOptionalPlaceholder}
-                    value={form.k401}
-                    onCommit={(v) => apply({ ...form, k401: v })}
-                  />
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setAssetsExpanded((v) => !v)}
+                  aria-expanded={assetsExpanded}
+                  className="text-[12px] font-semibold text-white/50 transition-colors hover:text-white"
+                >
+                  {assetsExpanded ? t.usFieldAssetsToggleHide : t.usFieldAssetsToggleShow}
+                </button>
+                {assetsExpanded && (
+                  <div className="mt-2.5">
+                    <h3 className="mb-2.5 text-[12px] font-semibold text-white/50">{t.usFieldAssetsSectionTitle}</h3>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <CurrencyField
+                        label={t.usFieldNetWorth}
+                        helper={t.usFieldNetWorthHelper}
+                        placeholder={t.usFieldOptionalPlaceholder}
+                        value={form.netWorth}
+                        onCommit={(v) => apply({ ...form, netWorth: v })}
+                      />
+                      <CurrencyField
+                        label={t.usFieldK401}
+                        helper={t.usFieldK401Helper}
+                        placeholder={t.usFieldOptionalPlaceholder}
+                        value={form.k401}
+                        onCommit={(v) => apply({ ...form, k401: v })}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

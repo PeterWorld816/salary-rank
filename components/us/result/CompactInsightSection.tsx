@@ -13,6 +13,9 @@ import CoachingInsightCard from "@/components/us/result/CoachingInsightCard";
 import type { StateMeta } from "@/data/us/stateMeta";
 import type { UsCountyIncome } from "@/lib/usIncomeCalc";
 import { useCompactResult } from "@/components/us/result/useCompactResult";
+import { useRevealAfterCountUp } from "@/lib/useCountUp";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
+import { getTierAnimationGroup } from "@/lib/tier";
 
 function CompactInsightSectionInner({
   presetState,
@@ -23,8 +26,23 @@ function CompactInsightSectionInner({
 }) {
   const { t } = useLanguage();
   const result = useCompactResult(presetState, presetCounty);
+  // Rendered by a separate component from CompactResultCard's headline
+  // card (both mounted on the same page, no shared parent) — so this uses
+  // the same "settle after count-up duration" timing, independently keyed
+  // off the same result.incomePercent, to land its gap-note bounce at
+  // effectively the same moment as that card's badge pulse.
+  const revealReady = useRevealAfterCountUp(result.ready ? result.incomePercent : null);
+  const reducedMotion = usePrefersReducedMotion();
   if (!result.ready) return null;
-  return <CoachingInsightCard insight={result.coachingInsight} title={t.usCoachingInsightTitle} gapNote={result.gapNote} />;
+  const revealGroup = getTierAnimationGroup(result.tier);
+  return (
+    <CoachingInsightCard
+      insight={result.coachingInsight}
+      title={t.usCoachingInsightTitle}
+      gapNote={result.gapNote}
+      bounceGapNote={revealReady && !reducedMotion && revealGroup === "encourage"}
+    />
+  );
 }
 
 export default function CompactInsightSection(props: { presetState: StateMeta | null; presetCounty: UsCountyIncome | null }) {

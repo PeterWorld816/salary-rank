@@ -76,6 +76,8 @@ export interface Translations {
   usFieldK401Helper: string;
   usFieldOptionalPlaceholder: string;
   usFieldAssetsSectionTitle: string;
+  usFieldAssetsToggleShow: string;
+  usFieldAssetsToggleHide: string;
   usSeeNationalResultButtonTemplate: string; // template: {income}
   usApply: string;
   usMapTitle: string;
@@ -199,7 +201,7 @@ export interface Translations {
   usDashboardAgeNetWorthLabelTemplate: string; // template: {age}
   usDashboardOccupationIncomeLabelTemplate: string; // template: {occupation}
   usDashboardHeadlineComboTemplate: string; // template: {baseLabel}, {basePercent}, {bestLabel}, {bestPercent}
-  usDashboardHeadlineSingleTemplate: string; // template: {bestLabel}, {bestPercent}
+  usDashboardHeadlineSingleTemplate: string; // template: {bestLabel} — deliberately omits {bestPercent}, already the big number right above it
   usDashboardSharePromptTitle: string;
   usDashboardSharePromptDesc: string;
   usDashboardPlaceSectionHeading: string;
@@ -214,6 +216,9 @@ export interface Translations {
   usPercentileGapNetWorthTemplate: string; // template: {amount}, {percent}
   usPercentileGapMaxedOut: string;
   usSimilarIncomePopulationTemplate: string; // template: {count}
+  usShareCardCurrentIncomeLabel: string;
+  usShareCardNextTierLabel: string;
+  usShareCardBeatTemplate: string; // template: {count}
 
   // ── Compare-with-a-friend invite page (app/us/compare/[inviteId])
   usComparePageTitle: string;
@@ -288,6 +293,8 @@ export const translations: Record<LangCode, Translations> = {
     usFieldK401Helper: "401k는 순자산과 별도로 입력해주세요",
     usFieldOptionalPlaceholder: "선택 입력",
     usFieldAssetsSectionTitle: "당신의 자산",
+    usFieldAssetsToggleShow: "+ 순자산 / 401k 추가하기 (선택)",
+    usFieldAssetsToggleHide: "순자산 / 401k 접기",
     usSeeNationalResultButtonTemplate: "{income}가 전국에서 상위 몇 %인지 보기",
     usApply: "적용하고 지도 보기",
     usMapTitle: "주(State)를 선택하세요",
@@ -406,7 +413,7 @@ export const translations: Record<LangCode, Translations> = {
     usDashboardAgeNetWorthLabelTemplate: "{age} 순자산",
     usDashboardOccupationIncomeLabelTemplate: "{occupation} 소득",
     usDashboardHeadlineComboTemplate: "{baseLabel} 기준으로는 상위 {basePercent}%지만, {bestLabel} 기준으로는 상위 {bestPercent}%까지 올라가요!",
-    usDashboardHeadlineSingleTemplate: "{bestLabel} 기준으로 상위 {bestPercent}%예요!",
+    usDashboardHeadlineSingleTemplate: "{bestLabel} 기준으로 계산한 순위예요.",
     usDashboardSharePromptTitle: "공유 카드는 지역을 선택하면 만들어져요",
     usDashboardSharePromptDesc: "지도에서 주(State)와 카운티(County)를 선택하면 공유용 카드와 친구 비교 기능을 쓸 수 있어요.",
     usDashboardPlaceSectionHeading: "도시 선택 (선택사항)",
@@ -421,6 +428,9 @@ export const translations: Record<LangCode, Translations> = {
     usPercentileGapNetWorthTemplate: "자산을 {amount} 더 모으면 미국 전체 상위 {percent}%로 올라갈 수 있어요.",
     usPercentileGapMaxedOut: "이미 우리가 추적하는 가장 높은 구간에 있어요!",
     usSimilarIncomePopulationTemplate: "당신과 비슷한 소득대의 사람은 미국에 대략 {count}명 정도예요.",
+    usShareCardCurrentIncomeLabel: "현재 소득",
+    usShareCardNextTierLabel: "다음 구간까지",
+    usShareCardBeatTemplate: "10명 중 {count}명보다 앞서요",
 
     usComparePageTitle: "친구와 비교하기",
     usCompareInviteIntro: "친구가 초대했어요! 정보를 입력하면 두 사람의 소득 순위를 나란히 비교해드려요.",
@@ -491,6 +501,8 @@ export const translations: Record<LangCode, Translations> = {
     usFieldK401Helper: "Enter this separately from net worth",
     usFieldOptionalPlaceholder: "Optional",
     usFieldAssetsSectionTitle: "Your Assets",
+    usFieldAssetsToggleShow: "+ Add net worth / 401k (optional)",
+    usFieldAssetsToggleHide: "Hide net worth / 401k",
     usSeeNationalResultButtonTemplate: "See where {income} ranks nationwide",
     usApply: "Apply & view map",
     usMapTitle: "Select a state",
@@ -609,7 +621,7 @@ export const translations: Record<LangCode, Translations> = {
     usDashboardAgeNetWorthLabelTemplate: "{age} net worth",
     usDashboardOccupationIncomeLabelTemplate: "{occupation} income",
     usDashboardHeadlineComboTemplate: "By {baseLabel} you're in the top {basePercent}%, but by {bestLabel} you climb to the top {bestPercent}%!",
-    usDashboardHeadlineSingleTemplate: "You're in the top {bestPercent}% by {bestLabel}!",
+    usDashboardHeadlineSingleTemplate: "That's your ranking by {bestLabel}.",
     usDashboardSharePromptTitle: "Pick a location to unlock your share card",
     usDashboardSharePromptDesc: "Choose a state and county on the map to get a shareable card and compare with a friend.",
     usDashboardPlaceSectionHeading: "Choose a city (optional)",
@@ -624,6 +636,9 @@ export const translations: Record<LangCode, Translations> = {
     usPercentileGapNetWorthTemplate: "Grow your net worth by {amount} more and you'd reach the nationwide top {percent}%.",
     usPercentileGapMaxedOut: "You're already in the highest tier we track!",
     usSimilarIncomePopulationTemplate: "About {count} people in the US are in a similar income bracket as you.",
+    usShareCardCurrentIncomeLabel: "Current income",
+    usShareCardNextTierLabel: "To next tier",
+    usShareCardBeatTemplate: "Ahead of {count} of 10 people",
 
     usComparePageTitle: "Compare with a friend",
     usCompareInviteIntro: "A friend invited you! Enter your info and we'll compare your income rank side by side.",

@@ -16,6 +16,7 @@ export default function CoachingInsightCard({
   insight,
   title,
   gapNote,
+  bounceGapNote = false,
 }: {
   insight: CoachingInsight;
   title: string;
@@ -25,6 +26,10 @@ export default function CoachingInsightCard({
   // rendered separately from `insight` so lib/insightMessages.ts's own
   // narrative logic stays untouched.
   gapNote?: string | null;
+  // "encourage" tier group's reveal effect (see lib/tier.ts's
+  // getTierAnimationGroup) — a small up-and-back bounce on this exact
+  // paragraph, timed by the caller to match the result card's badge pulse.
+  bounceGapNote?: boolean;
 }) {
   const accent = TONE_ACCENT[insight.tone];
   return (
@@ -34,7 +39,9 @@ export default function CoachingInsightCard({
         {insight.headline}
       </p>
       {gapNote && (
-        <p className="mb-3 rounded-lg border border-[#FBBF24]/25 bg-[#FBBF24]/10 px-3 py-2 text-[13px] font-semibold leading-snug text-[#FBBF24]">
+        <p
+          className={`mb-3 rounded-lg border border-[#FBBF24]/25 bg-[#FBBF24]/10 px-3 py-2 text-[13px] font-semibold leading-snug text-[#FBBF24] ${bounceGapNote ? "tier-gap-bounce" : ""}`}
+        >
           {gapNote}
         </p>
       )}

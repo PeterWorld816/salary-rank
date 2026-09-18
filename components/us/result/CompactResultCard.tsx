@@ -1,37 +1,35 @@
 "use client";
-// Thin, horizontal bell-curve card — the step-2 slot shared by the home page
-// (nationwide), /us/[state] (state), and /us/[state]/[county] (county): a
-// "Top X%" number on the left, a small DistributionChart (with its "You're
-// here!" marker) on the right, one row. Deliberately not the big centered
-// square card the old "compact" PersonalizedResult variant used — this is
-// meant to stay out of the way of the map/next-step section right below it.
-// See useCompactResult.ts for the shared calculation and
-// CompactInsightSection.tsx for the coaching-insight card that goes after
-// that map section.
-import { Suspense } from "react";
+// The result-card step shared by the home page (nationwide), /us/[state]
+// (state), and /us/[state]/[county] (county) — the same tier-colored
+// ResultCardVisual design used by PersonalizedResult.tsx's headline, shown
+// on screen and rasterized by Save Image from the exact same component/
+// props (see ResultCardVisual.tsx's own header comment). See
+// useCompactResult.ts for the shared calculation and CompactInsightSection.tsx
+// for the coaching-insight card that goes after that map section.
+import { Suspense, useRef } from "react";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { formatTemplate } from "@/lib/i18n";
-import DistributionChart from "@/components/DistributionChart";
-import TierBadge from "@/components/us/TierBadge";
+import ResultCardVisual, { WIDE_WIDTH, WIDE_HEIGHT } from "@/components/us/ResultCardVisual";
+import { siteHost } from "@/components/us/ShareCardBits";
+import { filledDotsFromPercent } from "@/lib/decileDots";
 import UsInputPanel from "@/components/us/UsInputPanel";
 import { NoDataCard } from "@/components/us/result/ResultBits";
 import Spinner from "@/components/Spinner";
+import ShareButtons from "@/components/ShareButtons";
 import type { StateMeta } from "@/data/us/stateMeta";
 import type { UsCountyIncome } from "@/lib/usIncomeCalc";
 import { useCompactResult, type CompactLevel } from "@/components/us/result/useCompactResult";
 import type { Translations } from "@/lib/i18n";
-import { useCountUp } from "@/lib/useCountUp";
+import { useCountUp, useRevealAfterCountUp } from "@/lib/useCountUp";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
+import { getTierAnimationGroup } from "@/lib/tier";
+import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
 
 const LEVEL_LABEL_KEY: Record<CompactLevel, keyof Translations> = {
   national: "usNationalPercentileHeroLabel",
   state: "usStatePercentileHeroLabel",
   county: "usCountyPercentileHeroLabel",
 };
-
-// Small enough to keep the card thin and wide rather than tall — see
-// lib/distributionPath.ts's CHART_VIEWBOX_H=150; at width=200 the chart
-// itself renders at ~94px tall, +22px for its absolute-positioned labels.
-const CHART_WIDTH = 200;
 
 function CompactResultCardInner({
   presetState,
@@ -40,42 +38,108 @@ function CompactResultCardInner({
   presetState: StateMeta | null;
   presetCounty: UsCountyIncome | null;
 }) {
-  const { t, lang } = useLanguage();
+  const { t } = useLanguage();
   const result = useCompactResult(presetState, presetCounty);
   const animatedPercent = useCountUp(result.ready ? result.incomePercent : null);
+  // ── Tier-branched reveal (see lib/tier.ts's getTierAnimationGroup) — same
+  // "wait for the count-up to settle" timing as PersonalizedResult's
+  // headline card, keyed off the same incomePercent the number above
+  // animates toward. ──
+  const revealReady = useRevealAfterCountUp(result.ready ? result.incomePercent : null);
+  const reducedMotion = usePrefersReducedMotion();
+  const shouldPlayReveal = revealReady && !reducedMotion;
+  const revealGroup = result.ready ? getTierAnimationGroup(result.tier) : null;
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Most-specific geography name available — same fallback order
+  // useCompactResult.ts uses internally for its own (unexported)
+  // locationName, so this always names whichever level `result.level` is.
+  const locationName = presetCounty
+    ? stripStateSuffix(presetCounty.name, presetState?.name ?? "")
+    : (presetState?.name ?? null);
+
+  const shareTitle = locationName && presetState ? `${t.usAppTitle} — ${locationName}, ${presetState.name}` : t.usAppTitle;
+  const shareText = result.ready ? formatTemplate(t.usShareTextTemplate, { percent: result.incomePercent }) : t.usAppTitle;
+
+  const downloadName =
+    result.ready && result.level === "county" && presetState && presetCounty
+      ? `us-income-${presetState.abbr}-${presetCounty.fips}.png`
+      : result.ready && result.level === "state" && presetState
+        ? `us-income-${presetState.abbr}.png`
+        : "us-income-national.png";
+
+  // ── Values shared verbatim between the on-screen ResultCardVisual and its
+  // hidden Save Image capture instance below, so the two can never show
+  // different numbers/text for the same result. ──
+  const resultCardHost = siteHost();
+  const resultCardIncomeValue = result.ready ? `${formatUsd(result.input.annualIncome)} / yr` : "";
+  const resultCardBeatText = result.ready ? formatTemplate(t.usShareCardBeatTemplate, { count: filledDotsFromPercent(result.incomePercent) }) : "";
+  const resultCardLocationLine = locationName ?? t.usAppTitle;
 
   return (
     <>
       <UsInputPanel />
       <div className="mx-auto max-w-2xl px-6 pt-8">
         {result.ready ? (
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 sm:flex-nowrap">
-            <div className="flex min-w-0 flex-col items-start gap-1">
-              <TierBadge tier={result.tier} />
-              <div className="text-[32px] font-extrabold leading-none tracking-tight text-[#FBBF24]">
-                {/* Falls back to the real (unanimated) target, not 0 — the
-                    count-up only replaces this once mounted client-side, so
-                    a literal "Top 0%" would otherwise be what's in the
-                    server-rendered HTML for every single one of these pages
-                    (and what a crawler sees if it doesn't wait out the
-                    animation), which reads as templated placeholder text
-                    rather than a real computed result. */}
-                {formatTemplate(t.topPercentTemplate, { percent: animatedPercent ?? result.incomePercent })}
-              </div>
-              <p className="text-[12px] font-semibold text-white/60">{t[LEVEL_LABEL_KEY[result.level]]}</p>
-            </div>
-            <div className="shrink-0">
-              <DistributionChart
-                monthlySalary={result.input.annualIncome}
-                width={CHART_WIDTH}
-                lang={lang}
-                dark
-                min={15000}
-                max={500000}
-                averageValue={result.medianForChart}
+          <>
+            <div className="mx-auto w-full" style={{ maxWidth: 480 }}>
+              <ResultCardVisual
+                variant="wide"
+                tier={result.tier}
+                percent={result.incomePercent}
+                displayPercent={animatedPercent}
+                percentTemplate={t.topPercentTemplate}
+                subLabel={t[LEVEL_LABEL_KEY[result.level]]}
+                locationLine={resultCardLocationLine}
+                host={resultCardHost}
+                watermarkFallback={t.usAppTitle}
+                incomeLabel={t.usShareCardCurrentIncomeLabel}
+                incomeValue={resultCardIncomeValue}
+                gapLabel={t.usShareCardNextTierLabel}
+                gapNote={result.gapNote}
+                beatText={resultCardBeatText}
+                play={shouldPlayReveal}
+                pulse={shouldPlayReveal && revealGroup === "encourage"}
               />
             </div>
-          </div>
+
+            {/* ── Hidden capture instance — same component, same props as
+                the visible card above, pinned to its fixed design pixel
+                width so Save Image keeps producing a correctly-scaled
+                1200x630 asset regardless of how the on-screen card is
+                currently scaled. ── */}
+            <div className="pointer-events-none absolute left-[-9999px] top-0 overflow-hidden" aria-hidden>
+              <div style={{ width: `${WIDE_WIDTH}px` }}>
+                <ResultCardVisual
+                  variant="wide"
+                  cardRef={cardRef}
+                  tier={result.tier}
+                  percent={result.incomePercent}
+                  percentTemplate={t.topPercentTemplate}
+                  subLabel={t[LEVEL_LABEL_KEY[result.level]]}
+                  locationLine={resultCardLocationLine}
+                  host={resultCardHost}
+                  watermarkFallback={t.usAppTitle}
+                  incomeLabel={t.usShareCardCurrentIncomeLabel}
+                  incomeValue={resultCardIncomeValue}
+                  gapLabel={t.usShareCardNextTierLabel}
+                  gapNote={result.gapNote}
+                  beatText={resultCardBeatText}
+                />
+              </div>
+            </div>
+
+            <div className="mx-auto mt-4 w-full" style={{ maxWidth: 480 }}>
+              <ShareButtons
+                cardRef={cardRef}
+                width={WIDE_WIDTH}
+                height={WIDE_HEIGHT}
+                shareTitle={shareTitle}
+                shareText={shareText}
+                downloadName={downloadName}
+              />
+            </div>
+          </>
         ) : (
           <NoDataCard title={t.usCountyNoDataTitle} desc={t.usCountyNoDataDesc} />
         )}
