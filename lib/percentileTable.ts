@@ -91,7 +91,8 @@ export function getValueAtPercentile(table: PercentileAnchor[], topPercent: numb
 export type PercentileGap = { nextTierPercent: number; amountNeeded: number };
 
 export function getNextPercentileGap(table: PercentileAnchor[], currentValue: number): PercentileGap | null {
-  const above = table.filter((anchor) => anchor.value > currentValue);
+  const currentTopPercent = getPercentileRankFromTable(table, currentValue);
+  const above = table.filter((anchor) => anchor.value > currentValue && anchor.topPercent < currentTopPercent);
   if (above.length === 0) return null;
   const next = above[above.length - 1];
   return { nextTierPercent: next.topPercent, amountNeeded: next.value - currentValue };

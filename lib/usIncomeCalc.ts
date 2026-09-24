@@ -202,6 +202,20 @@ export function getIncomePercentileFromAnchors(anchors: PercentileAnchor[], annu
   return clampDisplayPercent(getPercentileRankFromTable(anchors, annualIncome));
 }
 
+// Re-centers a published local distribution on the visitor's selected
+// household type. The annual input is treated as one person's income, so a
+// single-person household should not be compared with the all-household
+// median that includes multi-earner households.
+export function getContextualIncomePercentile(
+  anchors: PercentileAnchor[],
+  overallMedian: number | null,
+  contextualMedian: number | null,
+  annualIncome: number
+): number | null {
+  if (contextualMedian == null || overallMedian == null || contextualMedian <= 0 || anchors.length < 2) return null;
+  return clampDisplayPercent(getPercentileRankRelativeTo(anchors, overallMedian, contextualMedian, annualIncome));
+}
+
 // Place-level equivalent — "top X% in this specific city", the parent
 // county's real B19001-derived curve re-centered on the place's own median
 // (place / county median ratio) rather than a distribution unique to the

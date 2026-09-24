@@ -17,6 +17,7 @@ import { useLanguage } from "@/lib/LanguageProvider";
 import { getTier, type Tier } from "@/lib/tier";
 import {
   getStateIncome,
+  getContextualIncomePercentile,
   getIncomePercentileFromAnchors,
   getNationalIncomePercentile,
   getNationalIncomePercentileForAgeBand,
@@ -65,8 +66,22 @@ export function useCompactResult(presetState: StateMeta | null, presetCounty: Us
 
   const nationalPercentile = getNationalIncomePercentile(input.annualIncome);
   const stateIncome = presetState ? getStateIncome(presetState.fips) : null;
-  const statePercentile = stateIncome ? getIncomePercentileFromAnchors(stateIncome.percentileAnchors, input.annualIncome) : null;
-  const countyPercentile = presetCounty ? getIncomePercentileFromAnchors(presetCounty.percentileAnchors, input.annualIncome) : null;
+  const statePercentile = stateIncome
+    ? getContextualIncomePercentile(
+        stateIncome.percentileAnchors,
+        stateIncome.medianHouseholdIncome,
+        stateIncome.byMaritalStatus[input.maritalStatus],
+        input.annualIncome
+      ) ?? getIncomePercentileFromAnchors(stateIncome.percentileAnchors, input.annualIncome)
+    : null;
+  const countyPercentile = presetCounty
+    ? getContextualIncomePercentile(
+        presetCounty.percentileAnchors,
+        presetCounty.medianHouseholdIncome,
+        presetCounty.byMaritalStatus[input.maritalStatus],
+        input.annualIncome
+      ) ?? getIncomePercentileFromAnchors(presetCounty.percentileAnchors, input.annualIncome)
+    : null;
 
   // Most-specific geography with a real result wins — same fallback order the
   // old compact variant used, and it happens to match the level each page

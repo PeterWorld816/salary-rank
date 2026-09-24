@@ -105,6 +105,7 @@ export default function UsCountyPage({ params }: { params: Params }) {
   const nationalPercentile = median != null ? getNationalIncomePercentile(median) : null;
 
   const thresholdRows = [1, 5, 10, 25]
+    .filter((percent) => county.percentileAnchors[0] && percent >= county.percentileAnchors[0].topPercent)
     .map((percent) => {
       const amount = getValueAtPercentile(county.percentileAnchors, percent);
       return amount != null ? { percent, amount } : null;

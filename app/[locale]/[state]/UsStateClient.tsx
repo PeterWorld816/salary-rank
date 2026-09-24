@@ -132,6 +132,7 @@ function UsStateContent({
 
   const thresholdRows = stateIncome
     ? [10, 25, 50]
+        .filter((percent) => stateIncome.percentileAnchors[0] && percent >= stateIncome.percentileAnchors[0].topPercent)
         .map((percent) => {
           const amount = getValueAtPercentile(stateIncome.percentileAnchors, percent);
           return amount != null ? { percent, amount } : null;

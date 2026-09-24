@@ -39,6 +39,7 @@ import { getCountyName } from "@/lib/usCountyNames";
 import type { StateMeta } from "@/data/us/stateMeta";
 import {
   getIncomePercentileFromAnchors,
+  getContextualIncomePercentile,
   getPlaceIncomePercentileFromCounty,
   resolveIncomeReference,
   getStateIncome,
@@ -150,11 +151,35 @@ function PersonalizedResultContent({
 
   // ── Every percentile the old 3-step flow computed, all at once ──
   const nationalPercentile = getNationalIncomePercentile(input.annualIncome);
-  const statePercentile = state ? getStateIncomePercentile(state.fips, input.annualIncome) : null;
-  const countyPercentile = county ? getIncomePercentileFromAnchors(county.percentileAnchors, input.annualIncome) : null;
+  const stateIncome = state ? getStateIncome(state.fips) : null;
+  const statePercentile = stateIncome
+    ? getContextualIncomePercentile(
+        stateIncome.percentileAnchors,
+        stateIncome.medianHouseholdIncome,
+        stateIncome.byMaritalStatus[input.maritalStatus],
+        input.annualIncome
+      ) ?? getStateIncomePercentile(stateIncome.fips, input.annualIncome)
+    : null;
+  const countyContextualMedian = county ? county.byMaritalStatus[input.maritalStatus] : null;
+  const countyPercentile = county
+    ? getContextualIncomePercentile(
+        county.percentileAnchors,
+        county.medianHouseholdIncome,
+        countyContextualMedian,
+        input.annualIncome
+      ) ?? getIncomePercentileFromAnchors(county.percentileAnchors, input.annualIncome)
+    : null;
   const placePercentile =
     place && county
-      ? getPlaceIncomePercentileFromCounty(county.medianHouseholdIncome, county.percentileAnchors, place.medianHouseholdIncome, input.annualIncome)
+      ? getContextualIncomePercentile(
+          county.percentileAnchors,
+          county.medianHouseholdIncome,
+          county.medianHouseholdIncome != null && countyContextualMedian != null && place.medianHouseholdIncome != null
+            ? (place.medianHouseholdIncome * countyContextualMedian) / county.medianHouseholdIncome
+            : countyContextualMedian,
+          input.annualIncome
+        ) ??
+        getPlaceIncomePercentileFromCounty(county.medianHouseholdIncome, county.percentileAnchors, place.medianHouseholdIncome, input.annualIncome)
       : null;
   const ageIncomePercentile = getNationalIncomePercentileForAgeBand(input.ageBand, input.annualIncome);
   const netWorthPercentile = input.netWorth != null ? getUsNetWorthPercentile(input.netWorth) : null;
