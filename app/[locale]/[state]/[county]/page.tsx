@@ -125,11 +125,11 @@ export default function UsCountyPage({ params }: { params: Params }) {
 
   return (
     <UsShell>
-      <CompactResultCard presetState={state} presetCounty={county} />
-      <div className="mx-auto max-w-2xl px-4 pb-16 pt-8 sm:px-6">
+      <CompactResultCard presetState={state} presetCounty={county} shareAfterMapId="county-map-share-actions" />
+      <div className="mx-auto flex max-w-2xl flex-col px-4 pb-16 pt-8 sm:px-6">
         <Link
           href={`${base}/${state.abbr}`}
-          className="mb-6 inline-flex items-center gap-1 text-[13px] text-white/50 transition-colors hover:text-white/80"
+          className="mb-6 inline-flex min-h-11 items-center gap-1 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-[13px] text-white/60 transition-colors hover:border-[#34D399]/40 hover:bg-[#34D399]/10 hover:text-white"
         >
           <ChevronLeft className="h-4 w-4" />
           {t.usBackToStateMap}
@@ -146,7 +146,7 @@ export default function UsCountyPage({ params }: { params: Params }) {
           </div>
         ) : (
           <>
-            <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
+            <div className="order-2 mb-8 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
               <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
                 <span className="text-[13px] text-white/55">{t.usCountyMedianLabel}</span>
                 <span className="text-[18px] font-bold tabular-nums text-white">{formatUsd(median)}</span>
@@ -166,7 +166,7 @@ export default function UsCountyPage({ params }: { params: Params }) {
             </div>
 
             {thresholdRows.length > 0 && (
-              <div className="mb-8">
+              <div className="order-2 mb-8">
                 <h2 className="mb-3 text-[16px] font-bold text-white/90">{t.usCountyThresholdsHeading}</h2>
                 <PercentileThresholds rows={thresholdRows} topPercentTemplate={t.topPercentTemplate} />
               </div>
@@ -178,9 +178,9 @@ export default function UsCountyPage({ params }: { params: Params }) {
             directory" pages, not the personalized result) — kept below the
             thresholds table, clear of the compact result card/insight
             section's own interactive bits above and below it. */}
-        <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_GEO!} className="mb-8" />
+        <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_GEO!} className="order-3 mb-8" />
 
-        <div className="mb-8">
+        <div className="order-1 mb-8">
           {places.length === 0 ? (
             <div className="rounded-xl border border-white/10 bg-white/[0.02] px-5 py-8 text-center">
               <p className="mb-1 text-[14px] font-semibold text-white/70">{t.usCountyNoPlaceDataTitle}</p>
@@ -208,18 +208,19 @@ export default function UsCountyPage({ params }: { params: Params }) {
               )}
             </>
           )}
+          <div id="county-map-share-actions" className="mt-4 border-t border-white/[0.06] pt-4" />
         </div>
 
-        <div className="mb-8">
+        <div className="order-4 mb-8">
           <CompactInsightSection presetState={state} presetCounty={county} />
         </div>
 
-        <div className="rounded-lg bg-white/[0.03] px-4 py-3 text-center">
+        <div className="order-5 rounded-lg bg-white/[0.03] px-4 py-3 text-center">
           <p className="text-[12px] text-white/40">{formatTemplate(t.usSourceCensus, { range: acs5YearRange })}</p>
           <p className="mt-1 text-[12px] text-white/30">{t.usDisclaimer}</p>
         </div>
 
-        <Footer />
+        <Footer className="order-6" />
       </div>
     </UsShell>
   );

@@ -21,7 +21,7 @@ export default function RootBody({ children }: { children: React.ReactNode }) {
   return (
     <body style={isUsApp ? undefined : { paddingBottom: "calc(64px + env(safe-area-inset-bottom, 0px))" }}>
       <LanguageProvider initialLang={initialLang}>
-        <div className="fixed top-4 right-4 z-50">
+        <div className={`fixed right-4 z-50 ${isUsApp ? "bottom-4" : "top-4"}`}>
           <LanguageSelector />
         </div>
         {children}

@@ -9,7 +9,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, Home } from "lucide-react";
+import { ChevronDown, Home, SlidersHorizontal } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { formatUsdCompact } from "@/lib/usFormat";
 import {
@@ -28,7 +28,7 @@ import { MAP_BASIS_LENS_PARAM } from "@/components/us/mapBasisLens";
 
 // Height of the fixed slim bar (collapsed state) — the spacer below it must
 // match exactly, or page content would either gap or slide under the bar.
-const HEADER_HEIGHT = 56;
+const HEADER_HEIGHT = 64;
 
 export function readUsInputFromSearch(sp: URLSearchParams | { get(k: string): string | null }): UsInput {
   return decodeUsInput(sp.get("d") ?? "") ?? DEFAULT_US_INPUT;
@@ -67,6 +67,31 @@ function PillGroup({
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function SelectField({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: { id: string; label: string }[];
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="hidden sm:block">
+      <FieldLabel>{label}</FieldLabel>
+      <select value={value} onChange={(e) => onChange(e.target.value)} className={fieldClass}>
+        {options.map((option) => (
+          <option key={option.id} value={option.id} className="bg-[#101316] text-white">
+            {option.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
@@ -151,11 +176,10 @@ export default function UsInputPanel() {
   const router = useRouter();
   const sp = useSearchParams();
   const [form, setForm] = useState<UsInput>(() => readUsInputFromSearch(sp));
-  // No "d" param yet means this is a fresh visit with nothing changed —
-  // start expanded so the fields are immediately visible. Once a "d" param
-  // exists (a shared link, or coming back from the map), start collapsed —
-  // the summary chip is enough, and the full form is one tap away.
-  const [expanded, setExpanded] = useState(() => !sp.get("d"));
+  // Keep the first viewport focused on the result card and map. The compact
+  // summary chip still exposes the current answers, and the full form stays
+  // one tap away for both fresh visits and shared links.
+  const [expanded, setExpanded] = useState(false);
   // Net worth/401k start hidden behind their own toggle — most visitors
   // only ever fill in income, so showing two extra optional currency
   // fields by default just adds clutter. A shared link (or a friend
@@ -232,12 +256,12 @@ export default function UsInputPanel() {
             <Link
               href={homeHref}
               aria-label={t.home}
-              className="flex shrink-0 items-center justify-center rounded-full p-1.5 text-white/50 transition-colors hover:bg-white/[0.08] hover:text-[#34D399]"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/65 transition-colors hover:border-[#34D399]/50 hover:bg-[#34D399]/10 hover:text-[#34D399]"
             >
-              <Home className="h-4 w-4" />
+              <Home className="h-5 w-5" />
             </Link>
             <Link href={homeHref} className="group flex min-w-0 items-baseline gap-2">
-              <span className="truncate text-[14px] font-extrabold tracking-tight text-white transition-colors group-hover:text-[#34D399]">
+              <span className="truncate text-[16px] font-extrabold tracking-tight text-white transition-colors group-hover:text-[#34D399]">
                 {t.usAppTitle}
               </span>
               <span className="hidden truncate text-[12px] text-white/40 sm:inline">{t.usMastheadTagline}</span>
@@ -249,9 +273,13 @@ export default function UsInputPanel() {
             onClick={() => setExpanded((v) => !v)}
             aria-expanded={expanded}
             aria-label={expanded ? "Collapse input panel" : "Expand input panel"}
-            className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-[12px] font-semibold text-white/70 transition-colors hover:border-[#34D399]/40 hover:text-white"
+            className="flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-[#34D399]/35 bg-[#34D399]/10 px-3 py-1.5 text-left text-[12px] font-semibold text-white/85 transition-colors hover:border-[#34D399]/70 hover:bg-[#34D399]/15 hover:text-white"
           >
-            <span className="max-w-[140px] truncate sm:max-w-[280px]">{summary}</span>
+            <SlidersHorizontal className="h-4 w-4 shrink-0 text-[#34D399]" />
+            <span className="flex min-w-0 flex-col">
+              <span className="text-[10px] font-bold uppercase tracking-wide text-[#34D399]">{t.usInputTitle}</span>
+              <span className="max-w-[125px] truncate text-white/75 sm:max-w-[250px]">{summary}</span>
+            </span>
             <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`} />
           </button>
         </div>
@@ -263,27 +291,49 @@ export default function UsInputPanel() {
 
               <div>
                 <h3 className="mb-2.5 text-[12px] font-semibold text-white/50">{t.usGroupWho}</h3>
-                <div className="flex flex-col gap-3 sm:flex-row sm:gap-6">
-                  <PillGroup
+                <div className="grid gap-3 sm:grid-cols-5 sm:gap-4">
+                  <div className="sm:hidden">
+                    <PillGroup
+                      label={t.usFieldGender}
+                      value={form.gender}
+                      options={US_GENDERS.map((g) => ({ id: g.id, label: tr(g.label) }))}
+                      onChange={(v) => apply({ ...form, gender: v as UsInput["gender"] })}
+                    />
+                  </div>
+                  <SelectField
                     label={t.usFieldGender}
                     value={form.gender}
                     options={US_GENDERS.map((g) => ({ id: g.id, label: tr(g.label) }))}
                     onChange={(v) => apply({ ...form, gender: v as UsInput["gender"] })}
                   />
-                  <PillGroup
+                  <div className="sm:hidden">
+                    <PillGroup
+                      label={t.usFieldMarital}
+                      value={form.maritalStatus}
+                      options={US_MARITAL_STATUSES.map((m) => ({ id: m.id, label: tr(m.label) }))}
+                      onChange={(v) => apply({ ...form, maritalStatus: v as UsInput["maritalStatus"] })}
+                    />
+                  </div>
+                  <SelectField
                     label={t.usFieldMarital}
                     value={form.maritalStatus}
                     options={US_MARITAL_STATUSES.map((m) => ({ id: m.id, label: tr(m.label) }))}
                     onChange={(v) => apply({ ...form, maritalStatus: v as UsInput["maritalStatus"] })}
                   />
-                  <PillGroup
+                  <div className="sm:hidden">
+                    <PillGroup
+                      label={t.usFieldAgeBand}
+                      value={form.ageBand}
+                      options={US_AGE_BANDS.map((b) => ({ id: b.id, label: tr(b.label) }))}
+                      onChange={(v) => apply({ ...form, ageBand: v as UsInput["ageBand"] })}
+                    />
+                  </div>
+                  <SelectField
                     label={t.usFieldAgeBand}
                     value={form.ageBand}
                     options={US_AGE_BANDS.map((b) => ({ id: b.id, label: tr(b.label) }))}
                     onChange={(v) => apply({ ...form, ageBand: v as UsInput["ageBand"] })}
                   />
-                </div>
-                <div className="mt-3 max-w-xs">
                   <OccupationField
                     label={t.usFieldOccupation}
                     overallLabel={t.usOccupationOverall}
@@ -293,12 +343,6 @@ export default function UsInputPanel() {
                     onChange={(occupation) => apply({ ...form, occupation })}
                     tr={tr}
                   />
-                </div>
-              </div>
-
-              <div>
-                <h3 className="mb-2.5 text-[12px] font-semibold text-white/50">{t.usGroupMoney}</h3>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <CurrencyField
                     label={t.usFieldIncome}
                     value={form.annualIncome}

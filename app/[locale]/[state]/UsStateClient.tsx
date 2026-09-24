@@ -189,12 +189,12 @@ function UsStateContent({
 
   return (
     <UsShell>
-      <CompactResultCard presetState={state} presetCounty={null} />
+      <CompactResultCard presetState={state} presetCounty={null} shareAfterMapId="state-map-share-actions" />
 
-      <div className="mx-auto max-w-5xl px-4 pb-16 pt-8 sm:px-6">
+      <div className="mx-auto flex max-w-5xl flex-col px-4 pb-16 pt-8 sm:px-6">
         <Link
           href={qs ? `${base}?${qs}` : base}
-          className="mb-6 inline-flex items-center gap-1 text-[13px] text-white/50 transition-colors hover:text-white/80"
+          className="mb-6 inline-flex min-h-11 items-center gap-1 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-[13px] text-white/60 transition-colors hover:border-[#34D399]/40 hover:bg-[#34D399]/10 hover:text-white"
         >
           <ChevronLeft className="h-4 w-4" />
           {t.usBackToUsMap}
@@ -212,7 +212,7 @@ function UsStateContent({
             risk it silently degrading to a client-only render for crawlers
             that don't execute JS. */}
         {stateIncome?.medianHouseholdIncome != null && (
-          <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
+          <div className="order-2 mb-8 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
             <p className="text-[14px] leading-relaxed text-white/70">
               {formatTemplate(t.usStateIncomeIntroTemplate, {
                 state: state.name,
@@ -275,7 +275,7 @@ function UsStateContent({
         )}
 
         {stateIncome && (
-          <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
+          <div className="order-2 mb-8 rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
             <p className="mb-3 text-[12px] text-white/45">{t.usStateMedianLabel}</p>
             <div className="flex flex-col gap-2.5">
               <div className="flex items-center justify-between">
@@ -301,7 +301,7 @@ function UsStateContent({
             {t.usCountyNoDataDesc}
           </div>
         ) : (
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
+          <div className="order-1 rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
             <MapBasisControl
               lens={basisLens}
               onLensChange={handleLensChange}
@@ -337,21 +337,22 @@ function UsStateContent({
               </div>
             </div>
             <IncomeLegend min={min} max={max} />
+            <div id="state-map-share-actions" className="mt-4 border-t border-white/[0.06] pt-4" />
           </div>
         )}
 
-        <div className="mt-8">{countyListAdSlot}</div>
+        <div className="order-3 mt-8">{countyListAdSlot}</div>
 
-        <div className="mt-8">
+        <div className="order-4 mt-8">
           <CompactInsightSection presetState={state} presetCounty={null} />
         </div>
 
-        <div className="mt-2 rounded-lg bg-white/[0.03] px-4 py-3 text-center">
+        <div className="order-5 mt-2 rounded-lg bg-white/[0.03] px-4 py-3 text-center">
           <p className="text-[12px] text-white/40">{formatTemplate(t.usSourceCensus, { range: acs5YearRange })}</p>
           <p className="mt-1 text-[12px] text-white/30">{t.usDisclaimer}</p>
         </div>
 
-        <Footer />
+        <Footer className="order-6" />
       </div>
     </UsShell>
   );

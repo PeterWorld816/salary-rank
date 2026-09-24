@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { useLocaleBase } from "@/lib/useLocaleBase";
 
-export default function Footer() {
+export default function Footer({ className }: { className?: string }) {
   const { t } = useLanguage();
   const base = useLocaleBase();
 
@@ -15,7 +15,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="mt-10 border-t border-white/10 pt-6">
+    <footer className={`mt-10 border-t border-white/10 pt-6 ${className ?? ""}`}>
       <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
         {links.map((l) => (
           <Link

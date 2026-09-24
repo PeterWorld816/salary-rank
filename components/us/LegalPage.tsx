@@ -19,7 +19,7 @@ export function LegalPage({
       <div className="mx-auto max-w-2xl px-4 pb-16 pt-8 sm:px-6">
         <Link
           href={backHref}
-          className="mb-6 inline-flex items-center gap-1 text-[13px] text-white/50 transition-colors hover:text-white/80"
+          className="mb-6 inline-flex min-h-11 items-center gap-1 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-[13px] text-white/60 transition-colors hover:border-[#34D399]/40 hover:bg-[#34D399]/10 hover:text-white"
         >
           <ChevronLeft className="h-4 w-4" />
           {backLabel}

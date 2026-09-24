@@ -6,7 +6,8 @@
 // props (see ResultCardVisual.tsx's own header comment). See
 // useCompactResult.ts for the shared calculation and CompactInsightSection.tsx
 // for the coaching-insight card that goes after that map section.
-import { Suspense, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { formatTemplate } from "@/lib/i18n";
 import ResultCardVisual, { WIDE_WIDTH, WIDE_HEIGHT } from "@/components/us/ResultCardVisual";
@@ -34,9 +35,11 @@ const LEVEL_LABEL_KEY: Record<CompactLevel, keyof Translations> = {
 function CompactResultCardInner({
   presetState,
   presetCounty,
+  shareAfterMapId,
 }: {
   presetState: StateMeta | null;
   presetCounty: UsCountyIncome | null;
+  shareAfterMapId?: string;
 }) {
   const { t } = useLanguage();
   const result = useCompactResult(presetState, presetCounty);
@@ -50,6 +53,12 @@ function CompactResultCardInner({
   const shouldPlayReveal = revealReady && !reducedMotion;
   const revealGroup = result.ready ? getTierAnimationGroup(result.tier) : null;
   const cardRef = useRef<HTMLDivElement>(null);
+  const [shareTarget, setShareTarget] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!shareAfterMapId) return;
+    setShareTarget(document.getElementById(shareAfterMapId));
+  }, [shareAfterMapId]);
 
   // Most-specific geography name available — same fallback order
   // useCompactResult.ts uses internally for its own (unexported)
@@ -129,16 +138,32 @@ function CompactResultCardInner({
               </div>
             </div>
 
-            <div className="mx-auto mt-4 w-full" style={{ maxWidth: 480 }}>
-              <ShareButtons
-                cardRef={cardRef}
-                width={WIDE_WIDTH}
-                height={WIDE_HEIGHT}
-                shareTitle={shareTitle}
-                shareText={shareText}
-                downloadName={downloadName}
-              />
-            </div>
+            {shareTarget
+              ? createPortal(
+                  <div className="mx-auto w-full" style={{ maxWidth: 480 }}>
+                    <ShareButtons
+                      cardRef={cardRef}
+                      width={WIDE_WIDTH}
+                      height={WIDE_HEIGHT}
+                      shareTitle={shareTitle}
+                      shareText={shareText}
+                      downloadName={downloadName}
+                    />
+                  </div>,
+                  shareTarget
+                )
+              : !shareAfterMapId && (
+                  <div className="mx-auto mt-4 w-full" style={{ maxWidth: 480 }}>
+                    <ShareButtons
+                      cardRef={cardRef}
+                      width={WIDE_WIDTH}
+                      height={WIDE_HEIGHT}
+                      shareTitle={shareTitle}
+                      shareText={shareText}
+                      downloadName={downloadName}
+                    />
+                  </div>
+                )}
           </>
         ) : (
           <NoDataCard title={t.usCountyNoDataTitle} desc={t.usCountyNoDataDesc} />
@@ -148,7 +173,11 @@ function CompactResultCardInner({
   );
 }
 
-export default function CompactResultCard(props: { presetState: StateMeta | null; presetCounty: UsCountyIncome | null }) {
+export default function CompactResultCard(props: {
+  presetState: StateMeta | null;
+  presetCounty: UsCountyIncome | null;
+  shareAfterMapId?: string;
+}) {
   return (
     <Suspense
       fallback={

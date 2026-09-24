@@ -243,7 +243,7 @@ function UsHomeContent({
 
   return (
     <UsShell>
-      <CompactResultCard presetState={null} presetCounty={null} />
+      <CompactResultCard presetState={null} presetCounty={null} shareAfterMapId="us-map-share-actions" />
 
       <div className="mx-auto max-w-5xl px-4 pb-16 pt-8 sm:px-6">
         <h1 className="mb-2 text-[28px] font-extrabold tracking-tight text-balance">{t.usAppTitle}</h1>
@@ -313,6 +313,7 @@ function UsHomeContent({
             max={activeMax}
             fallbackLabel={usingOccupationFill ? t.usMapBasisOccupationFallbackTooltip : null}
           />
+          <div id="us-map-share-actions" className="mt-4 border-t border-white/[0.06] pt-4" />
         </div>
 
         <div className="mt-8">
