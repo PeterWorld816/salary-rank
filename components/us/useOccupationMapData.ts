@@ -57,11 +57,18 @@ export function useOccupationMapData(occId: string | null, ageBucket: string | n
       }
     }
 
-    Promise.all(Array.from({ length: Math.min(CONCURRENCY, US_STATES.length) }, worker)).then(() => {
-      if (cancelled) return;
-      setByFips(results);
-      setLoading(false);
-    });
+    Promise.all(Array.from({ length: Math.min(CONCURRENCY, US_STATES.length) }, worker))
+      .then(() => {
+        if (cancelled) return;
+        setByFips(results);
+        setLoading(false);
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        console.error("Unable to load all occupation map data; showing available states.", error);
+        setByFips(new Map(results));
+        setLoading(false);
+      });
 
     return () => {
       cancelled = true;

@@ -71,7 +71,7 @@ export default function TownPickerMap({
   }));
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-2 sm:p-4">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <div className="min-w-0 flex-1">
           <UsMap

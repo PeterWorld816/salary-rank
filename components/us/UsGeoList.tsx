@@ -48,7 +48,10 @@ export default function UsGeoList({
         placeholder={searchPlaceholder}
         className="mb-2 w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2.5 text-[14px] text-white outline-none transition-colors focus:border-[#34D399] focus:bg-white/[0.09]"
       />
-      <div className="overflow-y-auto rounded-lg border border-white/10 bg-white/[0.02]" style={{ maxHeight }}>
+      <div
+        className="us-geo-list-scroll overflow-y-auto rounded-lg border border-white/10 bg-white/[0.02]"
+        style={{ maxHeight }}
+      >
         {filtered.length === 0 ? (
           <p className="px-3 py-6 text-center text-[13px] text-white/40">{emptyText}</p>
         ) : (
@@ -57,7 +60,7 @@ export default function UsGeoList({
               key={item.id}
               type="button"
               onClick={() => onSelect(item.id)}
-              className={`flex w-full items-center justify-between gap-3 border-b border-white/[0.05] px-3 py-2.5 text-left text-[13px] transition-colors last:border-0 hover:bg-white/[0.06] hover:text-white ${
+              className={`flex min-h-11 w-full items-center justify-between gap-3 border-b border-white/[0.05] px-3 py-2.5 text-left text-[13px] transition-colors last:border-0 hover:bg-white/[0.06] hover:text-white ${
                 item.id === selectedId ? "bg-[#34D399]/[0.10] text-white" : "text-white/80"
               }`}
             >
