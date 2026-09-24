@@ -301,7 +301,7 @@ function UsStateContent({
             {t.usCountyNoDataDesc}
           </div>
         ) : (
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-2 sm:p-4">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
             <MapBasisControl
               lens={basisLens}
               onLensChange={handleLensChange}

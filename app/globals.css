@@ -127,6 +127,29 @@ body {
   min-height: 52px;
 }
 
+/* Keep the map readable on narrow screens. The SVG viewBox is intentionally
+   wide for desktop, so a tall mobile wrapper would letterbox it and make the
+   geography look much smaller than the surrounding content. */
+.us-map-container {
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.us-geo-list-scroll {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 639px) {
+  .us-map-container {
+    height: 280px !important;
+  }
+
+  .us-geo-list-scroll {
+    max-height: 280px !important;
+  }
+}
+
 /* Subtle, restrained screen transition — used on page/step entry, not on every element */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(8px); }

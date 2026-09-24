@@ -121,10 +121,10 @@ export default function UsMap({
   fit?: boolean;
   height?: number;
   // Wraps the map in react-simple-maps' ZoomableGroup for pinch-zoom +
-  // drag-pan, plus a double-tap-to-toggle-zoom gesture — used for the
-  // mobile "view as map" toggle, where small states are otherwise too
-  // cramped to tap accurately. Leave false (default) for the desktop map,
-  // which keeps its original plain/unzoomed click behavior untouched.
+  // drag-pan, plus the library's built-in double-tap/double-click zoom
+  // gesture — used for the mobile "view as map" interaction. Leave false
+  // (default) for the desktop map, which keeps its original plain/unzoomed
+  // click behavior untouched.
   zoomable?: boolean;
   minZoom?: number;
   maxZoom?: number;
@@ -151,8 +151,9 @@ export default function UsMap({
   const [hoveredMarker, setHoveredMarker] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
   const [center, setCenter] = useState<[number, number]>([0, 0]);
-  // Timestamp of the last accepted tap, used to tell a double-tap (zoom
-  // toggle) apart from two independent single taps (select) — see below.
+  // Timestamp of the last accepted tap, used to tell a double-tap (which is
+  // handled by react-simple-maps' ZoomableGroup) apart from two independent
+  // single taps (select) — see below.
   const lastTapRef = useRef(0);
 
   const width = 960;
@@ -229,8 +230,8 @@ export default function UsMap({
       return;
     }
     // A double-tap arrives as two clicks in quick succession — the second
-    // one lands here within DOUBLE_TAP_MS, so we swallow it (handled by
-    // handleDoubleClick instead) rather than also selecting/navigating.
+    // one lands here within DOUBLE_TAP_MS, so we swallow it rather than also
+    // selecting/navigating after the map zooms.
     const now = Date.now();
     if (now - lastTapRef.current < DOUBLE_TAP_MS) {
       lastTapRef.current = 0;
@@ -240,12 +241,6 @@ export default function UsMap({
     window.setTimeout(() => {
       if (lastTapRef.current === now) onSelect(id);
     }, DOUBLE_TAP_MS);
-  }
-
-  function handleDoubleClick() {
-    if (!zoomable) return;
-    lastTapRef.current = 0;
-    setZoom((z) => (z > 1 ? 1 : clampZoom(4)));
   }
 
   const geographies = (
@@ -362,13 +357,16 @@ export default function UsMap({
   ));
 
   return (
-    <div className="relative w-full select-none" style={{ height, touchAction: zoomable ? "none" : undefined }} data-us-map>
+    <div
+      className="us-map-container relative w-full select-none"
+      style={{ height, touchAction: zoomable ? "pan-y" : undefined }}
+      data-us-map
+    >
       <ComposableMap
         projection={projection}
         width={width}
         height={height}
         style={{ width: "100%", height: "100%" }}
-        onDoubleClick={handleDoubleClick}
       >
         <defs>
           <pattern id={FALLBACK_HATCH_PATTERN_ID} width={6} height={6} patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
@@ -403,7 +401,7 @@ export default function UsMap({
           <button
             type="button"
             onClick={() => setZoom((z) => clampZoom(z * 1.6))}
-            className="flex h-8 w-8 items-center justify-center rounded-md border border-white/15 bg-[rgba(5,6,7,0.85)] text-[16px] font-bold text-white/80 transition-colors hover:border-[#34D399] hover:text-white"
+            className="flex h-11 w-11 items-center justify-center rounded-md border border-white/15 bg-[rgba(5,6,7,0.85)] text-[16px] font-bold text-white/80 transition-colors hover:border-[#34D399] hover:text-white"
             aria-label="Zoom in"
           >
             +
@@ -411,7 +409,7 @@ export default function UsMap({
           <button
             type="button"
             onClick={() => setZoom((z) => clampZoom(z / 1.6))}
-            className="flex h-8 w-8 items-center justify-center rounded-md border border-white/15 bg-[rgba(5,6,7,0.85)] text-[16px] font-bold text-white/80 transition-colors hover:border-[#34D399] hover:text-white"
+            className="flex h-11 w-11 items-center justify-center rounded-md border border-white/15 bg-[rgba(5,6,7,0.85)] text-[16px] font-bold text-white/80 transition-colors hover:border-[#34D399] hover:text-white"
             aria-label="Zoom out"
           >
             −
@@ -422,7 +420,7 @@ export default function UsMap({
               setZoom(1);
               setCenter([0, 0]);
             }}
-            className="flex h-8 w-8 items-center justify-center rounded-md border border-white/15 bg-[rgba(5,6,7,0.85)] text-[11px] font-bold text-white/80 transition-colors hover:border-[#34D399] hover:text-white"
+            className="flex h-11 w-11 items-center justify-center rounded-md border border-white/15 bg-[rgba(5,6,7,0.85)] text-[11px] font-bold text-white/80 transition-colors hover:border-[#34D399] hover:text-white"
             aria-label="Reset zoom"
           >
             ⟲
