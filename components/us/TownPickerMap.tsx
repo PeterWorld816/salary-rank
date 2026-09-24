@@ -7,7 +7,7 @@
 // (/us/[state]/[county]/[place]). No markers show until one is picked —
 // that's what keeps the default map clean instead of showing every town in
 // the county at once.
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import type { FeatureCollection, Geometry } from "geojson";
@@ -29,7 +29,7 @@ export type CountyMapPlace = {
 // compare against.
 const COUNTY_FILL = "rgba(52,211,153,0.16)";
 
-export default function TownPickerMap({
+function TownPickerMapContent({
   stateName,
   countyName,
   countyGeo,
@@ -105,5 +105,19 @@ export default function TownPickerMap({
         </div>
       </div>
     </div>
+  );
+}
+
+export default function TownPickerMap(props: {
+  stateName: string;
+  countyName: string;
+  countyGeo: FeatureCollection<Geometry, UsMapFeatureProps>;
+  places: CountyMapPlace[];
+  placeHrefBase: string;
+}) {
+  return (
+    <Suspense fallback={null}>
+      <TownPickerMapContent {...props} />
+    </Suspense>
   );
 }
