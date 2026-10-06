@@ -39,8 +39,8 @@ const COPY = {
       {
         heading: "Advertising",
         body: [
-          "This Site may display ads served by third-party advertising companies, including Google AdSense. These companies may use cookies (including the DoubleClick DART cookie) or similar technologies to serve ads based on your prior visits to this and other websites, in order to show you ads that are more relevant to you.",
-          "You can opt out of personalized advertising by visiting Google's Ads Settings (adssettings.google.com), or opt out of several third-party vendors' use of cookies for personalized advertising by visiting www.aboutads.info/choices.",
+          "This Site displays ads served by Google AdSense. Google and its advertising partners may use cookies (including DoubleClick cookies) or similar technologies to show personalized ads based on your visits to this and other websites.",
+          "You can turn off personalized advertising in Google's Ads Settings (https://adssettings.google.com), or opt out of several third-party vendors' use of cookies for personalized advertising at https://www.aboutads.info/choices.",
         ],
       },
       {

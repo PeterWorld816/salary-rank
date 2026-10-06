@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: translations.en.usAppTitle,
   description: translations.en.usTagline,
+  other: {
+    "google-adsense-account": "ca-pub-7379794980536826",
+  },
   openGraph: {
     title: translations.en.usAppTitle,
     description: translations.en.usTagline,

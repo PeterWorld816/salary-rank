@@ -1,27 +1,22 @@
-"use client";
-// Site-wide AdSense loader — mount once in app/layout.tsx. Renders nothing
-// (not even a <script> tag) unless the browser is actually on
-// NEXT_PUBLIC_SITE_URL's hostname, so this never fires on localhost,
-// *.vercel.app previews, or any other non-production deploy — see lib/ads.ts.
-//
-// Client component on purpose: this sits in the root layout, and the host
-// check it used to do with headers() made every route in the app render
-// dynamically (killing ISR on the county/place pages).
+// Site-wide AdSense loader — keep this in the root layout so its bootstrap
+// is present in the initial HTML without making routes dynamically rendered.
 import Script from "next/script";
-import { getAdsenseClientId } from "@/lib/ads";
-import { useIsProductionHost } from "./useIsProductionHost";
+import { getAdsenseClientId, getProductionHost } from "@/lib/ads";
 
 export default function AdSenseScript() {
-  const isProduction = useIsProductionHost();
   const clientId = getAdsenseClientId();
-  if (!isProduction || !clientId) return null;
+  const productionHost = getProductionHost();
+  if (!clientId || !productionHost) return null;
 
   return (
-    <Script
-      async
-      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}`}
-      crossOrigin="anonymous"
-      strategy="afterInteractive"
-    />
+    <Script id="adsense-loader" strategy="beforeInteractive">
+      {`if (window.location.hostname.toLowerCase() === ${JSON.stringify(productionHost)}) {
+  var adsenseScript = document.createElement("script");
+  adsenseScript.async = true;
+  adsenseScript.crossOrigin = "anonymous";
+  adsenseScript.src = ${JSON.stringify(`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}`)};
+  document.head.appendChild(adsenseScript);
+}`}
+    </Script>
   );
 }
