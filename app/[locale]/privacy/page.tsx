@@ -18,14 +18,14 @@ const COPY = {
       {
         heading: "Overview",
         body: [
-          "This Privacy Policy explains what information this site (the “Site”) collects and how it's used. We built the Site to run entirely in your browser: the income, net worth, and demographic figures you enter are used only to calculate your percentile and are never transmitted to, or stored on, our servers.",
+          "This Privacy Policy explains what information this site (the “Site”) collects and how it's used. Income, net worth, and demographic answers are held in browser memory to calculate your percentile; they are not saved by the Site. They are included in a URL only when you deliberately use a sharing or friend-comparison feature, and anyone with that link can see the encoded answers.",
         ],
       },
       {
         heading: "Information we collect",
         body: [
           "We do not require an account, and we do not collect names, email addresses, or financial account information through the Site's calculator.",
-          "The values you enter (income, net worth, age band, etc.) stay in your browser. If you use the “compare with a friend” or “share” features, those values are encoded into the URL you choose to share — we don't log or store them separately.",
+          "The values you enter (income, net worth, age band, gender, marital status, and occupation) stay in browser memory while you use the Site. If you deliberately use the “compare with a friend” or “share” features, relevant answers are encoded into the URL you choose to share. Anyone with that link can view those answers; the Site does not save them separately.",
           "Like most websites, our hosting provider and any third-party services described below (advertising, analytics) may automatically collect standard technical data such as IP address, browser type, device type, and pages visited.",
         ],
       },
@@ -46,7 +46,7 @@ const COPY = {
       {
         heading: "Analytics",
         body: [
-          "We may use analytics services (such as Google Analytics or Vercel Analytics) to understand how visitors use the Site — for example, which pages are viewed and how long visitors stay. These services may use cookies or similar technology and may collect the technical data described above. Any data collected this way is aggregated and is not linked to the calculator inputs you enter, since those never leave your browser.",
+          "We may use analytics services (such as Google Analytics or Vercel Analytics) to understand how visitors use the Site — for example, which pages are viewed and how long visitors stay. These services may use cookies or similar technology and may collect the technical data described above. The Site does not send calculator answers as analytics events; answers in deliberately shared links are removed from the address bar after they are restored.",
         ],
       },
       {
@@ -85,14 +85,14 @@ const COPY = {
       {
         heading: "개요",
         body: [
-          "이 개인정보처리방침은 본 사이트(이하 “사이트”)가 수집하는 정보와 그 사용 방식을 설명합니다. 이 사이트는 사용자의 브라우저 안에서만 동작하도록 만들어졌습니다 — 입력한 소득, 순자산, 인적 정보는 백분위 계산에만 사용되며, 저희 서버로 전송되거나 저장되지 않습니다.",
+          "이 개인정보처리방침은 본 사이트(이하 “사이트”)가 수집하는 정보와 그 사용 방식을 설명합니다. 입력한 소득, 순자산, 성별, 결혼 여부, 연령대, 직업 정보는 백분위 계산을 위해 브라우저 메모리에서만 처리하며 사이트에 저장하지 않습니다. 사용자가 공유 또는 친구 비교 기능을 직접 사용할 때에만 필요한 입력값을 URL에 포함하며, 해당 링크를 가진 사람은 URL에 인코딩된 정보를 볼 수 있습니다.",
         ],
       },
       {
         heading: "수집하는 정보",
         body: [
           "이 사이트는 별도의 회원가입을 요구하지 않으며, 계산기를 통해 이름·이메일·금융계좌 정보를 수집하지 않습니다.",
-          "입력하신 값(소득, 순자산, 연령대 등)은 브라우저 안에만 남아있습니다. “친구와 비교하기”나 “공유하기” 기능을 사용하면, 해당 값은 사용자가 직접 공유하기로 선택한 URL 안에 인코딩될 뿐 별도로 로그를 남기거나 저장하지 않습니다.",
+          "입력하신 값(소득, 순자산, 성별, 결혼 여부, 연령대, 직업)은 사이트 이용 중 브라우저 메모리에만 유지됩니다. “친구와 비교하기” 또는 “공유하기”를 직접 누르면 관련 입력값이 공유 URL에 인코딩됩니다. 해당 링크를 가진 사람은 입력 정보를 볼 수 있으며, 사이트는 입력값을 별도로 저장하지 않습니다.",
           "대부분의 웹사이트와 마찬가지로, 호스팅 제공업체 및 아래 설명하는 제3자 서비스(광고, 애널리틱스)가 IP 주소, 브라우저 종류, 기기 종류, 방문한 페이지 등 일반적인 기술 정보를 자동으로 수집할 수 있습니다.",
         ],
       },
@@ -113,7 +113,7 @@ const COPY = {
       {
         heading: "애널리틱스",
         body: [
-          "저희는 방문자가 사이트를 어떻게 이용하는지 파악하기 위해 Google Analytics, Vercel Analytics 등 애널리틱스 서비스를 사용할 수 있습니다. 이들 서비스는 쿠키 또는 유사 기술을 사용할 수 있으며, 위에서 설명한 기술 정보를 수집할 수 있습니다. 이렇게 수집된 데이터는 집계된 형태로만 사용되며, 브라우저를 벗어나지 않는 계산기 입력값과는 연결되지 않습니다.",
+          "저희는 방문자가 사이트를 어떻게 이용하는지 파악하기 위해 Google Analytics, Vercel Analytics 등 애널리틱스 서비스를 사용할 수 있습니다. 이들 서비스는 쿠키 또는 유사 기술을 사용할 수 있으며, 위에서 설명한 기술 정보를 수집할 수 있습니다. 사이트는 계산기 입력값을 애널리틱스 이벤트로 보내지 않습니다. 사용자가 공유한 URL에 들어 있는 입력값은 화면에 복원된 뒤 주소창에서 제거됩니다.",
         ],
       },
       {

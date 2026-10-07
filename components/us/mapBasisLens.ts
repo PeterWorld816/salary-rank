@@ -1,38 +1,18 @@
-// The "?lens=" query param: which median the county choropleth shades by, and
-// which median the county page then quotes so the number doesn't change under
-// the visitor when they click through from the map.
-//
-// Pure — no React, no hooks, no component imports — because it's read from
-// two different client trees (app/us/[state]/UsStateClient.tsx and
-// components/us/CountyBasisFigure.tsx) and neither should have to depend on
-// the other. Same shape as readUsInputFromSearch's "?d=" codec in
-// UsInputPanel.tsx: parse defensively, never throw, always land on a usable
-// value.
-//
-// IMPORTANT: everything here is for *client* callers only. A server component
-// that reads searchParams opts its whole route out of static rendering, which
-// would cost /us/[state] its SSG prerender and /us/[state]/[county] its ISR
-// cache — see the header comment on app/us/[state]/[county]/page.tsx.
+// Shared helpers for resolving the map's React-state lens into the income
+// basis shown by the map and county result.
 import { resolveIncomeBasis, type UsIncomeBasis } from "@/lib/usIncomeCalc";
 import { formatTemplate, type Localized, type Translations } from "@/lib/i18n";
 import {
   US_GENDERS,
   US_MARITAL_STATUSES,
-  isDefaultUsInputSelection,
   type UsGenderId,
-  type UsInput,
   type UsMaritalStatusId,
 } from "@/lib/usInput";
-
-export const MAP_BASIS_LENS_PARAM = "lens";
 
 // The views offered above the map. NOT the same thing as UsIncomeBasis: a
 // lens is the visitor's request ("shade by my marital status"), a basis is
 // what that request resolves to once resolveIncomeBasis's priority rule and
 // the per-county fallback have had their say.
-//
-// The ids double as the on-the-wire "?lens=" values, so they're kept short and
-// URL-legible ("marital", not the basis axis' "maritalStatus").
 //
 // "occupation" is deliberately NOT a UsIncomeBasis axis — unlike the other
 // three, it isn't resolved through resolveIncomeBasis/resolveBasisIncome at
@@ -64,43 +44,6 @@ const LENS_IDS: UsMapBasisLens[] = ["household", "marital", "gender", "occupatio
 // axes selected, and resolveIncomeBasis() resolves that pair to marital
 // status. Defaulting to "household" would instead show a map that ignores the
 // answers the visitor just gave.
-export const DEFAULT_MAP_BASIS_LENS: UsMapBasisLens = "marital";
-
-// Missing, misspelled, or hand-edited "?lens=" values all fall back to a
-// default rather than erroring or blanking the map — a shared link that
-// predates this param is the common case, not an edge case.
-//
-// `input`, when passed, lets that fallback default to "personalized" instead
-// of the plain household-axis default whenever the visitor's answers already
-// differ from DEFAULT_US_INPUT — otherwise a shared "?d=..." result link (or
-// a refresh/back-navigation) would land with the map still shaded by "All
-// households"/"Single households" even though the URL already encodes a
-// combination that Personalized exists to show, and the visitor would have
-// to notice and tap the tab themselves to see their own numbers. Only the
-// nationwide map (the only page that ever offers "personalized" as a real
-// choice) passes `input` here; the state/county call sites omit it and keep
-// resolving to DEFAULT_MAP_BASIS_LENS, since "personalized" reaching them
-// only ever means it rode along from the nationwide map's own "?lens=" and
-// gets forced back off there regardless (see UsStateClient.tsx).
-export function readMapBasisLensFromSearch(
-  sp: URLSearchParams | { get(k: string): string | null },
-  input?: UsInput
-): UsMapBasisLens {
-  const raw = sp.get(MAP_BASIS_LENS_PARAM);
-  if (raw != null && LENS_IDS.includes(raw as UsMapBasisLens)) return raw as UsMapBasisLens;
-  if (input && !isDefaultUsInputSelection(input)) return "personalized";
-  return DEFAULT_MAP_BASIS_LENS;
-}
-
-// Writes the lens onto a copy of the current query string, preserving
-// everything already there (d, lang, st/co, from). Returns the params rather
-// than a full href so callers keep control of the pathname.
-export function withMapBasisLens(existing: URLSearchParams, lens: UsMapBasisLens): URLSearchParams {
-  const params = new URLSearchParams(existing);
-  params.set(MAP_BASIS_LENS_PARAM, lens);
-  return params;
-}
-
 // Translates a lens + the visitor's answers into the basis actually painted.
 // Deliberately routed through resolveIncomeBasis rather than switching on the
 // lens directly, so the "both axes selected -> marital wins" priority rule

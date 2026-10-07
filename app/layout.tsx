@@ -3,7 +3,6 @@ import "./globals.css";
 import { translations } from "@/lib/i18n";
 import { getSiteUrl } from "@/lib/site-url";
 import RootBody from "@/components/RootBody";
-import AdSenseScript from "@/components/ads/AdSenseScript";
 
 // Default/fallback metadata only — every real route (/us, /kr and their
 // nested pages) sets its own locale-aware metadata via generateMetadata,
@@ -41,7 +40,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <RootBody>{children}</RootBody>
-      <AdSenseScript />
     </html>
   );
 }

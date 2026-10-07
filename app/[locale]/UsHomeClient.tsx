@@ -1,6 +1,6 @@
 "use client";
 import { Suspense, useMemo } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import type { FeatureCollection, Geometry } from "geojson";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { useLocaleBase } from "@/lib/useLocaleBase";
@@ -13,11 +13,9 @@ import MapBasisControl from "@/components/us/MapBasisControl";
 import {
   basisForLens,
   basisLabel,
-  readMapBasisLensFromSearch,
-  withMapBasisLens,
   type UsMapBasisLens,
 } from "@/components/us/mapBasisLens";
-import { readUsInputFromSearch } from "@/components/us/UsInputPanel";
+import { useUsInput } from "@/components/us/UsInputContext";
 import Footer from "@/components/us/Footer";
 import Spinner from "@/components/Spinner";
 import CompactResultCard from "@/components/us/result/CompactResultCard";
@@ -46,25 +44,10 @@ function UsHomeContent({
 }) {
   const { t, tr } = useLanguage();
   const router = useRouter();
-  const pathname = usePathname();
-  const sp = useSearchParams();
-  const qs = sp.toString();
   const base = useLocaleBase();
 
-  // Same contract as the state page (app/[locale]/[state]/UsStateClient.tsx):
-  // the lens and the visitor's answers are read from the query string
-  // *client-side*, never from a server `searchParams` prop. This route is
-  // statically rendered (see the locale-from-URL change in page.tsx), and a
-  // server-side searchParams read anywhere in the tree would force
-  // per-request rendering and drop that prerender. The useSearchParams call
-  // is safe here only because UsHomeClient below wraps this subtree in a
-  // Suspense boundary.
-  const input = useMemo(() => readUsInputFromSearch(sp), [sp]);
-  // Passing `input` lets a missing "?lens=" default to "personalized" the
-  // moment the visitor's answers already differ from DEFAULT_US_INPUT (a
-  // shared result link, a refresh, Back) instead of always landing on the
-  // plain household/marital view — see readMapBasisLensFromSearch's comment.
-  const rawLens = readMapBasisLensFromSearch(sp, input);
+  const { input, mapLens, setMapLens } = useUsInput();
+  const rawLens: UsMapBasisLens = mapLens;
 
   // The occupation the visitor picked in the input panel (if any) — this is
   // the only map that ever shades by it, since state-level is as fine-
@@ -147,15 +130,10 @@ function UsHomeContent({
     return values.length ? { min: Math.min(...values), max: Math.max(...values) } : { min: 0, max: 1 };
   }, [occupationMapData.byFips]);
 
-  // Copies the whole current query string, so "?lens=" rides along to the
-  // state page for free, same as "?d=" and "?lang=" already do — the state
-  // page reads it back with the same readMapBasisLensFromSearch (and, for
-  // "occupation" specifically, forces itself back to all-households — see
-  // UsStateClient.tsx).
   function getHref(fips: string) {
     const state = getStateByFips(fips);
     if (!state) return base;
-    return qs ? `${base}/${state.abbr}?${qs}` : `${base}/${state.abbr}`;
+    return `${base}/${state.abbr}`;
   }
 
   // Which reference map/scale is actually painting the choropleth right
@@ -200,13 +178,8 @@ function UsHomeContent({
     router.push(getHref(fips));
   }
 
-  // replace(), not push(): the lens is a view toggle on the page you're
-  // already on, so each flip overwrites the current history entry rather than
-  // stacking one — otherwise Back would walk the visitor through every shading
-  // they tried. usePathname() rather than the /us|/kr `base` so /kr visitors
-  // stay on /kr.
   function handleLensChange(next: UsMapBasisLens) {
-    router.replace(`${pathname}?${withMapBasisLens(sp, next).toString()}`, { scroll: false });
+    setMapLens(next);
   }
 
   // Same basis as the map beside it — a sidebar quoting household medians next

@@ -33,7 +33,15 @@ import { useLanguage } from "@/lib/LanguageProvider";
 import { useLocaleBase } from "@/lib/useLocaleBase";
 import { formatTemplate } from "@/lib/i18n";
 import { formatUsd, formatPeopleCount, stripStateSuffix } from "@/lib/usFormat";
-import { US_AGE_BANDS, US_GENDERS, US_MARITAL_STATUSES, decodeFriendChallenge, buildCompareInviteHref } from "@/lib/usInput";
+import {
+  US_AGE_BANDS,
+  US_GENDERS,
+  US_MARITAL_STATUSES,
+  decodeFriendChallenge,
+  buildCompareInviteHref,
+  buildUsShareHref,
+  withoutTransientInputParams,
+} from "@/lib/usInput";
 import { getTier, getTierAnimationGroup } from "@/lib/tier";
 import { getCountyName } from "@/lib/usCountyNames";
 import type { StateMeta } from "@/data/us/stateMeta";
@@ -120,7 +128,7 @@ function PersonalizedResultContent({
   const [compareFallbackUrl, setCompareFallbackUrl] = useState<string | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
 
-  const { input, qs, from } = loc;
+  const { input, from } = loc;
   const ready = loc.ready;
   const state = ready ? loc.state : null;
   const county = ready ? loc.county : null;
@@ -128,8 +136,7 @@ function PersonalizedResultContent({
   const place = ready ? loc.place : null;
 
   // ── Inline city picker — jumps straight to a sibling place's own page
-  // (/us/[state]/[county]/[place]) carrying today's answers along, rather
-  // than patching a ?pl= param in place — every place gets its own
+  // (/us/[state]/[county]/[place]) rather than patching a ?pl= param in place — every place gets its own
   // crawlable/shareable URL now, so there's no "same page, new place" state
   // left to patch. ──
   const placeItems = useMemo(() => {
@@ -146,7 +153,7 @@ function PersonalizedResultContent({
 
   function handleSelectPlace(placeFips: string) {
     if (!state || !countyFips) return;
-    router.push(buildPlaceHref(base, new URLSearchParams(qs), state.abbr, countyFips, placeFips));
+    router.push(buildPlaceHref(base, state.abbr, countyFips, placeFips));
   }
 
   // ── Every percentile the old 3-step flow computed, all at once ──
@@ -534,7 +541,7 @@ function PersonalizedResultContent({
   const friendOutEarnsPercent = friendChallenge ? Math.max(1, Math.min(99, 100 - friendChallenge.percentile)) : null;
 
   const title = ready && state && locationName ? `${locationName}, ${state.name}` : t.usAppTitle;
-  const backHref = ready && state ? (qs ? `${base}/${state.abbr}?${qs}` : `${base}/${state.abbr}`) : qs ? `${base}?${qs}` : base;
+  const backHref = ready && state ? `${base}/${state.abbr}` : base;
   const backLabel = ready ? t.usBackToStateMap : t.usBackToUsMap;
 
   const shareTitle = ready && state && locationName ? `${t.usAppTitle} — ${locationName}, ${state.name}` : t.usAppTitle;
@@ -544,6 +551,13 @@ function PersonalizedResultContent({
       : ready && state && locationName
         ? `${locationName}, ${state.name}`
         : t.usAppTitle;
+  const getShareUrl = () =>
+    buildUsShareHref(
+      window.location.pathname,
+      withoutTransientInputParams(new URLSearchParams(window.location.search)),
+      input,
+      lang
+    );
 
   // ── "Compare with a friend" — genuinely different from Share/Save above:
   // this builds a dedicated /compare/[inviteId] invite link (see
@@ -727,6 +741,7 @@ function PersonalizedResultContent({
               height={WIDE_HEIGHT}
               shareTitle={shareTitle}
               shareText={shareText}
+              getShareUrl={getShareUrl}
               downloadName={`us-income-${state.abbr}-${countyFips}.png`}
               storyCardRef={storyCardRef}
               storyWidth={STORY_WIDTH}
@@ -901,13 +916,13 @@ function PersonalizedResultContent({
           {ready && state && (
             <div className="grid grid-cols-2 gap-3">
               <Link
-                href={qs ? `${base}/${state.abbr}?${qs}` : `${base}/${state.abbr}`}
+                href={`${base}/${state.abbr}`}
                 className="rounded-md border border-white/15 py-3 text-center text-[14px] font-semibold text-white/80 transition-colors hover:border-[#34D399] hover:text-white"
               >
                 {t.usBackToStateMap}
               </Link>
               <Link
-                href={qs ? `${base}?${qs}` : base}
+                href={base}
                 className="rounded-md border border-white/15 py-3 text-center text-[14px] font-semibold text-white/80 transition-colors hover:border-[#34D399] hover:text-white"
               >
                 {t.usBackToUsMap}

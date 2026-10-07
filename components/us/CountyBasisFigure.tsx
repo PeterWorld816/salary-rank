@@ -8,7 +8,7 @@
 // this one already IS the county-wide household median, and repeating it under
 // a second heading would just look like two conflicting figures.
 //
-// Reads the query string client-side only, inside its own Suspense boundary.
+// Reads the map lens client-side only, inside its own Suspense boundary.
 // app/us/[state]/[county]/page.tsx is ISR'd (revalidate = 86400) and must stay
 // that way: a `searchParams` read in that server component — or an unsuspended
 // useSearchParams anywhere in its tree — makes Next render it per request and
@@ -16,19 +16,16 @@
 // that page.
 import { Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { formatUsd } from "@/lib/usFormat";
 import { resolveBasisIncome, type UsIncomeBreakdownSource } from "@/lib/usIncomeCalc";
-import { readUsInputFromSearch } from "@/components/us/UsInputPanel";
-import { basisForLens, basisLabel, readMapBasisLensFromSearch, UNIT_EXPLAINER_HREF } from "@/components/us/mapBasisLens";
+import { useUsInput } from "@/components/us/UsInputContext";
+import { basisForLens, basisLabel, UNIT_EXPLAINER_HREF } from "@/components/us/mapBasisLens";
 
 function CountyBasisFigureContent({ county }: { county: UsIncomeBreakdownSource }) {
   const { t, tr } = useLanguage();
-  const sp = useSearchParams();
-
-  const input = readUsInputFromSearch(sp);
-  const basis = basisForLens(readMapBasisLensFromSearch(sp), input.gender, input.maritalStatus);
+  const { input, mapLens } = useUsInput();
+  const basis = basisForLens(mapLens, input.gender, input.maritalStatus);
   if (basis.axis === "household") return null;
 
   const reference = resolveBasisIncome(county, basis);

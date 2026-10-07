@@ -1,7 +1,7 @@
 "use client";
 // Compact standalone form for the invite recipient's own answers — deliberately
 // not a reuse of UsInputPanel (that component owns the fixed site-wide header
-// bar and writes straight to the URL's ?d=, neither of which fits here). Only
+// bar and the shared calculator state, neither of which fits here). Only
 // asks for what getMostSpecificIncomePercentile actually needs (income) plus
 // the demographic fields kept for parity with the rest of /us's UsInput shape
 // — net worth/401(k) are left out of this first pass, see the component's

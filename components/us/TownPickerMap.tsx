@@ -9,7 +9,6 @@
 // the county at once.
 import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useSearchParams } from "next/navigation";
 import type { FeatureCollection, Geometry } from "geojson";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
@@ -46,7 +45,6 @@ function TownPickerMapContent({
 }) {
   const { t } = useLanguage();
   const router = useRouter();
-  const searchParams = useSearchParams();
   // Selecting a town (via the map's markers or the list below) shares this
   // single handler, so the two stay in sync by construction. No marker is
   // shown until one is picked — see `markers` below.
@@ -54,8 +52,7 @@ function TownPickerMapContent({
 
   function handleSelect(placeFips: string) {
     setSelectedFips(placeFips);
-    const query = searchParams.toString();
-    router.push(`${placeHrefBase}/${placeFips}${query ? `?${query}` : ""}`);
+    router.push(`${placeHrefBase}/${placeFips}`);
   }
 
   const markers: UsMapMarker[] = places
