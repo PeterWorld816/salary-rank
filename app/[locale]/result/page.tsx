@@ -1,7 +1,17 @@
 import type { Metadata } from "next";
 import { permanentRedirect } from "next/navigation";
 import { localeFromParams, localeBase } from "@/lib/serverLocale";
-import { pageMetadata, resultOgImage } from "@/lib/seo";
+import { pageMetadata, personalResultOgImage } from "@/lib/seo";
+import { decodeUsInput } from "@/lib/usInput";
+import {
+  getContextualIncomePercentile,
+  getNationalIncomePercentile,
+  getNationalIncomePercentileForAgeBand,
+  getStateIncome,
+  getStateIncomePercentile,
+} from "@/lib/usIncomeCalc";
+import { getStateByAbbr } from "@/data/us/stateMeta";
+import { RECEIPT_IMAGE_HEIGHT, RECEIPT_IMAGE_WIDTH } from "@/lib/receiptCard";
 import AdSlot from "@/components/ads/AdSlot";
 import PersonalizedResult from "@/components/us/result/PersonalizedResult";
 
@@ -22,7 +32,39 @@ type SearchParams = Record<string, string | string[] | undefined>;
 export function generateMetadata({ params, searchParams }: { params: Params; searchParams: SearchParams }): Metadata {
   const locale = localeFromParams(params);
   const m = META[locale];
-  return pageMetadata(locale, `${localeBase(locale)}/result`, m.title, m.description, { image: resultOgImage(locale, searchParams) });
+  const input = typeof searchParams.d === "string" ? decodeUsInput(searchParams.d) : null;
+  const percentile = input ? getNationalIncomePercentile(input.annualIncome) : null;
+  if (input && percentile != null) {
+    const stateCode = typeof searchParams.st === "string" ? searchParams.st : undefined;
+    const state = stateCode ? getStateByAbbr(stateCode) : null;
+    const agePercent = getNationalIncomePercentileForAgeBand(input.ageBand, input.annualIncome);
+    const stateIncome = state ? getStateIncome(state.fips) : null;
+    const statePercent =
+      stateIncome != null
+        ? getContextualIncomePercentile(
+            stateIncome.percentileAnchors,
+            stateIncome.medianHouseholdIncome,
+            stateIncome.byMaritalStatus[input.maritalStatus],
+            input.annualIncome
+          ) ?? getStateIncomePercentile(stateIncome.fips, input.annualIncome)
+        : null;
+    const image = personalResultOgImage({
+      percent: percentile,
+      age: input.ageBand,
+      agePercent: agePercent ?? undefined,
+      state: state?.abbr,
+      statePercent: statePercent ?? undefined,
+    });
+    return {
+      ...pageMetadata(locale, localeBase(locale), m.title, m.description, {
+        image,
+        imageWidth: RECEIPT_IMAGE_WIDTH,
+        imageHeight: RECEIPT_IMAGE_HEIGHT,
+      }),
+      robots: { index: false, follow: true },
+    };
+  }
+  return pageMetadata(locale, `${localeBase(locale)}/result`, m.title, m.description);
 }
 
 // /us/result?st=&co=(&pl=) used to be the whole dashboard; that content now

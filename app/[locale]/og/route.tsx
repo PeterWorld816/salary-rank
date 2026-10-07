@@ -1,55 +1,50 @@
-// Dynamic per-share OG image, in two modes:
-//  - Personal (?d=...&st=...): for /us/result/*, where the percentile is
-//    this specific visitor's own answer. See lib/seo.ts's resultOgImage().
-//  - Location (?loc=...&median=...&percentile=...): for the state/county/
-//    place pages, where there's no visitor input at generateMetadata time —
-//    just that location's own median income and its national percentile,
-//    the same public numbers those pages already show in their own body
-//    copy. See lib/seo.ts's locationOgImage().
-// Built on next/og's ImageResponse — satori (JSX/CSS -> SVG) + resvg (SVG ->
-// PNG) under the hood, on the edge runtime, deliberately not a headless
-// browser: this needs to render in milliseconds per request, not seconds.
-//
-// This is a plain Route Handler rather than the opengraph-image.tsx file
-// convention — Next's generated wrapper for that convention discards the
-// incoming Request and only forwards route `params`, so a file-convention
-// image can never see the query string a shared result link actually
-// carries.
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
-import nationalIncomeData from "@/data/us/nationalIncome.json";
-import { getPercentileRankFromTable, clampDisplayPercent, type PercentileAnchor } from "@/lib/percentileTable";
-import { decodeUsInput, US_AGE_BANDS } from "@/lib/usInput";
 import { getStateByAbbr } from "@/data/us/stateMeta";
+import { getReceiptGrade, receiptRankFromPercent, RECEIPT_IMAGE_HEIGHT, RECEIPT_IMAGE_WIDTH } from "@/lib/receiptCard";
+import { getSiteUrl } from "@/lib/site-url";
 import { formatUsd } from "@/lib/usFormat";
 
 export const runtime = "edge";
 
-const WIDTH = 1200;
-const HEIGHT = 630;
+const OG_WIDTH = 1200;
+const OG_HEIGHT = 630;
 const BG = "#08090A";
-const FONT_FAMILY = "Noto Sans KR"; // covers Latin + Hangul, so one font serves both locales
+const FONT_FAMILY = "Noto Sans KR";
 
 const COPY = {
   en: { fallback: "What's Your Income Percentile?", top: (p: number) => `Top ${p}%` },
   ko: { fallback: "미국 소득 상위 몇 %?", top: (p: number) => `상위 ${p}%` },
 } as const;
 
-// Only the national anchor table (~1.5KB) — deliberately not importing
-// lib/usIncomeCalc.ts for exports (state/net-worth/401k tables) this edge
-// route never touches, to keep its cold start minimal.
-function getNationalPercentile(annualIncome: number): number | null {
-  const anchors = nationalIncomeData.percentileAnchors as PercentileAnchor[];
-  if (anchors.length < 2) return null;
-  return clampDisplayPercent(getPercentileRankFromTable(anchors, annualIncome));
+let receiptFontsPromise:
+  | Promise<{ name: string; data: ArrayBuffer; weight: 400 | 700; style: "normal" }[]>
+  | undefined;
+
+async function loadReceiptFonts() {
+  receiptFontsPromise ??= Promise.all([
+    fetch(new URL("/fonts/archivo-black.ttf", getSiteUrl())),
+    fetch(new URL("/fonts/courier-prime-regular.ttf", getSiteUrl())),
+    fetch(new URL("/fonts/courier-prime-bold.ttf", getSiteUrl())),
+  ]).then(async ([archivo, courierRegular, courierBold]) => {
+    for (const response of [archivo, courierRegular, courierBold]) {
+      if (!response.ok) throw new Error(`Receipt font request failed: ${response.status}`);
+    }
+    const [archivoData, courierRegularData, courierBoldData] = await Promise.all([
+      archivo.arrayBuffer(),
+      courierRegular.arrayBuffer(),
+      courierBold.arrayBuffer(),
+    ]);
+    return [
+      { name: "Archivo Black", data: archivoData, weight: 400 as const, style: "normal" as const },
+      { name: "Courier Prime", data: courierRegularData, weight: 400 as const, style: "normal" as const },
+      { name: "Courier Prime", data: courierBoldData, weight: 700 as const, style: "normal" as const },
+    ];
+  });
+  return receiptFontsPromise;
 }
 
-// Fetches only the glyphs this render needs, as a TTF (an old-Chrome UA makes
-// Google's css2 endpoint serve ttf instead of woff2, which is all satori can
-// parse) — the standard trick for getting Hangul into ImageResponse without
-// vendoring a multi-MB font file into the repo. Returns [] on any failure so
-// a network hiccup degrades to the default font rather than a 500.
-async function loadFont(text: string): Promise<{ name: string; data: ArrayBuffer; weight: 700; style: "normal" }[]> {
+async function loadKoreanFont(text: string) {
   try {
     const cssUrl = `https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@700&text=${encodeURIComponent(text)}`;
     const css = await fetch(cssUrl, {
@@ -57,29 +52,19 @@ async function loadFont(text: string): Promise<{ name: string; data: ArrayBuffer
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36",
       },
-    }).then((res) => res.text());
+    }).then((response) => response.text());
     const match = css.match(/src: url\(([^)]+)\) format\('(?:opentype|truetype)'\)/);
     if (!match) return [];
-    const fontRes = await fetch(match[1]);
-    if (!fontRes.ok) return [];
-    const data = await fontRes.arrayBuffer();
-    return [{ name: FONT_FAMILY, data, weight: 700, style: "normal" }];
-  } catch (err) {
-    console.error("[/us/og] font fetch failed", err);
+    const response = await fetch(match[1]);
+    if (!response.ok) return [];
+    return [{ name: FONT_FAMILY, data: await response.arrayBuffer(), weight: 700 as const, style: "normal" as const }];
+  } catch (error) {
+    console.error("[/us/og] Korean font fetch failed", error);
     return [];
   }
 }
 
 function Card({ top, sub }: { top: string; sub?: string }) {
-  const topStyle: Record<string, string | number> = {
-    display: "flex",
-    fontSize: sub ? 150 : 64,
-    fontWeight: 700,
-    lineHeight: 1.05,
-    textAlign: sub ? "left" : "center",
-  };
-  if (!sub) topStyle.maxWidth = WIDTH - 120;
-
   return (
     <div
       style={{
@@ -95,16 +80,12 @@ function Card({ top, sub }: { top: string; sub?: string }) {
         fontFamily: FONT_FAMILY,
       }}
     >
-      <div style={topStyle}>{top}</div>
+      <div style={{ display: "flex", fontSize: sub ? 150 : 64, fontWeight: 700, lineHeight: 1.05, textAlign: sub ? "left" : "center", maxWidth: OG_WIDTH - 120 }}>{top}</div>
       {sub && <div style={{ display: "flex", fontSize: 40, fontWeight: 700, opacity: 0.75 }}>{sub}</div>}
     </div>
   );
 }
 
-// Location mode's layout — location name, then the big percentile, then the
-// median-income line, grouped together (not spread top/bottom like Card's
-// personal mode) since all three numbers are the point here, not just one
-// hero stat with a caption.
 function LocationCard({ heading, location, detail }: { heading: string; location: string; detail?: string }) {
   return (
     <div
@@ -121,19 +102,147 @@ function LocationCard({ heading, location, detail }: { heading: string; location
         fontFamily: FONT_FAMILY,
       }}
     >
-      <div style={{ display: "flex", fontSize: 40, fontWeight: 700, opacity: 0.75, marginBottom: 8, maxWidth: WIDTH - 120 }}>{location}</div>
+      <div style={{ display: "flex", fontSize: 40, fontWeight: 700, opacity: 0.75, marginBottom: 8, maxWidth: OG_WIDTH - 120 }}>{location}</div>
       <div style={{ display: "flex", fontSize: 130, fontWeight: 700, lineHeight: 1.05 }}>{heading}</div>
       {detail && <div style={{ display: "flex", fontSize: 36, fontWeight: 700, opacity: 0.6, marginTop: 20 }}>{detail}</div>}
     </div>
   );
 }
 
-// Every response here is a pure function of its query params — same params
-// always produce the same PNG — so it's safe to cache aggressively at the
-// edge/CDN. stale-while-revalidate lets an already-cached image keep being
-// served instantly while a (rare — these URLs don't change per visitor)
-// revalidation happens in the background.
+function ReceiptImage({
+  percent,
+  age,
+  agePercent,
+  state,
+  statePercent,
+}: {
+  percent: number;
+  age: string | null;
+  agePercent: number | null;
+  state: string | null;
+  statePercent: number | null;
+}) {
+  const rank = receiptRankFromPercent(percent);
+  const grade = getReceiptGrade(rank);
+  const rows = [
+    { label: "NATIONWIDE", percent },
+    age && agePercent != null ? { label: `AGE BAND · ${age.toUpperCase()}`, percent: agePercent } : null,
+    state && statePercent != null ? { label: `STATE · ${state}`, percent: statePercent } : null,
+  ].filter((row): row is { label: string; percent: number } => row != null);
+  const textStyle = { display: "flex", fontFamily: "Courier Prime", color: "#1b1b18" };
+
+  return (
+    <div style={{ display: "flex", width: "100%", height: "100%", backgroundColor: grade.background, padding: 36, boxSizing: "border-box" }}>
+      <div style={{ display: "flex", width: "100%", height: "100%", flexDirection: "column", justifyContent: "space-between", position: "relative", overflow: "hidden", backgroundColor: "#f7f4ea", color: "#1b1b18", padding: "48px 66px", boxSizing: "border-box" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 9, borderBottom: "3px dashed #9c998e", paddingBottom: 18 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ ...textStyle, fontFamily: "Archivo Black", fontSize: 57 }}>INCOME RECEIPT</span>
+            <span style={{ ...textStyle, fontSize: 27, fontWeight: 700 }}>US · 001</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 25, fontWeight: 700 }}>
+            <span style={{ ...textStyle }}>SHOPPER</span>
+            <span style={{ ...textStyle }}>100 AMERICANS</span>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 36 }}>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ ...textStyle, fontSize: 27, fontWeight: 700, letterSpacing: "0.05em" }}>YOUR PLACE IN LINE</span>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 15, fontFamily: "Archivo Black", lineHeight: 1 }}>
+              <span style={{ display: "flex", fontSize: 192, letterSpacing: "-0.06em" }}>#{rank}</span>
+              <span style={{ display: "flex", fontSize: 51 }}>/ 100</span>
+            </div>
+            <span style={{ ...textStyle, fontSize: 27 }}>{100 - rank} behind you</span>
+          </div>
+
+          <div style={{ display: "flex", flexWrap: "wrap", alignContent: "center", justifyContent: "center", width: 330, height: 240, flexShrink: 0, gap: "6px 12px" }}>
+            {Array.from({ length: 100 }, (_, index) => {
+              const position = index + 1;
+              const isYou = position === rank;
+              const ahead = position < rank;
+              return (
+                <span
+                  key={position}
+                  style={{
+                    display: "flex",
+                    flex: "0 0 auto",
+                    width: isYou ? 24 : 18,
+                    height: isYou ? 24 : 18,
+                    borderRadius: "50%",
+                    backgroundColor: isYou ? grade.background : ahead ? "#25251f" : "#d7d0bd",
+                    ...(isYou
+                      ? {
+                          border: "4px solid #1b1b18",
+                          boxShadow: `0 0 0 4px ${grade.background}`,
+                        }
+                      : {}),
+                    boxSizing: "border-box",
+                  }}
+                />
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 12, borderTop: "3px dashed #9c998e", borderBottom: "3px dashed #9c998e", padding: "18px 0" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 27 }}>
+            <div style={{ display: "flex", width: 192, height: 192, flexShrink: 0, alignItems: "center", justifyContent: "center", transform: "rotate(-8deg)", border: `8px solid ${grade.background}`, color: grade.background, fontFamily: "Archivo Black", fontSize: 120, lineHeight: 1 }}>
+              {grade.label}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 8 }}>
+              <span style={{ ...textStyle, fontSize: 25, fontWeight: 700, letterSpacing: "0.06em" }}>INCOME GRADE</span>
+              <span style={{ ...textStyle, fontSize: 30, fontWeight: 700, lineHeight: 1.2 }}>{grade.line}</span>
+              <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
+                {["S", "A+", "A", "B+", "B", "C+", "C", "D"].map((label) => (
+                  <span key={label} style={{ ...textStyle, minWidth: 30, justifyContent: "center", border: "2px solid #77746b", padding: "1px 3px", fontSize: 19, fontWeight: label === grade.label ? 700 : 400, backgroundColor: label === grade.label ? grade.background : "transparent", color: label === grade.label ? "#fff" : "#1b1b18" }}>
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {rows.map((row) => (
+            <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 18, fontSize: 29 }}>
+              <span style={{ ...textStyle, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.label}</span>
+              <span style={{ ...textStyle, flexShrink: 0, fontWeight: 700 }}>#{receiptRankFromPercent(row.percent)} / 100</span>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: "flex", minHeight: 72, position: "relative", alignItems: "center", overflow: "hidden" }}>
+          <div aria-hidden="true" style={{ display: "flex", width: "100%", height: 48, justifyContent: "space-between", alignItems: "stretch" }}>
+            {Array.from({ length: 96 }, (_, index) => (
+              <span key={index} style={{ display: "flex", width: index % 7 === 0 ? 4 : index % 3 === 0 ? 3 : 2, backgroundColor: "#1b1b18", flexShrink: 0 }} />
+            ))}
+          </div>
+          <span style={{ display: "flex", position: "absolute", right: 12, bottom: 0, transform: "rotate(-11deg)", border: `6px solid ${grade.background}`, color: grade.background, padding: "9px 15px", fontFamily: "Archivo Black", fontSize: 28, lineHeight: 1, whiteSpace: "nowrap" }}>
+            {grade.stamp}
+          </span>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 20, lineHeight: 1.1 }}>
+          <span style={{ ...textStyle }}>THANK YOU. COME RANK AGAIN.</span>
+          <span style={{ ...textStyle, fontFamily: "Archivo Black", fontSize: 21 }}>salary-statistics.netlify.app</span>
+        </div>
+        <span style={{ ...textStyle, justifyContent: "center", fontSize: 16, lineHeight: 1.1, textAlign: "center" }}>
+          For fun. Grades are not a measure of your worth.
+        </span>
+      </div>
+    </div>
+  );
+}
+
 const CACHE_CONTROL = "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400";
+
+function readOptionalPercent(searchParams: URLSearchParams, key: string): number | null {
+  const raw = searchParams.get(key);
+  if (raw == null) return null;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed > 0 && parsed <= 100 ? parsed : null;
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -142,51 +251,41 @@ export async function GET(request: NextRequest) {
   const loc = searchParams.get("loc");
 
   let node: React.ReactElement;
-  let textForFont: string;
+  let width = OG_WIDTH;
+  let height = OG_HEIGHT;
+  let fonts: { name: string; data: ArrayBuffer; weight: 400 | 700; style: "normal" }[] = [];
 
   if (loc) {
-    // ── Location mode — state/county/place pages' own median income and
-    // national percentile, no visitor input involved. ──
-    const percentileRaw = Number(searchParams.get("percentile"));
-    const percentile = Number.isFinite(percentileRaw) && percentileRaw > 0 ? percentileRaw : null;
+    const percentile = readOptionalPercent(searchParams, "percentile");
     const medianRaw = Number(searchParams.get("median"));
     const median = Number.isFinite(medianRaw) && medianRaw > 0 ? medianRaw : null;
-
     const heading = percentile != null ? copy.top(percentile) : copy.fallback;
     const detail = median != null ? (lang === "ko" ? `가구 중위소득 ${formatUsd(median)}` : `Median household income ${formatUsd(median)}`) : undefined;
-
     node = <LocationCard heading={heading} location={loc} detail={detail} />;
-    textForFont = `${heading}${loc}${detail ?? ""}`;
+    const koreanFonts = await loadKoreanFont(`${heading}${loc}${detail ?? ""}`);
+    fonts = koreanFonts;
   } else {
-    // ── Personal mode — this visitor's own ?d= answer. ──
-    const input = decodeUsInput(searchParams.get("d") ?? "");
-    const percentile = input ? getNationalPercentile(input.annualIncome) : null;
-
-    let top: string;
-    let sub: string | undefined;
-    if (!input || percentile == null) {
-      top = copy.fallback;
-      sub = undefined;
+    const percentile = readOptionalPercent(searchParams, "p");
+    if (percentile == null) {
+      node = <Card top={copy.fallback} />;
+      fonts = await loadKoreanFont(copy.fallback);
     } else {
-      const state = getStateByAbbr(searchParams.get("st") ?? "");
-      const ageBand = US_AGE_BANDS.find((b) => b.id === input.ageBand);
-      top = copy.top(percentile);
-      sub = [ageBand?.label[lang], state?.name, formatUsd(input.annualIncome)].filter(Boolean).join(" · ");
+      const ageRaw = searchParams.get("age");
+      const age = ageRaw && /^[a-z0-9-]{1,12}$/i.test(ageRaw) ? ageRaw : null;
+      const stateRaw = searchParams.get("st")?.toUpperCase() ?? "";
+      const state = getStateByAbbr(stateRaw)?.abbr ?? null;
+      const agePercent = age ? readOptionalPercent(searchParams, "pa") : null;
+      const statePercent = state ? readOptionalPercent(searchParams, "ps") : null;
+      node = <ReceiptImage percent={percentile} age={age} agePercent={agePercent} state={state} statePercent={statePercent} />;
+      width = RECEIPT_IMAGE_WIDTH;
+      height = RECEIPT_IMAGE_HEIGHT;
+      fonts = await loadReceiptFonts();
     }
-
-    node = <Card top={top} sub={sub} />;
-    textForFont = `${top}${sub ?? ""}`;
   }
 
-  // An explicit empty `fonts` array (as opposed to omitting the option
-  // entirely) makes @vercel/og throw "No fonts are loaded" instead of
-  // falling back to its bundled default — so only pass it through when the
-  // Google Fonts fetch actually produced something.
-  const fonts = await loadFont(textForFont);
-
   return new ImageResponse(node, {
-    width: WIDTH,
-    height: HEIGHT,
+    width,
+    height,
     ...(fonts.length ? { fonts } : {}),
     headers: { "Cache-Control": CACHE_CONTROL },
   });

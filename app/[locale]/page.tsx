@@ -1,15 +1,61 @@
 import type { Metadata } from "next";
 import { getUsStatesGeo } from "@/lib/usGeo";
 import { localeFromParams, localeBase } from "@/lib/serverLocale";
-import { homeMetadata } from "@/lib/seo";
+import { homeMetadata, personalResultOgImage } from "@/lib/seo";
+import { decodeUsInput } from "@/lib/usInput";
+import {
+  getContextualIncomePercentile,
+  getNationalIncomePercentile,
+  getNationalIncomePercentileForAgeBand,
+  getStateIncome,
+  getStateIncomePercentile,
+} from "@/lib/usIncomeCalc";
+import { getStateByAbbr } from "@/data/us/stateMeta";
+import { RECEIPT_IMAGE_HEIGHT, RECEIPT_IMAGE_WIDTH } from "@/lib/receiptCard";
 import UsHomeClient from "./UsHomeClient";
 import AdSlot from "@/components/ads/AdSlot";
 
 type Params = { locale: string };
+type SearchParams = Record<string, string | string[] | undefined>;
 
-export function generateMetadata({ params }: { params: Params }): Metadata {
+export function generateMetadata({ params, searchParams }: { params: Params; searchParams: SearchParams }): Metadata {
   const locale = localeFromParams(params);
-  return homeMetadata(locale, localeBase(locale));
+  const pathname = localeBase(locale);
+  const rawInput = searchParams.d;
+  const input = typeof rawInput === "string" ? decodeUsInput(rawInput) : null;
+  const percentile = input ? getNationalIncomePercentile(input.annualIncome) : null;
+  if (!input || percentile == null) return homeMetadata(locale, pathname);
+
+  const stateCode = typeof searchParams.st === "string" ? searchParams.st : undefined;
+  const state = stateCode ? getStateByAbbr(stateCode) : null;
+  const agePercent = getNationalIncomePercentileForAgeBand(input.ageBand, input.annualIncome);
+  const stateIncome = state ? getStateIncome(state.fips) : null;
+  const statePercent =
+    stateIncome != null
+      ? getContextualIncomePercentile(
+          stateIncome.percentileAnchors,
+          stateIncome.medianHouseholdIncome,
+          stateIncome.byMaritalStatus[input.maritalStatus],
+          input.annualIncome
+        ) ?? getStateIncomePercentile(stateIncome.fips, input.annualIncome)
+      : null;
+  const image = personalResultOgImage({
+    percent: percentile,
+    age: input.ageBand,
+    agePercent: agePercent ?? undefined,
+    state: state?.abbr,
+    statePercent: statePercent ?? undefined,
+  });
+  const metadata = homeMetadata(locale, pathname);
+  return {
+    ...metadata,
+    robots: { index: false, follow: true },
+    openGraph: {
+      ...metadata.openGraph,
+      images: [{ url: image, width: RECEIPT_IMAGE_WIDTH, height: RECEIPT_IMAGE_HEIGHT }],
+    },
+    twitter: { ...metadata.twitter, images: [image] },
+  };
 }
 
 export default function UsPage() {

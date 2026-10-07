@@ -24,7 +24,7 @@ const MINT_GLOW = "radial-gradient(circle, rgba(52,211,153,0.20) 0%, rgba(52,211
 // safe and needs no extra plumbing through props.
 export function siteHost(): string {
   const raw = process.env.NEXT_PUBLIC_SITE_URL;
-  if (!raw) return "";
+  if (!raw) return "salary-statistics.netlify.app";
   return raw.replace(/^https?:\/\//i, "").replace(/\/+$/, "");
 }
 
@@ -225,12 +225,14 @@ export function SharePercentileGapFooter({
   gapLabel,
   gapNote,
   align = "flex-start",
+  showIncome = true,
 }: {
   incomeLabel: string;
   incomeValue: string;
   gapLabel: string;
   gapNote: string | null;
   align?: "flex-start" | "center";
+  showIncome?: boolean;
 }) {
   const labelStyle = {
     display: "flex" as const,
@@ -242,13 +244,15 @@ export function SharePercentileGapFooter({
   };
   return (
     <div style={{ display: "flex", width: "100%", alignItems: "flex-start" }}>
-      <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: cu(2), alignItems: align, minWidth: 0 }}>
-        <span style={labelStyle}>{incomeLabel}</span>
-        <span style={{ display: "flex", fontSize: cu(13), color: "#FFFFFF", fontWeight: 800, textAlign: align === "center" ? "center" : "left" }}>
-          {incomeValue}
-        </span>
-      </div>
-      {gapNote && (
+      {showIncome && (
+        <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: cu(2), alignItems: align, minWidth: 0 }}>
+          <span style={labelStyle}>{incomeLabel}</span>
+          <span style={{ display: "flex", fontSize: cu(13), color: "#FFFFFF", fontWeight: 800, textAlign: align === "center" ? "center" : "left" }}>
+            {incomeValue}
+          </span>
+        </div>
+      )}
+      {showIncome && gapNote && (
         <>
           <div style={{ display: "flex", width: "1px", background: "rgba(255,255,255,0.14)", margin: `${cu(1)} ${cu(14)} 0 0` }} />
           <div style={{ display: "flex", flexDirection: "column", flex: 1.5, gap: cu(2), minWidth: 0, alignItems: align }}>

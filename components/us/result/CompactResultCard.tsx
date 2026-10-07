@@ -9,29 +9,18 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "@/lib/LanguageProvider";
-import { formatTemplate } from "@/lib/i18n";
-import ResultCardVisual, { WIDE_WIDTH, WIDE_HEIGHT } from "@/components/us/ResultCardVisual";
-import { siteHost } from "@/components/us/ShareCardBits";
-import { filledDotsFromPercent } from "@/lib/decileDots";
+import { useLocaleBase } from "@/lib/useLocaleBase";
+import ResultCardVisual, { CARD_PREVIEW_MAX_WIDTH, WIDE_WIDTH, WIDE_HEIGHT } from "@/components/us/ResultCardVisual";
 import UsInputPanel from "@/components/us/UsInputPanel";
 import { NoDataCard } from "@/components/us/result/ResultBits";
 import Spinner from "@/components/Spinner";
 import ShareButtons from "@/components/ShareButtons";
 import type { StateMeta } from "@/data/us/stateMeta";
 import type { UsCountyIncome } from "@/lib/usIncomeCalc";
-import { useCompactResult, type CompactLevel } from "@/components/us/result/useCompactResult";
-import type { Translations } from "@/lib/i18n";
-import { useCountUp, useRevealAfterCountUp } from "@/lib/useCountUp";
-import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
-import { getTierAnimationGroup } from "@/lib/tier";
+import { useCompactResult } from "@/components/us/result/useCompactResult";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
-import { buildUsShareHref, withoutTransientInputParams } from "@/lib/usInput";
-
-const LEVEL_LABEL_KEY: Record<CompactLevel, keyof Translations> = {
-  national: "usNationalPercentileHeroLabel",
-  state: "usStatePercentileHeroLabel",
-  county: "usCountyPercentileHeroLabel",
-};
+import { buildUsShareHref, US_AGE_BANDS } from "@/lib/usInput";
+import { receiptRankFromPercent, receiptShareText } from "@/lib/receiptCard";
 
 function CompactResultCardInner({
   presetState,
@@ -43,16 +32,8 @@ function CompactResultCardInner({
   shareAfterMapId?: string;
 }) {
   const { t, lang } = useLanguage();
+  const base = useLocaleBase();
   const result = useCompactResult(presetState, presetCounty);
-  const animatedPercent = useCountUp(result.ready ? result.incomePercent : null);
-  // ── Tier-branched reveal (see lib/tier.ts's getTierAnimationGroup) — same
-  // "wait for the count-up to settle" timing as PersonalizedResult's
-  // headline card, keyed off the same incomePercent the number above
-  // animates toward. ──
-  const revealReady = useRevealAfterCountUp(result.ready ? result.incomePercent : null);
-  const reducedMotion = usePrefersReducedMotion();
-  const shouldPlayReveal = revealReady && !reducedMotion;
-  const revealGroup = result.ready ? getTierAnimationGroup(result.tier) : null;
   const cardRef = useRef<HTMLDivElement>(null);
   const [shareTarget, setShareTarget] = useState<HTMLElement | null>(null);
 
@@ -69,14 +50,12 @@ function CompactResultCardInner({
     : (presetState?.name ?? null);
 
   const shareTitle = locationName && presetState ? `${t.usAppTitle} — ${locationName}, ${presetState.name}` : t.usAppTitle;
-  const shareText = result.ready ? formatTemplate(t.usShareTextTemplate, { percent: result.incomePercent }) : t.usAppTitle;
-  const getShareUrl = () =>
-    buildUsShareHref(
-      window.location.pathname,
-      withoutTransientInputParams(new URLSearchParams(window.location.search)),
-      result.input,
-      lang
-    );
+  const shareText = result.ready ? receiptShareText(receiptRankFromPercent(result.nationalPercentile)) : t.usAppTitle;
+  const getShareUrl = () => {
+    const shareUrl = new URL(buildUsShareHref(base, new URLSearchParams(), result.input, lang), window.location.origin);
+    if (presetState) shareUrl.searchParams.set("st", presetState.abbr);
+    return `${shareUrl.pathname}${shareUrl.search}`;
+  };
 
   const downloadName =
     result.ready && result.level === "county" && presetState && presetCounty
@@ -85,13 +64,27 @@ function CompactResultCardInner({
         ? `us-income-${presetState.abbr}.png`
         : "us-income-national.png";
 
-  // ── Values shared verbatim between the on-screen ResultCardVisual and its
-  // hidden Save Image capture instance below, so the two can never show
-  // different numbers/text for the same result. ──
-  const resultCardHost = siteHost();
-  const resultCardIncomeValue = result.ready ? `${formatUsd(result.input.annualIncome)} / yr` : "";
-  const resultCardBeatText = result.ready ? formatTemplate(t.usShareCardBeatTemplate, { count: filledDotsFromPercent(result.incomePercent) }) : "";
-  const resultCardLocationLine = locationName ?? t.usAppTitle;
+  // Only the age-band benchmark exists in the published nationwide data;
+  // gender-by-age percentiles are omitted rather than estimated.
+  const ageBand = US_AGE_BANDS.find((band) => band.id === result.input.ageBand);
+  const ageLabel = ageBand ? (lang === "ko" ? ageBand.label.ko : ageBand.label.en) : result.input.ageBand;
+  const receiptRows =
+    result.ready
+      ? [
+          {
+            label: "NATIONWIDE",
+            percent: result.nationalPercentile,
+          },
+          result.ageIncomePercentile != null && {
+            label: `AGE BAND · ${ageLabel.toUpperCase()}`,
+            percent: result.ageIncomePercentile,
+          },
+          result.statePercentile != null && presetState && {
+            label: `STATE · ${presetState.abbr}`,
+            percent: result.statePercentile,
+          },
+        ].filter((line): line is { label: string; percent: number } => Boolean(line))
+      : [];
 
   return (
     <>
@@ -99,24 +92,11 @@ function CompactResultCardInner({
       <div className="mx-auto max-w-2xl px-6 pt-8">
         {result.ready ? (
           <>
-            <div className="mx-auto w-full" style={{ maxWidth: 480 }}>
+            <div className="mx-auto w-full" style={{ maxWidth: CARD_PREVIEW_MAX_WIDTH }}>
               <ResultCardVisual
                 variant="wide"
-                tier={result.tier}
-                percent={result.incomePercent}
-                displayPercent={animatedPercent}
-                percentTemplate={t.topPercentTemplate}
-                subLabel={t[LEVEL_LABEL_KEY[result.level]]}
-                locationLine={resultCardLocationLine}
-                host={resultCardHost}
-                watermarkFallback={t.usAppTitle}
-                incomeLabel={t.usShareCardCurrentIncomeLabel}
-                incomeValue={resultCardIncomeValue}
-                gapLabel={t.usShareCardNextTierLabel}
-                gapNote={result.gapNote}
-                beatText={resultCardBeatText}
-                play={shouldPlayReveal}
-                pulse={shouldPlayReveal && revealGroup === "encourage"}
+                percent={result.nationalPercentile}
+                rows={receiptRows}
               />
             </div>
 
@@ -130,25 +110,15 @@ function CompactResultCardInner({
                 <ResultCardVisual
                   variant="wide"
                   cardRef={cardRef}
-                  tier={result.tier}
-                  percent={result.incomePercent}
-                  percentTemplate={t.topPercentTemplate}
-                  subLabel={t[LEVEL_LABEL_KEY[result.level]]}
-                  locationLine={resultCardLocationLine}
-                  host={resultCardHost}
-                  watermarkFallback={t.usAppTitle}
-                  incomeLabel={t.usShareCardCurrentIncomeLabel}
-                  incomeValue={resultCardIncomeValue}
-                  gapLabel={t.usShareCardNextTierLabel}
-                  gapNote={result.gapNote}
-                  beatText={resultCardBeatText}
+                  percent={result.nationalPercentile}
+                  rows={receiptRows}
                 />
               </div>
             </div>
 
             {shareTarget
               ? createPortal(
-                  <div className="mx-auto w-full" style={{ maxWidth: 480 }}>
+                  <div className="mx-auto w-full" style={{ maxWidth: CARD_PREVIEW_MAX_WIDTH }}>
                     <ShareButtons
                       cardRef={cardRef}
                       width={WIDE_WIDTH}
@@ -162,7 +132,7 @@ function CompactResultCardInner({
                   shareTarget
                 )
               : !shareAfterMapId && (
-                  <div className="mx-auto mt-4 w-full" style={{ maxWidth: 480 }}>
+                  <div className="mx-auto mt-4 w-full" style={{ maxWidth: CARD_PREVIEW_MAX_WIDTH }}>
                     <ShareButtons
                       cardRef={cardRef}
                       width={WIDE_WIDTH}

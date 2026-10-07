@@ -43,6 +43,9 @@ export type CompactResult =
       ready: true;
       level: CompactLevel;
       incomePercent: number;
+      nationalPercentile: number;
+      statePercentile: number | null;
+      ageIncomePercentile: number | null;
       tier: Tier;
       netWorthPercentile: number | null;
       medianForChart: number;
@@ -162,6 +165,9 @@ export function useCompactResult(presetState: StateMeta | null, presetCounty: Us
     ready: true,
     level,
     incomePercent,
+    nationalPercentile: nationalPercentile ?? incomePercent,
+    statePercentile,
+    ageIncomePercentile,
     tier: getTier(incomePercent),
     netWorthPercentile,
     medianForChart,

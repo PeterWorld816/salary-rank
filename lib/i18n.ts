@@ -142,7 +142,6 @@ export interface Translations {
   usK401VsMedianTemplate: string; // template: {percent}
   usK401MissingTitle: string;
   usK401MissingDesc: string;
-  usShareTextTemplate: string; // template: {percent} — ShareButtons' shareText, national percentile
   usPlaceBackToCounty: string;
   usSourceCensus: string;
   usSourceScf: string;
@@ -216,8 +215,6 @@ export interface Translations {
   usPercentileGapNetWorthTemplate: string; // template: {amount}, {percent}
   usPercentileGapMaxedOut: string;
   usSimilarIncomePopulationTemplate: string; // template: {count}
-  usShareCardCurrentIncomeLabel: string;
-  usShareCardNextTierLabel: string;
   usShareCardBeatTemplate: string; // template: {count}
 
   // ── Compare-with-a-friend invite page (app/us/compare/[inviteId])
@@ -345,7 +342,6 @@ export const translations: Record<LangCode, Translations> = {
     usNetWorthMissingDesc: "위쪽 '당신의 자산'에 입력해주세요 — 10초면 돼요.",
     usK401MissingTitle: "401(k) 잔액을 입력하면 확인할 수 있어요",
     usK401MissingDesc: "위쪽 '당신의 자산'에 입력해주세요 — 10초면 돼요.",
-    usShareTextTemplate: "내 미국 소득 순위는 상위 {percent}%였어요. 당신은 어느 정도일까요?",
     usNetWorthSectionTitle: "순자산 순위",
     usNetWorthNationalBadge: "🇺🇸 전국 기준",
     usNetWorthHeroLabel: "당신은 미국 전체 자산 상위",
@@ -428,8 +424,6 @@ export const translations: Record<LangCode, Translations> = {
     usPercentileGapNetWorthTemplate: "자산을 {amount} 더 모으면 미국 전체 상위 {percent}%로 올라갈 수 있어요.",
     usPercentileGapMaxedOut: "이미 우리가 추적하는 가장 높은 구간에 있어요!",
     usSimilarIncomePopulationTemplate: "당신과 비슷한 소득대의 사람은 미국에 대략 {count}명 정도예요.",
-    usShareCardCurrentIncomeLabel: "현재 소득",
-    usShareCardNextTierLabel: "다음 구간까지",
     usShareCardBeatTemplate: "10명 중 {count}명보다 앞서요",
 
     usComparePageTitle: "친구와 비교하기",
@@ -553,7 +547,6 @@ export const translations: Record<LangCode, Translations> = {
     usNetWorthMissingDesc: "Fill it in under \"Your Assets\" above — takes 10 seconds.",
     usK401MissingTitle: "Add your 401(k) balance to see this",
     usK401MissingDesc: "Fill it in under \"Your Assets\" above — takes 10 seconds.",
-    usShareTextTemplate: "I checked my US income percentile: top {percent}%. Where would you rank?",
     usNetWorthSectionTitle: "Net worth rank",
     usNetWorthNationalBadge: "🇺🇸 Nationwide only",
     usNetWorthHeroLabel: "You're in the nationwide top",
@@ -636,8 +629,6 @@ export const translations: Record<LangCode, Translations> = {
     usPercentileGapNetWorthTemplate: "Grow your net worth by {amount} more and you'd reach the nationwide top {percent}%.",
     usPercentileGapMaxedOut: "You're already in the highest tier we track!",
     usSimilarIncomePopulationTemplate: "About {count} people in the US are in a similar income bracket as you.",
-    usShareCardCurrentIncomeLabel: "Current income",
-    usShareCardNextTierLabel: "To next tier",
     usShareCardBeatTemplate: "Ahead of {count} of 10 people",
 
     usComparePageTitle: "Compare with a friend",

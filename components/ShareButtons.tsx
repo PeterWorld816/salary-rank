@@ -87,7 +87,7 @@ export default function ShareButtons({
       } catch {}
     }
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(`${shareText}\n${url}`);
       showToast(t.copied);
     } catch {
       showToast(t.shareFailed);

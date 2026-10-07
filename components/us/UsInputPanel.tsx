@@ -10,6 +10,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronDown, Home, SlidersHorizontal } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
+import LanguageSelector from "@/components/LanguageSelector";
 import { formatUsdCompact } from "@/lib/usFormat";
 import {
   US_AGE_BANDS,
@@ -237,8 +238,8 @@ export default function UsInputPanel() {
             >
               <Home className="h-5 w-5" />
             </Link>
-            <Link href={homeHref} className="group flex min-w-0 items-baseline gap-2">
-              <span className="truncate text-[16px] font-extrabold tracking-tight text-white transition-colors group-hover:text-[#34D399]">
+            <Link href={homeHref} className="group flex shrink-0 items-baseline gap-2">
+              <span className="whitespace-nowrap text-[15px] font-extrabold tracking-tight text-white transition-colors group-hover:text-[#34D399] min-[400px]:text-[16px]">
                 {t.usAppTitle}
               </span>
               <span className="hidden truncate text-[12px] text-white/40 sm:inline">{t.usMastheadTagline}</span>
@@ -250,13 +251,14 @@ export default function UsInputPanel() {
             onClick={() => setExpanded((v) => !v)}
             aria-expanded={expanded}
             aria-label={expanded ? "Collapse input panel" : "Expand input panel"}
-            className="flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-[#34D399]/35 bg-[#34D399]/10 px-3 py-1.5 text-left text-[12px] font-semibold text-white/85 transition-colors hover:border-[#34D399]/70 hover:bg-[#34D399]/15 hover:text-white"
+            className="flex min-h-11 shrink-0 items-center gap-2 rounded-xl border border-[#34D399]/35 bg-[#34D399]/10 px-2.5 py-1.5 text-left text-[12px] font-semibold text-white/85 transition-colors hover:border-[#34D399]/70 hover:bg-[#34D399]/15 hover:text-white min-[480px]:px-3"
           >
             <SlidersHorizontal className="h-4 w-4 shrink-0 text-[#34D399]" />
-            <span className="flex min-w-0 flex-col">
+            <span className="hidden min-w-0 flex-col min-[480px]:flex">
               <span className="text-[10px] font-bold uppercase tracking-wide text-[#34D399]">{t.usInputTitle}</span>
-              <span className="max-w-[125px] truncate text-white/75 sm:max-w-[250px]">{summary}</span>
+              <span className="max-w-[250px] truncate text-white/75">{summary}</span>
             </span>
+            <span className="text-white/75 min-[480px]:hidden">{formatUsdCompact(form.annualIncome)}</span>
             <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition-transform ${expanded ? "rotate-180" : ""}`} />
           </button>
         </div>
@@ -264,7 +266,12 @@ export default function UsInputPanel() {
         {expanded && (
           <div className="mx-auto max-w-5xl px-4 pb-5 sm:px-6">
             <div className="flex flex-col gap-5 border-t border-white/[0.06] pt-4">
-              <h2 className="text-[12px] font-bold uppercase tracking-wide text-[#34D399]">{t.usInputTitle}</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-[12px] font-bold uppercase tracking-wide text-[#34D399]">{t.usInputTitle}</h2>
+                <div className="hidden max-[479px]:block">
+                  <LanguageSelector />
+                </div>
+              </div>
 
               <div>
                 <h3 className="mb-2.5 text-[12px] font-semibold text-white/50">{t.usGroupWho}</h3>

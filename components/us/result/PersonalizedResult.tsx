@@ -40,7 +40,6 @@ import {
   decodeFriendChallenge,
   buildCompareInviteHref,
   buildUsShareHref,
-  withoutTransientInputParams,
 } from "@/lib/usInput";
 import { getTier, getTierAnimationGroup } from "@/lib/tier";
 import { getCountyName } from "@/lib/usCountyNames";
@@ -73,7 +72,7 @@ import {
   type StateOccupationFile,
 } from "@/lib/usOccupationIncome";
 import { buildPercentileGapNote } from "@/lib/percentileGap";
-import { useCountUp, useRevealAfterCountUp } from "@/lib/useCountUp";
+import { useRevealAfterCountUp } from "@/lib/useCountUp";
 import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { US_TOTAL_HOUSEHOLDS_2024 } from "@/lib/usPopulation";
 import nationalIncomeData from "@/data/us/nationalIncome.json";
@@ -81,10 +80,9 @@ import netWorthPercentilesUS from "@/data/us/netWorthPercentilesUS.json";
 import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
 import UsInputPanel from "@/components/us/UsInputPanel";
-import ResultCardVisual, { WIDE_WIDTH, WIDE_HEIGHT } from "@/components/us/ResultCardVisual";
+import ResultCardVisual, { CARD_PREVIEW_MAX_WIDTH, WIDE_WIDTH, WIDE_HEIGHT } from "@/components/us/ResultCardVisual";
 import UsShareCardStory, { STORY_WIDTH, STORY_HEIGHT } from "@/components/us/UsShareCardStory";
-import { siteHost } from "@/components/us/ShareCardBits";
-import { filledDotsFromPercent } from "@/lib/decileDots";
+import { receiptRankFromPercent, receiptShareText } from "@/lib/receiptCard";
 import { pickFeaturedPercentiles, type NamedPercent } from "@/lib/shareCardCandidates";
 import DistributionChart from "@/components/DistributionChart";
 import ShareButtons from "@/components/ShareButtons";
@@ -289,6 +287,20 @@ function PersonalizedResultContent({
   const ageBandLabel = ageBand ? tr(ageBand.label) : input.ageBand;
   const genderLabel = tr(US_GENDERS.find((g) => g.id === input.gender)?.label ?? { ko: "", en: "" });
   const maritalLabel = tr(US_MARITAL_STATUSES.find((m) => m.id === input.maritalStatus)?.label ?? { ko: "", en: "" });
+  const receiptRows = [
+    nationalPercentile != null && {
+      label: "NATIONWIDE",
+      percent: nationalPercentile,
+    },
+    ageIncomePercentile != null && {
+      label: `AGE BAND · ${ageBandLabel.toUpperCase()}`,
+      percent: ageIncomePercentile,
+    },
+    statePercentile != null && state && {
+      label: `STATE · ${state.abbr}`,
+      percent: statePercentile,
+    },
+  ].filter((line): line is { label: string; percent: number } => Boolean(line));
 
   // ── Occupation card — deliberately state-level only, never county/place
   // (see lib/usOccupationIncome.ts's header comment: PUMS sample sizes don't
@@ -382,6 +394,10 @@ function PersonalizedResultContent({
     }
   }
   const headlineTier = headlineTierPercent != null ? getTier(headlineTierPercent) : null;
+  const revealReady = useRevealAfterCountUp(headlineTierPercent);
+  const reducedMotion = usePrefersReducedMotion();
+  const shouldPlayReveal = revealReady && !reducedMotion;
+  const revealGroup = headlineTier ? getTierAnimationGroup(headlineTier) : null;
 
   // ── Save Story's secondary pill — the runner-up metric next to the same
   // `best` this headline already picked (pickFeaturedPercentiles's
@@ -396,24 +412,10 @@ function PersonalizedResultContent({
   // ── Values shared verbatim between the on-screen ResultCardVisual and its
   // two hidden capture instances (Save Image/Save Story) below, so all three
   // can never show different numbers/text for the same result. ──
-  const resultCardHost = siteHost();
-  const resultCardIncomeValue = `${formatUsd(input.annualIncome)} / yr`;
-  const resultCardBeatText =
-    headlineTierPercent != null ? formatTemplate(t.usShareCardBeatTemplate, { count: filledDotsFromPercent(headlineTierPercent) }) : "";
-
   // ── The "reveal" flourishes — a brief count-up instead of the number just
   // appearing, plus a real "how many people are near you" line right under
   // it. Both keyed off the same headlineTierPercent/annualIncome the number
   // itself already shows, no separate computation path. ──
-  const animatedHeadlinePercent = useCountUp(headlineTierPercent);
-  // ── Tier-branched reveal (see lib/tier.ts's getTierAnimationGroup) — the
-  // light-sweep/confetti card effect and the badge-pulse/gap-note-bounce
-  // pair both wait for this same "count-up settled" moment, keyed off the
-  // same headlineTierPercent the number itself animates toward. ──
-  const revealReady = useRevealAfterCountUp(headlineTierPercent);
-  const reducedMotion = usePrefersReducedMotion();
-  const shouldPlayReveal = revealReady && !reducedMotion;
-  const revealGroup = headlineTier ? getTierAnimationGroup(headlineTier) : null;
   const similarIncomePopulation =
     headlineTierPercent != null
       ? estimateBandPopulation(nationalIncomeData.percentileAnchors as PercentileAnchor[], input.annualIncome, US_TOTAL_HOUSEHOLDS_2024)
@@ -547,17 +549,15 @@ function PersonalizedResultContent({
   const shareTitle = ready && state && locationName ? `${t.usAppTitle} — ${locationName}, ${state.name}` : t.usAppTitle;
   const shareText =
     nationalPercentile != null
-      ? formatTemplate(t.usShareTextTemplate, { percent: nationalPercentile })
+      ? receiptShareText(receiptRankFromPercent(nationalPercentile))
       : ready && state && locationName
         ? `${locationName}, ${state.name}`
         : t.usAppTitle;
-  const getShareUrl = () =>
-    buildUsShareHref(
-      window.location.pathname,
-      withoutTransientInputParams(new URLSearchParams(window.location.search)),
-      input,
-      lang
-    );
+  const getShareUrl = () => {
+    const shareUrl = new URL(buildUsShareHref(base, new URLSearchParams(), input, lang), window.location.origin);
+    if (state) shareUrl.searchParams.set("st", state.abbr);
+    return `${shareUrl.pathname}${shareUrl.search}`;
+  };
 
   // ── "Compare with a friend" — genuinely different from Share/Save above:
   // this builds a dedicated /compare/[inviteId] invite link (see
@@ -648,24 +648,11 @@ function PersonalizedResultContent({
           </div>
         ) : (
           <>
-            <div className="mx-auto w-full" style={{ maxWidth: 480 }}>
+            <div className="mx-auto w-full" style={{ maxWidth: CARD_PREVIEW_MAX_WIDTH }}>
               <ResultCardVisual
                 variant="wide"
-                tier={headlineTier}
-                percent={headlineTierPercent}
-                displayPercent={animatedHeadlinePercent}
-                percentTemplate={t.topPercentTemplate}
-                subLabel={best ? shortLabels[best.key] : null}
-                locationLine={state && locationName ? `${locationName}, ${state.name}` : null}
-                host={resultCardHost}
-                watermarkFallback={t.usAppTitle}
-                incomeLabel={t.usShareCardCurrentIncomeLabel}
-                incomeValue={resultCardIncomeValue}
-                gapLabel={t.usShareCardNextTierLabel}
-                gapNote={gapNote}
-                beatText={resultCardBeatText}
-                play={shouldPlayReveal}
-                pulse={shouldPlayReveal && revealGroup === "encourage"}
+                percent={nationalPercentile}
+                rows={receiptRows}
               />
             </div>
             <p className="mt-4 text-center text-[15px] font-semibold leading-snug text-balance text-white/80">{headline}</p>
@@ -690,18 +677,8 @@ function PersonalizedResultContent({
             <ResultCardVisual
               variant="wide"
               cardRef={cardRef}
-              tier={headlineTier}
-              percent={headlineTierPercent}
-              percentTemplate={t.topPercentTemplate}
-              subLabel={best ? shortLabels[best.key] : null}
-              locationLine={state && locationName ? `${locationName}, ${state.name}` : null}
-              host={resultCardHost}
-              watermarkFallback={t.usAppTitle}
-              incomeLabel={t.usShareCardCurrentIncomeLabel}
-              incomeValue={resultCardIncomeValue}
-              gapLabel={t.usShareCardNextTierLabel}
-              gapNote={gapNote}
-              beatText={resultCardBeatText}
+              percent={nationalPercentile}
+              rows={receiptRows}
             />
           </div>
         </div>
@@ -712,20 +689,8 @@ function PersonalizedResultContent({
           <div style={{ width: `${STORY_WIDTH}px` }}>
             <UsShareCardStory
               cardRef={storyCardRef}
-              tier={headlineTier}
-              percent={headlineTierPercent}
-              percentTemplate={t.topPercentTemplate}
-              subLabel={best ? shortLabels[best.key] : null}
-              locationLine={state && locationName ? `${locationName}, ${state.name}` : null}
-              watermarkFallback={t.usAppTitle}
-              incomeLabel={t.usShareCardCurrentIncomeLabel}
-              incomeValue={resultCardIncomeValue}
-              gapLabel={t.usShareCardNextTierLabel}
-              gapNote={gapNote}
-              beatText={resultCardBeatText}
-              secondaryLabel={secondary ? secondary.label : null}
-              secondaryValueText={secondary ? formatTemplate(t.topPercentTemplate, { percent: secondary.percent }) : null}
-              sourceText={t.usShareCardSource}
+              percent={nationalPercentile}
+              rows={receiptRows}
             />
           </div>
         </div>

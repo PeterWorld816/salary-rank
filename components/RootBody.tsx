@@ -14,6 +14,12 @@ export default function RootBody({ children }: { children: React.ReactNode }) {
   // fully dark background — the light-theme body padding would otherwise
   // leave a strip of white showing below it.
   const isUsApp = pathname.startsWith("/us") || pathname.startsWith("/kr");
+  const hasUsInputPanel = /^\/(?:us|kr)(?:\/[a-z]{2}(?:\/\d{5}(?:\/\d{7})?)?|\/result(?:\/.*)?)?$/.test(pathname);
+  const languageSelectorPosition = !isUsApp
+    ? "top-4"
+    : hasUsInputPanel
+      ? "bottom-4 max-[479px]:hidden"
+      : "bottom-4 max-[479px]:static max-[479px]:mx-auto max-[479px]:flex max-[479px]:w-full max-[479px]:max-w-5xl max-[479px]:justify-end max-[479px]:px-4 max-[479px]:pt-3";
   // Derived here rather than passed down from app/layout.tsx: the root layout
   // must not read headers() (it would make every route dynamic), and this
   // component already knows the path. Runs during prerender too, so the
@@ -24,7 +30,7 @@ export default function RootBody({ children }: { children: React.ReactNode }) {
     <body style={isUsApp ? undefined : { paddingBottom: "calc(64px + env(safe-area-inset-bottom, 0px))" }}>
       <LanguageProvider initialLang={initialLang}>
         <UsInputProvider pathname={pathname}>
-          <div className={`fixed right-4 z-50 ${isUsApp ? "bottom-4" : "top-4"}`}>
+          <div className={`fixed right-4 z-50 ${languageSelectorPosition}`}>
             <LanguageSelector />
           </div>
           {children}

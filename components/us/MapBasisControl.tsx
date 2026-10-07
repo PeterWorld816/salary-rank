@@ -9,6 +9,8 @@
 // browser. The lens codec, the priority rule, and the label wording all live
 // in components/us/mapBasisLens.ts, shared with the county page.
 import Link from "next/link";
+import { useEffect, useRef } from "react";
+import { ChevronRight } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { formatTemplate } from "@/lib/i18n";
 import { US_GENDERS, US_MARITAL_STATUSES, type UsGenderId, type UsMaritalStatusId } from "@/lib/usInput";
@@ -51,6 +53,32 @@ export default function MapBasisControl({
   forcedOffNotice?: string | null;
 }) {
   const { t, tr } = useLanguage();
+  const tabsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const tabs = tabsRef.current;
+    if (!tabs) return;
+    const revealActiveTab = (behavior: ScrollBehavior) => {
+      const activeTab = Array.from(tabs.children).find(
+        (child): child is HTMLElement =>
+          child instanceof HTMLElement && child.getAttribute("data-map-basis-lens") === lens
+      );
+      if (!activeTab) return;
+
+      const tabLeft = activeTab.offsetLeft;
+      const tabRight = tabLeft + activeTab.offsetWidth;
+      if (tabLeft < tabs.scrollLeft) {
+        tabs.scrollTo({ left: tabLeft, behavior });
+      } else if (tabRight > tabs.scrollLeft + tabs.clientWidth) {
+        tabs.scrollTo({ left: tabRight - tabs.clientWidth, behavior });
+      }
+    };
+
+    revealActiveTab("smooth");
+    const resizeObserver = new ResizeObserver(() => revealActiveTab("auto"));
+    resizeObserver.observe(tabs);
+    return () => resizeObserver.disconnect();
+  }, [lens, occupationOption?.label, personalizedOption?.tabLabel]);
 
   const genderLabel = tr(US_GENDERS.find((g) => g.id === gender)?.label ?? { ko: "", en: "" });
   const maritalLabel = tr(US_MARITAL_STATUSES.find((m) => m.id === maritalStatus)?.label ?? { ko: "", en: "" });
@@ -88,7 +116,8 @@ export default function MapBasisControl({
             widths. sm+ reverts to the original wrapping row. */}
         <div className="relative -mx-1 sm:mx-0">
           <div
-            className="flex gap-1.5 overflow-x-auto px-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden"
+            ref={tabsRef}
+            className="flex gap-1.5 overflow-x-auto px-1 pr-9 [-ms-overflow-style:none] [scrollbar-width:none] sm:flex-wrap sm:overflow-visible sm:px-0 sm:pr-0 [&::-webkit-scrollbar]:hidden"
             role="group"
             aria-label={t.usMapBasisHeading}
           >
@@ -97,6 +126,7 @@ export default function MapBasisControl({
               return (
                 <button
                   key={o.id}
+                  data-map-basis-lens={o.id}
                   type="button"
                   onClick={() => onLensChange(o.id)}
                   aria-pressed={active}
@@ -113,9 +143,11 @@ export default function MapBasisControl({
             })}
           </div>
           <div
-            className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#0d0f11] to-transparent sm:hidden"
+            className="pointer-events-none absolute inset-y-0 right-0 flex w-9 items-center justify-end bg-gradient-to-l from-[#0d0f11] via-[#0d0f11]/90 to-transparent pr-1 text-white/50 sm:hidden"
             aria-hidden
-          />
+          >
+            <ChevronRight className="h-3.5 w-3.5" />
+          </div>
         </div>
       </div>
 

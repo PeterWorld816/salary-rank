@@ -41,7 +41,7 @@ export function pageMetadata(
   pathname: string,
   title: string,
   description: string,
-  opts?: { image?: string; type?: "website" | "article"; publishedTime?: string }
+  opts?: { image?: string; imageWidth?: number; imageHeight?: number; type?: "website" | "article"; publishedTime?: string }
 ): Metadata {
   // Built as absolute URLs directly (not left relative for metadataBase to
   // resolve) so canonical/og:url/og:image/twitter:image are all correct
@@ -69,7 +69,7 @@ export function pageMetadata(
       siteName: SITE_TITLE[locale],
       type: opts?.type ?? "website",
       locale: OG_LOCALE[locale],
-      images: [{ url: image, width: 1200, height: 630 }],
+      images: [{ url: image, width: opts?.imageWidth ?? 1200, height: opts?.imageHeight ?? 630 }],
       ...(opts?.publishedTime ? { publishedTime: opts.publishedTime } : {}),
     },
     twitter: {
@@ -85,18 +85,16 @@ export function homeMetadata(locale: AppLocale, pathname: string): Metadata {
   return pageMetadata(locale, pathname, SITE_TITLE[locale], SITE_DESCRIPTION[locale]);
 }
 
-// Points a /us/result/* page's og:image/twitter:image at the dynamic per-share
-// card (app/us/og/route.tsx) instead of the static OG_IMAGE fallback, carrying
-// over just the two params that image needs (d, st) plus the locale it should
-// render text in. Falls back to the static image when there's no "d" yet
-// (e.g. a bare /us/result hit with no answers) so the route never
-// renders its own "no data" fallback where the static one already works.
-export function resultOgImage(locale: AppLocale, searchParams: Record<string, string | string[] | undefined>): string | undefined {
-  const d = searchParams.d;
-  if (typeof d !== "string") return undefined;
-  const params = new URLSearchParams({ d, lang: locale === "kr" ? "ko" : "en" });
-  const st = searchParams.st;
-  if (typeof st === "string") params.set("st", st);
+// Personal share previews receive only rendered-result summaries. Never put
+// the encoded input payload (d) or exact income into the image URL.
+export function personalResultOgImage(
+  summary: { percent: number; age?: string; agePercent?: number; state?: string; statePercent?: number }
+): string {
+  const params = new URLSearchParams({ p: String(summary.percent) });
+  if (summary.age) params.set("age", summary.age);
+  if (summary.agePercent != null) params.set("pa", String(summary.agePercent));
+  if (summary.state) params.set("st", summary.state);
+  if (summary.statePercent != null) params.set("ps", String(summary.statePercent));
   return `/us/og?${params.toString()}`;
 }
 
