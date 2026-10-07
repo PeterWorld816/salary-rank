@@ -84,10 +84,14 @@ vercel
 
 ## AdSense
 
-- `NEXT_PUBLIC_ADSENSE_CLIENT_ID` env var — the AdSense publisher ID ads actually load with
-  (see `lib/ads.ts`; ads only render on the exact host `NEXT_PUBLIC_SITE_URL` points at).
-- The root layout emits the AdSense account meta tag and an initial-HTML loader bootstrap.
-  It loads Google's script only when the browser hostname matches `NEXT_PUBLIC_SITE_URL`.
+- The root layout emits the AdSense account meta tag. After shared `d`/`lang` query
+  parameters are removed, it loads Google's Auto ads script using the public publisher ID
+  constant in `components/ads/AdSenseScript.tsx`. It does not load on compare-invite pages,
+  whose path contains encoded calculator answers. The loader does not depend on Netlify
+  environment variables or a production-host check.
+- `NEXT_PUBLIC_ADSENSE_CLIENT_ID` and `NEXT_PUBLIC_SITE_URL` still gate manually placed
+  `<AdSlot />` units in `lib/ads.ts`; they are not required for the Auto ads loader.
 - `public/ads.txt` — 완료됨: the real publisher ID (`pub-7379794980536826`) is in place, no
-  longer a placeholder. Keep it in sync with `NEXT_PUBLIC_ADSENSE_CLIENT_ID` above — AdSense
-  won't serve ads on the domain without a matching `ads.txt` entry.
+  longer a placeholder. Keep it in sync with the publisher ID constant and any configured
+  `NEXT_PUBLIC_ADSENSE_CLIENT_ID` — AdSense won't serve ads on the domain without a matching
+  `ads.txt` entry.

@@ -3,12 +3,11 @@
 // brand + collapsed "YOUR INFO" summary chip) that stays pinned to the top of
 // the viewport while scrolling, Robinhood-style. Tapping the chip expands the
 // full input form in normal document flow below the bar — only that expanded
-// state is allowed to scroll away, per design. Reads/writes the "d" query
-// param (lib/usInput.ts) so answers survive /us -> /us/[state] ->
-// /us/[state]/[county] navigation, same trick as the Korea quiz's ?d= param.
-import { useState } from "react";
+// state is allowed to scroll away, per design. Answers live in shared React
+// state and are encoded into URLs only by explicit share actions.
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronDown, Home, SlidersHorizontal } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { formatUsdCompact } from "@/lib/usFormat";
@@ -16,23 +15,15 @@ import {
   US_AGE_BANDS,
   US_GENDERS,
   US_MARITAL_STATUSES,
-  buildUsSearchParams,
-  decodeUsInput,
-  encodeUsInput,
   isDefaultUsInputSelection,
-  DEFAULT_US_INPUT,
   type UsInput,
 } from "@/lib/usInput";
 import OccupationField from "@/components/us/OccupationField";
-import { MAP_BASIS_LENS_PARAM } from "@/components/us/mapBasisLens";
+import { useUsInput } from "@/components/us/UsInputContext";
 
 // Height of the fixed slim bar (collapsed state) — the spacer below it must
 // match exactly, or page content would either gap or slide under the bar.
 const HEADER_HEIGHT = 64;
-
-export function readUsInputFromSearch(sp: URLSearchParams | { get(k: string): string | null }): UsInput {
-  return decodeUsInput(sp.get("d") ?? "") ?? DEFAULT_US_INPUT;
-}
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-white/40">{children}</label>;
@@ -109,6 +100,10 @@ function CurrencyField({
 }: { label: string; helper?: string; placeholder?: string; value: number | null; onCommit: (v: number | null) => void }) {
   const [text, setText] = useState(() => (value == null ? "" : formatDigits(String(Math.round(value)))));
 
+  useEffect(() => {
+    setText(value == null ? "" : formatDigits(String(Math.round(value))));
+  }, [value]);
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const input = e.target;
     const caret = input.selectionStart ?? input.value.length;
@@ -171,11 +166,10 @@ function CurrencyField({
 }
 
 export default function UsInputPanel() {
-  const { t, tr, lang } = useLanguage();
+  const { t, tr } = useLanguage();
+  const { input: form, setInput: setForm, setMapLens } = useUsInput();
   const pathname = usePathname();
-  const router = useRouter();
   const sp = useSearchParams();
-  const [form, setForm] = useState<UsInput>(() => readUsInputFromSearch(sp));
   // Keep the first viewport focused on the result card and map. The compact
   // summary chip still exposes the current answers, and the full form stays
   // one tap away for both fresh visits and shared links.
@@ -186,21 +180,17 @@ export default function UsInputPanel() {
   // challenge) that already carries a value for either one starts
   // expanded instead, so it stays visible rather than hiding data the
   // visitor already entered.
-  const [assetsExpanded, setAssetsExpanded] = useState(() => form.netWorth != null || form.k401 != null);
+  const [assetsExpanded, setAssetsExpanded] = useState(false);
+  useEffect(() => {
+    if (form.netWorth != null || form.k401 != null) setAssetsExpanded(true);
+  }, [form.netWorth, form.k401]);
 
   // A pending "compare with a friend" challenge (see lib/usInput.ts) lives in
-  // its own query param, independent of "d" — apply()/homeHref below rebuild
-  // the query string from scratch, so without this a friend editing their
-  // own answers would silently drop the challenge they arrived with.
+  // its own query param, independent of the in-memory calculator answers.
   const from = sp.get("from");
 
-  // Preserves every other param already on the URL (st/co on the result-step
-  // pages, from's friend challenge, etc.) — only d/lang are ours to rewrite.
   function apply(next: UsInput) {
     setForm(next);
-    const params = new URLSearchParams(sp.toString());
-    params.set("d", encodeUsInput(next));
-    params.set("lang", lang);
 
     // Changing ANY of gender/marital status/age band/occupation is the
     // moment the map's shading should "just follow" what the visitor asked
@@ -215,30 +205,17 @@ export default function UsInputPanel() {
       next.ageBand !== form.ageBand ||
       next.occupation !== form.occupation;
     if (personalizableChanged) {
-      params.set(MAP_BASIS_LENS_PARAM, isDefaultUsInputSelection(next) ? "household" : "personalized");
+      setMapLens(isDefaultUsInputSelection(next) ? "household" : "personalized");
     }
-
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
   const genderLabel = tr(US_GENDERS.find((g) => g.id === form.gender)?.label ?? { ko: "", en: "" });
   const maritalLabel = tr(US_MARITAL_STATUSES.find((m) => m.id === form.maritalStatus)?.label ?? { ko: "", en: "" });
   const ageLabel = tr(US_AGE_BANDS.find((b) => b.id === form.ageBand)?.label ?? { ko: "", en: "" });
   const summary = `${genderLabel} · ${maritalLabel} · ${ageLabel} · ${formatUsdCompact(form.annualIncome)}`;
-  // Always points at /us or /kr (the state-picker map, matching whichever
-  // section we're in) carrying the current answers along — same "d"/"lang"
-  // encoding apply() writes to the URL, just targeting a fixed destination
-  // instead of the current pathname.
+  // Return to the state-picker map without putting calculator answers in URL.
   const localeBase = pathname.startsWith("/kr") ? "/kr" : "/us";
-  // Carries the active SHADING lens along to the home map, same as every
-  // other /us link already does with "?d=" — buildUsSearchParams only knows
-  // about d/lang/from, so without this the logo/title link would silently
-  // drop back to the household view even while the visitor was looking at
-  // "Personalized (Your filters)".
-  const homeParams = buildUsSearchParams(form, lang, from);
-  const currentLens = sp.get(MAP_BASIS_LENS_PARAM);
-  if (currentLens) homeParams.set(MAP_BASIS_LENS_PARAM, currentLens);
-  const homeHref = `${localeBase}?${homeParams.toString()}`;
+  const homeHref = from ? `${localeBase}?from=${encodeURIComponent(from)}` : localeBase;
 
   return (
     <>

@@ -25,6 +25,7 @@ import { useCountUp, useRevealAfterCountUp } from "@/lib/useCountUp";
 import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { getTierAnimationGroup } from "@/lib/tier";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
+import { buildUsShareHref, withoutTransientInputParams } from "@/lib/usInput";
 
 const LEVEL_LABEL_KEY: Record<CompactLevel, keyof Translations> = {
   national: "usNationalPercentileHeroLabel",
@@ -41,7 +42,7 @@ function CompactResultCardInner({
   presetCounty: UsCountyIncome | null;
   shareAfterMapId?: string;
 }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const result = useCompactResult(presetState, presetCounty);
   const animatedPercent = useCountUp(result.ready ? result.incomePercent : null);
   // ── Tier-branched reveal (see lib/tier.ts's getTierAnimationGroup) — same
@@ -69,6 +70,13 @@ function CompactResultCardInner({
 
   const shareTitle = locationName && presetState ? `${t.usAppTitle} — ${locationName}, ${presetState.name}` : t.usAppTitle;
   const shareText = result.ready ? formatTemplate(t.usShareTextTemplate, { percent: result.incomePercent }) : t.usAppTitle;
+  const getShareUrl = () =>
+    buildUsShareHref(
+      window.location.pathname,
+      withoutTransientInputParams(new URLSearchParams(window.location.search)),
+      result.input,
+      lang
+    );
 
   const downloadName =
     result.ready && result.level === "county" && presetState && presetCounty
@@ -147,6 +155,7 @@ function CompactResultCardInner({
                       height={WIDE_HEIGHT}
                       shareTitle={shareTitle}
                       shareText={shareText}
+                      getShareUrl={getShareUrl}
                       downloadName={downloadName}
                     />
                   </div>,
@@ -160,6 +169,7 @@ function CompactResultCardInner({
                       height={WIDE_HEIGHT}
                       shareTitle={shareTitle}
                       shareText={shareText}
+                      getShareUrl={getShareUrl}
                       downloadName={downloadName}
                     />
                   </div>

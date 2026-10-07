@@ -1,6 +1,5 @@
-// Query-string codec for the /us section — mirrors the "?d=..." pattern from
-// lib/salaryCalc.ts so the input panel's answers survive navigation from
-// /us -> /us/[state] -> /us/[state]/[county] without a server round trip.
+// Query-string codec for explicit share and compare links in the /us section.
+// Routine calculator changes stay in React state instead of the address bar.
 //
 // ageBand isn't in the spec's listed input panel fields, but it's required to
 // compare a 401k balance against data/us/401kByAge.json (which is bucketed by
@@ -39,7 +38,7 @@ export type UsInput = {
 };
 
 // The answer set a fresh visitor starts from — shared with UsInputPanel.tsx
-// (which reads it back for a missing "d" param) and with the "Personalized"
+// and with the "Personalized"
 // map SHADING (components/us/mapBasisLens.ts / UsInputPanel.tsx's apply()),
 // which needs to know when the visitor has moved away from every default
 // answer so it can switch SHADING on, and back to "All households" when
@@ -130,15 +129,26 @@ export function decodeUsInput(raw: string): UsInput | null {
   };
 }
 
-// Builds the query string used for every /us link (map clicks, back links).
-// `from` (a friend-challenge snapshot, see encodeFriendChallenge below) is
-// carried through explicitly here because apply()/homeHref in
-// UsInputPanel.tsx rebuild the query string from scratch rather than
-// patching the existing one — every other /us link just reuses the current
-// search string verbatim and so preserves it automatically.
-export function buildUsSearchParams(input: UsInput, lang: string, from?: string | null): URLSearchParams {
-  const params = new URLSearchParams({ d: encodeUsInput(input), lang });
-  if (from) params.set("from", from);
+export function buildUsShareHref(
+  pathname: string,
+  existing: URLSearchParams,
+  input: UsInput,
+  lang: string
+): string {
+  const params = new URLSearchParams(existing);
+  params.delete("d");
+  params.delete("lens");
+  params.set("d", encodeUsInput(input));
+  params.set("lang", lang);
+  const query = params.toString();
+  return query ? `${pathname}?${query}` : pathname;
+}
+
+export function withoutTransientInputParams(existing: URLSearchParams): URLSearchParams {
+  const params = new URLSearchParams(existing);
+  params.delete("d");
+  params.delete("lang");
+  params.delete("lens");
   return params;
 }
 

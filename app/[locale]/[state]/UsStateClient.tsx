@@ -1,7 +1,7 @@
 "use client";
 import { Suspense, useMemo } from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import type { FeatureCollection, Geometry } from "geojson";
 import { useLanguage } from "@/lib/LanguageProvider";
@@ -16,11 +16,9 @@ import IncomeLegend from "@/components/us/IncomeLegend";
 import MapBasisControl from "@/components/us/MapBasisControl";
 import {
   basisForLens,
-  readMapBasisLensFromSearch,
-  withMapBasisLens,
   type UsMapBasisLens,
 } from "@/components/us/mapBasisLens";
-import { readUsInputFromSearch } from "@/components/us/UsInputPanel";
+import { useUsInput } from "@/components/us/UsInputContext";
 import Footer from "@/components/us/Footer";
 import Spinner from "@/components/Spinner";
 import { getStateByFips, type StateMeta } from "@/data/us/stateMeta";
@@ -35,7 +33,6 @@ import {
   type UsCountyIncome,
 } from "@/lib/usIncomeCalc";
 import { getValueAtPercentile } from "@/lib/percentileTable";
-import { buildCountyHref } from "@/components/us/result/useResultLocation";
 import { incomeFill } from "@/components/us/colorScale";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
 import { PercentileThresholds } from "@/components/us/PercentileThresholds";
@@ -54,9 +51,6 @@ function UsStateContent({
 }) {
   const { t } = useLanguage();
   const router = useRouter();
-  const pathname = usePathname();
-  const sp = useSearchParams();
-  const qs = sp.toString();
   const base = useLocaleBase();
 
   // Which median the map shades by, and the visitor's own answers — both read
@@ -67,7 +61,8 @@ function UsStateContent({
   // rendering and drop both caches. This whole subtree already sits inside the
   // Suspense boundary in UsStateClient below, which is what keeps the useSearchParams
   // call from opting the route out of static generation.
-  const rawLens = readMapBasisLensFromSearch(sp);
+  const { input, mapLens, setMapLens } = useUsInput();
+  const rawLens = mapLens;
   // County-level occupation data doesn't exist (see
   // lib/usOccupationIncome.ts's header comment), and "Personalized" is the
   // same restriction one level up (it folds occupation in whenever one's
@@ -79,11 +74,9 @@ function UsStateContent({
   const occupationForcedOff = rawLens === "occupation";
   const personalizedForcedOff = rawLens === "personalized";
   const basisLens: UsMapBasisLens = occupationForcedOff || personalizedForcedOff ? "household" : rawLens;
-  // Changing gender/marital status in the input panel rewrites "?d=", which
-  // re-renders this subtree with a new basis; nothing remounts, so the
-  // choropleth just transitions its fills (see UsMap's `transition: fill
-  // 150ms`). Flipping the lens below goes through the same path.
-  const input = useMemo(() => readUsInputFromSearch(sp), [sp]);
+  // Input changes update shared React state and recompute the map basis;
+  // nothing remounts, so the choropleth transitions its fills (see UsMap's
+  // `transition: fill 150ms`). Flipping the lens below uses the URL.
   const basis = useMemo(
     () => basisForLens(basisLens, input.gender, input.maritalStatus),
     [basisLens, input.gender, input.maritalStatus]
@@ -150,7 +143,7 @@ function UsStateContent({
   // Picking a county opens its merged SEO+result page — see
   // app/us/[state]/[county]/page.tsx.
   function getHref(fips: string) {
-    return buildCountyHref(base, sp, state.abbr, fips);
+    return `${base}/${state.abbr}/${fips}`;
   }
 
   function getLabel(fips: string) {
@@ -172,20 +165,18 @@ function UsStateContent({
 
   // Single navigation entry point shared by both the map (Geography onClick)
   // and the search list (row onClick) — see step 4 of the mobile UX rework.
-  // getHref copies the whole current query string, so "?lens=" rides along to
-  // the county page for free, same as "?d=" and "?lang=" already do.
+  // The selected map lens stays in shared React state across navigation.
   function handleSelect(fips: string) {
     router.push(getHref(fips));
   }
 
   // replace(), not push(): the lens is a view toggle on the page you're
-  // already on, so each flip must overwrite the current history entry rather
   // than stack a new one. Otherwise Back would walk the visitor through every
   // shading they tried instead of returning them to the nationwide map. Same
   // reasoning (and the same { scroll: false }) as UsInputPanel's apply().
   // usePathname() rather than the /us|/kr `base` so /kr visitors stay on /kr.
   function handleLensChange(next: UsMapBasisLens) {
-    router.replace(`${pathname}?${withMapBasisLens(sp, next).toString()}`, { scroll: false });
+    setMapLens(next);
   }
 
   return (
@@ -194,7 +185,7 @@ function UsStateContent({
 
       <div className="mx-auto flex max-w-5xl flex-col px-4 pb-16 pt-8 sm:px-6">
         <Link
-          href={qs ? `${base}?${qs}` : base}
+          href={base}
           className="mb-6 inline-flex min-h-11 items-center gap-1 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-[13px] text-white/60 transition-colors hover:border-[#34D399]/40 hover:bg-[#34D399]/10 hover:text-white"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -208,7 +199,7 @@ function UsStateContent({
 
         {/* This SEO copy doesn't touch searchParams itself — confirmed via
             `next build` + curl that it's present in the prerendered HTML for
-            every state (data/us/*, unlike ?st=/?co=/?d=, is known at build
+            every state (data/us/*, unlike route-specific query values, is known at build
             time either way). Keep it that way: reading `sp`/`qs` here would
             risk it silently degrading to a client-only render for crawlers
             that don't execute JS. */}
@@ -243,7 +234,7 @@ function UsStateContent({
                     <ul className="flex flex-col gap-1.5">
                       {nearbyStates.map((s) => {
                         const nearbyMeta = getStateByFips(s.fips);
-                        const nearbyHref = nearbyMeta ? (qs ? `${base}/${nearbyMeta.abbr}?${qs}` : `${base}/${nearbyMeta.abbr}`) : null;
+                        const nearbyHref = nearbyMeta ? `${base}/${nearbyMeta.abbr}` : null;
                         const row = (
                           <>
                             <span>{s.name}</span>

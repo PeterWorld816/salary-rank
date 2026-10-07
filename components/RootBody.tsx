@@ -4,6 +4,8 @@ import { LanguageProvider } from "@/lib/LanguageProvider";
 import type { LangCode } from "@/lib/i18n";
 import BottomNav from "@/components/BottomNav";
 import LanguageSelector from "@/components/LanguageSelector";
+import { UsInputProvider } from "@/components/us/UsInputContext";
+import AdSenseScript from "@/components/ads/AdSenseScript";
 
 export default function RootBody({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -21,11 +23,14 @@ export default function RootBody({ children }: { children: React.ReactNode }) {
   return (
     <body style={isUsApp ? undefined : { paddingBottom: "calc(64px + env(safe-area-inset-bottom, 0px))" }}>
       <LanguageProvider initialLang={initialLang}>
-        <div className={`fixed right-4 z-50 ${isUsApp ? "bottom-4" : "top-4"}`}>
-          <LanguageSelector />
-        </div>
-        {children}
-        <BottomNav />
+        <UsInputProvider pathname={pathname}>
+          <div className={`fixed right-4 z-50 ${isUsApp ? "bottom-4" : "top-4"}`}>
+            <LanguageSelector />
+          </div>
+          {children}
+          <BottomNav />
+          <AdSenseScript />
+        </UsInputProvider>
       </LanguageProvider>
     </body>
   );

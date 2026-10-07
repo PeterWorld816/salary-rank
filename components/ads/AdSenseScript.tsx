@@ -1,22 +1,26 @@
-// Site-wide AdSense loader — keep this in the root layout so its bootstrap
-// is present in the initial HTML without making routes dynamically rendered.
-import Script from "next/script";
-import { getAdsenseClientId, getProductionHost } from "@/lib/ads";
+"use client";
+
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { useUsInput } from "@/components/us/UsInputContext";
+
+const ADSENSE_CLIENT_ID = "ca-pub-7379794980536826";
 
 export default function AdSenseScript() {
-  const clientId = getAdsenseClientId();
-  const productionHost = getProductionHost();
-  if (!clientId || !productionHost) return null;
+  const { inputUrlCleaned } = useUsInput();
+  const pathname = usePathname();
+  const isCompareInvite = /^\/(?:us|kr)\/compare\//.test(pathname);
 
-  return (
-    <Script id="adsense-loader" strategy="beforeInteractive">
-      {`if (window.location.hostname.toLowerCase() === ${JSON.stringify(productionHost)}) {
-  var adsenseScript = document.createElement("script");
-  adsenseScript.async = true;
-  adsenseScript.crossOrigin = "anonymous";
-  adsenseScript.src = ${JSON.stringify(`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}`)};
-  document.head.appendChild(adsenseScript);
-}`}
-    </Script>
-  );
+  useEffect(() => {
+    if (!inputUrlCleaned || isCompareInvite || document.querySelector("script[data-adsense-loader]")) return;
+
+    const script = document.createElement("script");
+    script.dataset.adsenseLoader = "true";
+    script.async = true;
+    script.crossOrigin = "anonymous";
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`;
+    document.head.appendChild(script);
+  }, [inputUrlCleaned, isCompareInvite]);
+
+  return null;
 }

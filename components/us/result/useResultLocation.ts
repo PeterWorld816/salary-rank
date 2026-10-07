@@ -1,9 +1,8 @@
 "use client";
 // Every /us/result/* step is stateless — it re-derives everything it needs
-// from the URL each render (?st=, ?co=, ?d=, same no-server-storage
-// principle as the rest of /us). This hook is the one place that parses
-// those params, so all callers agree on what "no location picked yet"
-// looks like.
+// from the URL each render (?st=, ?co=). Calculator answers live in shared
+// React state; this hook parses location params so callers agree on what "no
+// location picked yet" looks like.
 //
 // State/county/place can also arrive already resolved from the server (the
 // /us/[state]/[county]/[place] route tree — see those pages' `resolve()`)
@@ -20,7 +19,7 @@
 import { useSearchParams } from "next/navigation";
 import { getStateByAbbr, type StateMeta } from "@/data/us/stateMeta";
 import type { UsCountyIncome, UsPlaceIncome } from "@/lib/usIncomeCalc";
-import { readUsInputFromSearch } from "@/components/us/UsInputPanel";
+import { useUsInput } from "@/components/us/UsInputContext";
 import type { UsInput } from "@/lib/usInput";
 
 export type ResultLocation =
@@ -31,12 +30,11 @@ export type ResultLocation =
       countyFips: string;
       place: UsPlaceIncome | null;
       input: UsInput;
-      qs: string;
       from: string | null;
     }
-  | { ready: false; input: UsInput; qs: string; from: string | null };
+  | { ready: false; input: UsInput; from: string | null };
 
-// `input`/`qs`/`from` are on both branches — a national result (income vs.
+// `input`/`from` are on both branches — a national result (income vs.
 // the whole US) only ever needs `input`, never a county, so callers like
 // OverallResultContent can read those without narrowing on `ready` first.
 // Only the county/state/place-specific fields require `ready: true`.
@@ -46,16 +44,15 @@ export function useResultLocation(
   presetPlace?: UsPlaceIncome | null
 ): ResultLocation {
   const sp = useSearchParams();
-  const qs = sp.toString();
+  const { input } = useUsInput();
   const stateAbbr = sp.get("st");
-  const input = readUsInputFromSearch(sp);
   const from = sp.get("from");
 
   const state = presetState ?? (stateAbbr ? getStateByAbbr(stateAbbr) : null);
   const county = presetCounty ?? null;
   const countyFips = county?.fips ?? null;
 
-  if (!state || !county || !countyFips) return { ready: false, input, qs, from };
+  if (!state || !county || !countyFips) return { ready: false, input, from };
 
   // A place only counts if it's actually inside this county — a stale/
   // mismatched preset (e.g. left over after a county change) silently drops
@@ -63,23 +60,9 @@ export function useResultLocation(
   const rawPlace = presetPlace ?? null;
   const place = rawPlace && rawPlace.countyFips === countyFips ? rawPlace : null;
 
-  return { ready: true, state, county, countyFips, place, input, qs, from };
+  return { ready: true, state, county, countyFips, place, input, from };
 }
 
-// Builds the href to a county's merged SEO+result page
-// (/us/[state]/[county]), carrying forward whatever's already in the query
-// string (d, lang, from) — dropping `pl` since picking a new county
-// invalidates whatever place was selected before.
-export function buildCountyHref(base: string, existing: URLSearchParams, stateAbbr: string, countyFips: string): string {
-  const params = new URLSearchParams(existing);
-  params.delete("pl");
-  const qs = params.toString();
-  return qs ? `${base}/${stateAbbr}/${countyFips}?${qs}` : `${base}/${stateAbbr}/${countyFips}`;
-}
-
-// Same, plus a specific place within that county
-// (/us/[state]/[county]/[place]).
-export function buildPlaceHref(base: string, existing: URLSearchParams, stateAbbr: string, countyFips: string, placeFips: string): string {
-  const qs = existing.toString();
-  return qs ? `${base}/${stateAbbr}/${countyFips}/${placeFips}?${qs}` : `${base}/${stateAbbr}/${countyFips}/${placeFips}`;
+export function buildPlaceHref(base: string, stateAbbr: string, countyFips: string, placeFips: string): string {
+  return `${base}/${stateAbbr}/${countyFips}/${placeFips}`;
 }

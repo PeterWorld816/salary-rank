@@ -43,6 +43,7 @@ export default function ShareButtons({
   cardRef,
   shareTitle,
   shareText,
+  getShareUrl,
   downloadName,
   width,
   height,
@@ -54,6 +55,7 @@ export default function ShareButtons({
   cardRef: RefObject<HTMLDivElement>;
   shareTitle: string;
   shareText: string;
+  getShareUrl: () => string;
   downloadName: string;
   width: number;
   height: number;
@@ -77,7 +79,7 @@ export default function ShareButtons({
   };
 
   const handleShare = async () => {
-    const url = typeof window !== "undefined" ? window.location.href : "";
+    const url = `${window.location.origin}${getShareUrl()}`;
     if (navigator.share) {
       try {
         await navigator.share({ title: shareTitle, text: shareText, url });
