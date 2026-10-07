@@ -12,10 +12,10 @@ export default function AdSenseScript() {
   const isCompareInvite = /^\/(?:us|kr)\/compare\//.test(pathname);
 
   useEffect(() => {
-    if (!inputUrlCleaned || isCompareInvite || document.querySelector("script[data-adsense-loader]")) return;
+    if (!inputUrlCleaned || isCompareInvite || document.getElementById("adsense-loader")) return;
 
     const script = document.createElement("script");
-    script.dataset.adsenseLoader = "true";
+    script.id = "adsense-loader";
     script.async = true;
     script.crossOrigin = "anonymous";
     script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`;
