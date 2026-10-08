@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import { translations } from "./i18n";
 import type { AppLocale } from "./serverLocale";
 import { absoluteUrl } from "./site-url";
+import { shieldShareImagePath } from "./shieldShare";
 
 const SITE_TITLE: Record<AppLocale, string> = {
   us: "What's Your US Income Percentile?",
@@ -90,12 +91,7 @@ export function homeMetadata(locale: AppLocale, pathname: string): Metadata {
 export function personalResultOgImage(
   summary: { percent: number; age?: string; agePercent?: number; state?: string; statePercent?: number }
 ): string {
-  const params = new URLSearchParams({ p: String(summary.percent) });
-  if (summary.age) params.set("age", summary.age);
-  if (summary.agePercent != null) params.set("pa", String(summary.agePercent));
-  if (summary.state) params.set("st", summary.state);
-  if (summary.statePercent != null) params.set("ps", String(summary.statePercent));
-  return `/us/og?${params.toString()}`;
+  return shieldShareImagePath(summary);
 }
 
 // Same dynamic image route (app/us/og/route.tsx), personalized instead by

@@ -35,6 +35,10 @@ export interface Translations {
   share: string;
   save: string;
   saveStory: string;
+  saveImageFormat: string;
+  copyLink: string;
+  shareCardTitle: string;
+  shareCardDescription: string;
   copied: string;
   shareFailed: string;
   saveFailed: string;
@@ -201,6 +205,9 @@ export interface Translations {
   usDashboardOccupationIncomeLabelTemplate: string; // template: {occupation}
   usDashboardHeadlineComboTemplate: string; // template: {baseLabel}, {basePercent}, {bestLabel}, {bestPercent}
   usDashboardHeadlineSingleTemplate: string; // template: {bestLabel} — deliberately omits {bestPercent}, already the big number right above it
+  usRankScopeNational: string;
+  usRankScopeStateTemplate: string; // template: {state}
+  usRankScopeCountyTemplate: string; // template: {county}, {state}
   usDashboardSharePromptTitle: string;
   usDashboardSharePromptDesc: string;
   usDashboardPlaceSectionHeading: string;
@@ -253,6 +260,10 @@ export const translations: Record<LangCode, Translations> = {
     share: "공유하기",
     save: "이미지 저장",
     saveStory: "스토리 저장",
+    saveImageFormat: "이미지 저장 (4:5)",
+    copyLink: "링크 복사",
+    shareCardTitle: "공유 카드",
+    shareCardDescription: "방패 카드와 함께 결과를 공유해보세요.",
     copied: "링크 복사됨!",
     shareFailed: "공유 실패",
     saveFailed: "저장 실패. 다시 시도해주세요.",
@@ -409,7 +420,10 @@ export const translations: Record<LangCode, Translations> = {
     usDashboardAgeNetWorthLabelTemplate: "{age} 순자산",
     usDashboardOccupationIncomeLabelTemplate: "{occupation} 소득",
     usDashboardHeadlineComboTemplate: "{baseLabel} 기준으로는 상위 {basePercent}%지만, {bestLabel} 기준으로는 상위 {bestPercent}%까지 올라가요!",
-    usDashboardHeadlineSingleTemplate: "{bestLabel} 기준으로 계산한 순위예요.",
+    usDashboardHeadlineSingleTemplate: "{bestLabel} 소득 분포에서의 순위예요.",
+    usRankScopeNational: "전국",
+    usRankScopeStateTemplate: "{state}",
+    usRankScopeCountyTemplate: "{county}, {state}",
     usDashboardSharePromptTitle: "공유 카드는 지역을 선택하면 만들어져요",
     usDashboardSharePromptDesc: "지도에서 주(State)와 카운티(County)를 선택하면 공유용 카드와 친구 비교 기능을 쓸 수 있어요.",
     usDashboardPlaceSectionHeading: "도시 선택 (선택사항)",
@@ -458,6 +472,10 @@ export const translations: Record<LangCode, Translations> = {
     share: "Share",
     save: "Save Image",
     saveStory: "Save Story",
+    saveImageFormat: "Save Image (4:5)",
+    copyLink: "Copy Link",
+    shareCardTitle: "Your share card",
+    shareCardDescription: "Share your result with this shield card.",
     copied: "Link copied!",
     shareFailed: "Share failed",
     saveFailed: "Save failed. Please try again.",
@@ -614,7 +632,10 @@ export const translations: Record<LangCode, Translations> = {
     usDashboardAgeNetWorthLabelTemplate: "{age} net worth",
     usDashboardOccupationIncomeLabelTemplate: "{occupation} income",
     usDashboardHeadlineComboTemplate: "By {baseLabel} you're in the top {basePercent}%, but by {bestLabel} you climb to the top {bestPercent}%!",
-    usDashboardHeadlineSingleTemplate: "That's your ranking by {bestLabel}.",
+    usDashboardHeadlineSingleTemplate: "This is your rank in the {bestLabel} income distribution.",
+    usRankScopeNational: "nationwide",
+    usRankScopeStateTemplate: "{state}",
+    usRankScopeCountyTemplate: "{county}, {state}",
     usDashboardSharePromptTitle: "Pick a location to unlock your share card",
     usDashboardSharePromptDesc: "Choose a state and county on the map to get a shareable card and compare with a friend.",
     usDashboardPlaceSectionHeading: "Choose a city (optional)",

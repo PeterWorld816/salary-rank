@@ -11,7 +11,7 @@ import {
   getStateIncomePercentile,
 } from "@/lib/usIncomeCalc";
 import { getStateByAbbr } from "@/data/us/stateMeta";
-import { RECEIPT_IMAGE_HEIGHT, RECEIPT_IMAGE_WIDTH } from "@/lib/receiptCard";
+import { SHARE_IMAGE_HEIGHT, SHARE_IMAGE_WIDTH } from "@/components/us/ShieldShareCard";
 import AdSlot from "@/components/ads/AdSlot";
 import PersonalizedResult from "@/components/us/result/PersonalizedResult";
 
@@ -58,8 +58,8 @@ export function generateMetadata({ params, searchParams }: { params: Params; sea
     return {
       ...pageMetadata(locale, localeBase(locale), m.title, m.description, {
         image,
-        imageWidth: RECEIPT_IMAGE_WIDTH,
-        imageHeight: RECEIPT_IMAGE_HEIGHT,
+        imageWidth: SHARE_IMAGE_WIDTH,
+        imageHeight: SHARE_IMAGE_HEIGHT,
       }),
       robots: { index: false, follow: true },
     };

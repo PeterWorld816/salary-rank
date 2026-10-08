@@ -80,10 +80,9 @@ import netWorthPercentilesUS from "@/data/us/netWorthPercentilesUS.json";
 import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
 import UsInputPanel from "@/components/us/UsInputPanel";
-import ResultCardVisual, { CARD_PREVIEW_MAX_WIDTH, WIDE_WIDTH, WIDE_HEIGHT } from "@/components/us/ResultCardVisual";
+import ShieldShareCard, { WIDE_WIDTH, WIDE_HEIGHT } from "@/components/us/ShieldShareCard";
 import UsShareCardStory, { STORY_WIDTH, STORY_HEIGHT } from "@/components/us/UsShareCardStory";
-import { receiptRankFromPercent, receiptShareText } from "@/lib/receiptCard";
-import { pickFeaturedPercentiles, type NamedPercent } from "@/lib/shareCardCandidates";
+import { shieldShareImagePath, shieldShareText } from "@/lib/shieldShare";
 import DistributionChart from "@/components/DistributionChart";
 import ShareButtons from "@/components/ShareButtons";
 import Spinner from "@/components/Spinner";
@@ -287,17 +286,17 @@ function PersonalizedResultContent({
   const ageBandLabel = ageBand ? tr(ageBand.label) : input.ageBand;
   const genderLabel = tr(US_GENDERS.find((g) => g.id === input.gender)?.label ?? { ko: "", en: "" });
   const maritalLabel = tr(US_MARITAL_STATUSES.find((m) => m.id === input.maritalStatus)?.label ?? { ko: "", en: "" });
-  const receiptRows = [
+  const shareRows = [
     nationalPercentile != null && {
       label: "NATIONWIDE",
       percent: nationalPercentile,
     },
     ageIncomePercentile != null && {
-      label: `AGE BAND · ${ageBandLabel.toUpperCase()}`,
+      label: `AGE ${input.ageBand.replace("-", "–")}`,
       percent: ageIncomePercentile,
     },
     statePercentile != null && state && {
-      label: `STATE · ${state.abbr}`,
+      label: `IN ${state.name.toUpperCase()}`,
       percent: statePercentile,
     },
   ].filter((line): line is { label: string; percent: number } => Boolean(line));
@@ -399,19 +398,6 @@ function PersonalizedResultContent({
   const shouldPlayReveal = revealReady && !reducedMotion;
   const revealGroup = headlineTier ? getTierAnimationGroup(headlineTier) : null;
 
-  // ── Save Story's secondary pill — the runner-up metric next to the same
-  // `best` this headline already picked (pickFeaturedPercentiles's
-  // "featured" always agrees with `best` above, same lowest-percent-wins
-  // rule; only its `secondary` is new information). ──
-  const namedMetrics: NamedPercent[] = metrics.map((m) => ({ key: m.key, label: shortLabels[m.key], percent: m.percent }));
-  const namedIncomeBaseline: NamedPercent | null = incomeBaseline
-    ? { key: incomeBaseline.key, label: shortLabels[incomeBaseline.key], percent: incomeBaseline.percent }
-    : null;
-  const { secondary } = pickFeaturedPercentiles(namedMetrics, namedIncomeBaseline);
-
-  // ── Values shared verbatim between the on-screen ResultCardVisual and its
-  // two hidden capture instances (Save Image/Save Story) below, so all three
-  // can never show different numbers/text for the same result. ──
   // ── The "reveal" flourishes — a brief count-up instead of the number just
   // appearing, plus a real "how many people are near you" line right under
   // it. Both keyed off the same headlineTierPercent/annualIncome the number
@@ -547,9 +533,19 @@ function PersonalizedResultContent({
   const backLabel = ready ? t.usBackToStateMap : t.usBackToUsMap;
 
   const shareTitle = ready && state && locationName ? `${t.usAppTitle} — ${locationName}, ${state.name}` : t.usAppTitle;
+  const shareImageSummary =
+    nationalPercentile != null
+      ? {
+          percent: nationalPercentile,
+          age: input.ageBand,
+          agePercent: ageIncomePercentile ?? undefined,
+          state: state?.abbr.toUpperCase(),
+          statePercent: state ? statePercentile ?? undefined : undefined,
+        }
+      : null;
   const shareText =
     nationalPercentile != null
-      ? receiptShareText(receiptRankFromPercent(nationalPercentile))
+      ? shieldShareText(nationalPercentile)
       : ready && state && locationName
         ? `${locationName}, ${state.name}`
         : t.usAppTitle;
@@ -634,13 +630,8 @@ function PersonalizedResultContent({
         </>
       )}
 
-      {/* ── Headline: the same tier-colored card design used for Save Image/
-          Save Story (ResultCardVisual) — one component, shown on screen and
-          rasterized, so what a visitor sees here and what they save are
-          guaranteed to read identically. Responsive: fills the available
-          width up to a max, scales down cleanly on mobile. Below it, the
-          narrative headline sentence + "people near you" line stay as plain
-          text — copy the compact card design itself doesn't carry. ── */}
+      {/* ── Keep the ordinary result as the percentile headline and
+          distribution chart. The shield card is only shown from the modal. ── */}
       <div className="relative mb-8">
         {headline == null || headlineTierPercent == null || headlineTier == null ? (
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
@@ -648,53 +639,31 @@ function PersonalizedResultContent({
           </div>
         ) : (
           <>
-            <div className="mx-auto w-full" style={{ maxWidth: CARD_PREVIEW_MAX_WIDTH }}>
-              <ResultCardVisual
-                variant="wide"
-                percent={nationalPercentile}
-                rows={receiptRows}
-              />
-            </div>
-            <p className="mt-4 text-center text-[15px] font-semibold leading-snug text-balance text-white/80">{headline}</p>
+            <div className="mx-auto flex max-w-md flex-col items-center rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+              <p className="text-[13px] font-semibold text-white/55">
+                {formatTemplate(t.topPercentTemplate, { percent: headlineTierPercent })}
+              </p>
+              <p className="mt-1 text-center text-[20px] font-extrabold leading-tight text-white">{headline}</p>
+              <div className="mt-4">
+                <DistributionChart
+                  monthlySalary={input.annualIncome}
+                  width={280}
+                  lang={lang}
+                  dark
+                  min={15000}
+                  max={500000}
+                  averageValue={county?.medianHouseholdIncome ?? nationalMedianHouseholdIncome ?? 75000}
+                />
+              </div>
             {similarIncomePopulation != null && (
               <p className="mt-3 text-center text-[12px] leading-relaxed text-white/45">
                 {formatTemplate(t.usSimilarIncomePopulationTemplate, { count: formatPeopleCount(similarIncomePopulation, lang) })}
               </p>
             )}
+            </div>
           </>
         )}
       </div>
-
-      {/* ── Hidden capture instances — same component, same props as the
-          visible card above (never shown on screen, not display:none so
-          html-to-image can still lay them out), pinned to the card's fixed
-          design pixel width so Save Image/Save Story keep producing
-          identical, correctly-scaled 1200x630 / 1080x1920 assets regardless
-          of how the on-screen card is currently scaled. ── */}
-      {headline != null && headlineTierPercent != null && headlineTier != null && (
-        <div className="pointer-events-none absolute left-[-9999px] top-0 overflow-hidden" aria-hidden>
-          <div style={{ width: `${WIDE_WIDTH}px` }}>
-            <ResultCardVisual
-              variant="wide"
-              cardRef={cardRef}
-              percent={nationalPercentile}
-              rows={receiptRows}
-            />
-          </div>
-        </div>
-      )}
-
-      {headline != null && headlineTierPercent != null && headlineTier != null && (
-        <div className="pointer-events-none absolute left-[-9999px] top-0 overflow-hidden" aria-hidden>
-          <div style={{ width: `${STORY_WIDTH}px` }}>
-            <UsShareCardStory
-              cardRef={storyCardRef}
-              percent={nationalPercentile}
-              rows={receiptRows}
-            />
-          </div>
-        </div>
-      )}
 
       {/* ── Share/Save buttons + compare-with-a-friend ── */}
       {ready && state && county ? (
@@ -708,10 +677,29 @@ function PersonalizedResultContent({
               shareText={shareText}
               getShareUrl={getShareUrl}
               downloadName={`us-income-${state.abbr}-${countyFips}.png`}
+              cardPreview={
+                <ShieldShareCard
+                  variant="wide"
+                  cardRef={cardRef}
+                  percent={nationalPercentile}
+                  rows={shareRows}
+                  location={`${locationName ?? state.name}, ${state.abbr.toUpperCase()}`}
+                />
+              }
               storyCardRef={storyCardRef}
               storyWidth={STORY_WIDTH}
               storyHeight={STORY_HEIGHT}
               storyDownloadName={`us-income-story-${state.abbr}-${countyFips}.png`}
+              storyPreview={
+                <UsShareCardStory
+                  cardRef={storyCardRef}
+                  percent={nationalPercentile}
+                  rows={shareRows}
+                  location={`${locationName ?? state.name}, ${state.abbr.toUpperCase()}`}
+                />
+              }
+              downloadImageUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary) : undefined}
+              downloadStoryUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary, "story") : undefined}
             />
           </div>
 
@@ -748,25 +736,6 @@ function PersonalizedResultContent({
       ) : (
         <div className="mb-10">
           <NoDataCard title={t.usDashboardSharePromptTitle} desc={t.usDashboardSharePromptDesc} />
-        </div>
-      )}
-
-      {/* ── Bell curve — the one chart always on screen (besides the
-          headline above). Everything else (mini stat grid, compare chart,
-          gender/marital reference rows, net-worth curve) lives behind "See
-          full breakdown" below. ── */}
-      {(placePercentile != null || countyPercentile != null || statePercentile != null || nationalPercentile != null) && (
-        <div className="mb-8 flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.02] p-5">
-          <DistributionChart
-            monthlySalary={input.annualIncome}
-            width={280}
-            lang={lang}
-            dark
-            min={15000}
-            max={500000}
-            averageValue={county?.medianHouseholdIncome ?? nationalMedianHouseholdIncome ?? 75000}
-          />
-          <p className="mt-2 text-[11px] text-white/30">{formatTemplate(t.usAcs5YearLabel, { range: acs5YearRange })}</p>
         </div>
       )}
 

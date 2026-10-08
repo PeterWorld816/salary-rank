@@ -1,16 +1,16 @@
 "use client";
 // The result-card step shared by the home page (nationwide), /us/[state]
-// (state), and /us/[state]/[county] (county) — the same tier-colored
-// ResultCardVisual design used by PersonalizedResult.tsx's headline, shown
-// on screen and rasterized by Save Image from the exact same component/
-// props (see ResultCardVisual.tsx's own header comment). See
-// useCompactResult.ts for the shared calculation and CompactInsightSection.tsx
-// for the coaching-insight card that goes after that map section.
+// (state), and /us/[state]/[county] (county). The ordinary result stays a
+// percentile headline and distribution chart; the shield card only appears
+// after a share/save action opens the modal. See useCompactResult.ts for the
+// shared calculation and CompactInsightSection.tsx for the coaching insight.
 import { Suspense, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { useLocaleBase } from "@/lib/useLocaleBase";
-import ResultCardVisual, { CARD_PREVIEW_MAX_WIDTH, WIDE_WIDTH, WIDE_HEIGHT } from "@/components/us/ResultCardVisual";
+import ShieldShareCard, { STORY_WIDTH, STORY_HEIGHT, WIDE_WIDTH, WIDE_HEIGHT } from "@/components/us/ShieldShareCard";
+import UsShareCardStory from "@/components/us/UsShareCardStory";
+import DistributionChart from "@/components/DistributionChart";
 import UsInputPanel from "@/components/us/UsInputPanel";
 import { NoDataCard } from "@/components/us/result/ResultBits";
 import Spinner from "@/components/Spinner";
@@ -18,9 +18,10 @@ import ShareButtons from "@/components/ShareButtons";
 import type { StateMeta } from "@/data/us/stateMeta";
 import type { UsCountyIncome } from "@/lib/usIncomeCalc";
 import { useCompactResult } from "@/components/us/result/useCompactResult";
-import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
+import { stripStateSuffix } from "@/lib/usFormat";
 import { buildUsShareHref, US_AGE_BANDS } from "@/lib/usInput";
-import { receiptRankFromPercent, receiptShareText } from "@/lib/receiptCard";
+import { shieldShareImagePath, shieldShareText } from "@/lib/shieldShare";
+import { formatTemplate } from "@/lib/i18n";
 
 function CompactResultCardInner({
   presetState,
@@ -35,6 +36,7 @@ function CompactResultCardInner({
   const base = useLocaleBase();
   const result = useCompactResult(presetState, presetCounty);
   const cardRef = useRef<HTMLDivElement>(null);
+  const storyCardRef = useRef<HTMLDivElement>(null);
   const [shareTarget, setShareTarget] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -50,7 +52,7 @@ function CompactResultCardInner({
     : (presetState?.name ?? null);
 
   const shareTitle = locationName && presetState ? `${t.usAppTitle} — ${locationName}, ${presetState.name}` : t.usAppTitle;
-  const shareText = result.ready ? receiptShareText(receiptRankFromPercent(result.nationalPercentile)) : t.usAppTitle;
+  const shareText = result.ready ? shieldShareText(result.nationalPercentile) : t.usAppTitle;
   const getShareUrl = () => {
     const shareUrl = new URL(buildUsShareHref(base, new URLSearchParams(), result.input, lang), window.location.origin);
     if (presetState) shareUrl.searchParams.set("st", presetState.abbr);
@@ -68,7 +70,7 @@ function CompactResultCardInner({
   // gender-by-age percentiles are omitted rather than estimated.
   const ageBand = US_AGE_BANDS.find((band) => band.id === result.input.ageBand);
   const ageLabel = ageBand ? (lang === "ko" ? ageBand.label.ko : ageBand.label.en) : result.input.ageBand;
-  const receiptRows =
+  const shareRows =
     result.ready
       ? [
           {
@@ -76,15 +78,42 @@ function CompactResultCardInner({
             percent: result.nationalPercentile,
           },
           result.ageIncomePercentile != null && {
-            label: `AGE BAND · ${ageLabel.toUpperCase()}`,
+            label: `AGE ${ageLabel.toUpperCase()}`,
             percent: result.ageIncomePercentile,
           },
           result.statePercentile != null && presetState && {
-            label: `STATE · ${presetState.abbr}`,
+            label: `IN ${presetState.name.toUpperCase()}`,
             percent: result.statePercentile,
           },
         ].filter((line): line is { label: string; percent: number } => Boolean(line))
       : [];
+  const shareImageSummary = result.ready
+    ? {
+        percent: result.nationalPercentile,
+        age: result.input.ageBand,
+        agePercent: result.ageIncomePercentile ?? undefined,
+        state: presetState?.abbr.toUpperCase(),
+        statePercent: presetState ? result.statePercentile ?? undefined : undefined,
+      }
+    : null;
+  const shareLocation = locationName && presetState ? `${locationName}, ${presetState.abbr.toUpperCase()}` : presetState?.abbr.toUpperCase() ?? "United States";
+  const cardPreview = (
+    <ShieldShareCard
+      variant="wide"
+      percent={result.ready ? result.nationalPercentile : null}
+      rows={shareRows}
+      location={shareLocation}
+      cardRef={cardRef}
+    />
+  );
+  const storyPreview = (
+    <UsShareCardStory
+      percent={result.ready ? result.nationalPercentile : null}
+      rows={shareRows}
+      location={shareLocation}
+      cardRef={storyCardRef}
+    />
+  );
 
   return (
     <>
@@ -92,55 +121,80 @@ function CompactResultCardInner({
       <div className="mx-auto max-w-2xl px-6 pt-8">
         {result.ready ? (
           <>
-            <div className="mx-auto w-full" style={{ maxWidth: CARD_PREVIEW_MAX_WIDTH }}>
-              <ResultCardVisual
-                variant="wide"
-                percent={result.nationalPercentile}
-                rows={receiptRows}
-              />
-            </div>
-
-            {/* ── Hidden capture instance — same component, same props as
-                the visible card above, pinned to its fixed design pixel
-                width so Save Image keeps producing a correctly-scaled
-                1200x630 asset regardless of how the on-screen card is
-                currently scaled. ── */}
-            <div className="pointer-events-none absolute left-[-9999px] top-0 overflow-hidden" aria-hidden>
-              <div style={{ width: `${WIDE_WIDTH}px` }}>
-                <ResultCardVisual
-                  variant="wide"
-                  cardRef={cardRef}
-                  percent={result.nationalPercentile}
-                  rows={receiptRows}
+            <div className="mx-auto mb-8 w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+              <p className="text-center text-[13px] font-semibold text-white/55">
+                {formatTemplate(t.topPercentTemplate, { percent: result.incomePercent })}
+              </p>
+              <h2 className="mt-1 text-center text-[22px] font-extrabold leading-tight text-white">
+                {formatTemplate(t.usDashboardHeadlineSingleTemplate, {
+                  bestLabel:
+                    result.level === "county"
+                      ? formatTemplate(t.usRankScopeCountyTemplate, {
+                          county: locationName ?? "",
+                          state: presetState?.name ?? "",
+                        })
+                      : result.level === "state"
+                        ? formatTemplate(t.usRankScopeStateTemplate, { state: presetState?.name ?? "" })
+                        : t.usRankScopeNational,
+                })}
+              </h2>
+              <div className="mt-4 flex justify-center">
+                <DistributionChart
+                  monthlySalary={result.input.annualIncome}
+                  width={280}
+                  lang={lang}
+                  dark
+                  min={15000}
+                  max={500000}
+                  averageValue={result.medianForChart}
                 />
               </div>
+              <p className="mt-2 text-center text-[11px] text-white/35">
+                {formatTemplate(t.usAcs5YearLabel, { range: "2019–2023" })}
+              </p>
             </div>
 
             {shareTarget
               ? createPortal(
-                  <div className="mx-auto w-full" style={{ maxWidth: CARD_PREVIEW_MAX_WIDTH }}>
+                  <div className="mx-auto w-full" style={{ maxWidth: 440 }}>
                     <ShareButtons
                       cardRef={cardRef}
+                      storyCardRef={storyCardRef}
                       width={WIDE_WIDTH}
                       height={WIDE_HEIGHT}
+                      storyWidth={STORY_WIDTH}
+                      storyHeight={STORY_HEIGHT}
                       shareTitle={shareTitle}
                       shareText={shareText}
                       getShareUrl={getShareUrl}
                       downloadName={downloadName}
+                      storyDownloadName={`story-${downloadName}`}
+                      cardPreview={cardPreview}
+                      storyPreview={storyPreview}
+                      downloadImageUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary) : undefined}
+                      downloadStoryUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary, "story") : undefined}
                     />
                   </div>,
                   shareTarget
                 )
               : !shareAfterMapId && (
-                  <div className="mx-auto mt-4 w-full" style={{ maxWidth: CARD_PREVIEW_MAX_WIDTH }}>
+                  <div className="mx-auto mt-4 w-full" style={{ maxWidth: 440 }}>
                     <ShareButtons
                       cardRef={cardRef}
+                      storyCardRef={storyCardRef}
                       width={WIDE_WIDTH}
                       height={WIDE_HEIGHT}
+                      storyWidth={STORY_WIDTH}
+                      storyHeight={STORY_HEIGHT}
                       shareTitle={shareTitle}
                       shareText={shareText}
                       getShareUrl={getShareUrl}
                       downloadName={downloadName}
+                      storyDownloadName={`story-${downloadName}`}
+                      cardPreview={cardPreview}
+                      storyPreview={storyPreview}
+                      downloadImageUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary) : undefined}
+                      downloadStoryUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary, "story") : undefined}
                     />
                   </div>
                 )}

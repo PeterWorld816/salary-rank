@@ -32,5 +32,14 @@ export function receiptShareText(rank: number): string {
   return `I'm #${rank} out of 100 Americans (grade ${grade.label}). Where do you rank?`;
 }
 
+export function formatReceiptDate(date = new Date()): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date).replace(",", "").toUpperCase();
+}
+
 export const RECEIPT_IMAGE_WIDTH = 1080;
 export const RECEIPT_IMAGE_HEIGHT = 1350;

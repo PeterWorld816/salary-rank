@@ -1,5 +1,5 @@
 import type { RefObject } from "react";
-import ResultCardVisual, { STORY_WIDTH, STORY_HEIGHT, type ReceiptRankRow } from "@/components/us/ResultCardVisual";
+import ShieldShareCard, { STORY_WIDTH, STORY_HEIGHT, type ShieldRankRow } from "@/components/us/ShieldShareCard";
 
 export { STORY_WIDTH, STORY_HEIGHT };
 
@@ -7,10 +7,23 @@ export default function UsShareCardStory({
   percent,
   rows,
   cardRef,
+  location,
+  noDataMessage,
 }: {
   percent: number | null;
-  rows: ReceiptRankRow[];
+  rows: ShieldRankRow[];
   cardRef?: RefObject<HTMLDivElement>;
+  location?: string;
+  noDataMessage?: string;
 }) {
-  return <ResultCardVisual variant="story" cardRef={cardRef} percent={percent} rows={rows} />;
+  return (
+    <ShieldShareCard
+      variant="story"
+      cardRef={cardRef}
+      percent={percent}
+      rows={rows}
+      location={location}
+      noDataMessage={noDataMessage}
+    />
+  );
 }

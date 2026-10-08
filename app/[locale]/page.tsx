@@ -11,7 +11,7 @@ import {
   getStateIncomePercentile,
 } from "@/lib/usIncomeCalc";
 import { getStateByAbbr } from "@/data/us/stateMeta";
-import { RECEIPT_IMAGE_HEIGHT, RECEIPT_IMAGE_WIDTH } from "@/lib/receiptCard";
+import { SHARE_IMAGE_HEIGHT, SHARE_IMAGE_WIDTH } from "@/components/us/ShieldShareCard";
 import UsHomeClient from "./UsHomeClient";
 import AdSlot from "@/components/ads/AdSlot";
 
@@ -52,7 +52,7 @@ export function generateMetadata({ params, searchParams }: { params: Params; sea
     robots: { index: false, follow: true },
     openGraph: {
       ...metadata.openGraph,
-      images: [{ url: image, width: RECEIPT_IMAGE_WIDTH, height: RECEIPT_IMAGE_HEIGHT }],
+      images: [{ url: image, width: SHARE_IMAGE_WIDTH, height: SHARE_IMAGE_HEIGHT }],
     },
     twitter: { ...metadata.twitter, images: [image] },
   };

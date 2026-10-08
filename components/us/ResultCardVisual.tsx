@@ -1,5 +1,6 @@
+"use client";
 import type { CSSProperties, RefObject } from "react";
-import { getReceiptGrade, receiptRankFromPercent } from "@/lib/receiptCard";
+import { formatReceiptDate, getReceiptGrade, receiptRankFromPercent } from "@/lib/receiptCard";
 import { siteHost } from "@/components/us/ShareCardBits";
 
 export const WIDE_WIDTH = 360;
@@ -18,189 +19,252 @@ export type ResultCardVisualProps = {
   cardRef?: RefObject<HTMLDivElement>;
   percent: number | null;
   rows: ReceiptRankRow[];
+  gender?: string;
+  ageBand?: string;
+  location?: string;
+  date?: string;
   noDataMessage?: string;
 };
 
-function ReceiptCard({ percent, rows }: { percent: number; rows: ReceiptRankRow[] }) {
-  const rank = receiptRankFromPercent(percent);
+const PAPER = "#f7f4ea";
+const INK = "#1b1b19";
+
+function scaled(value: number): string {
+  return `calc(100cqw / 360 * ${value})`;
+}
+
+function ReceiptCard({
+  percent,
+  rows,
+  gender,
+  ageBand,
+  location,
+  date,
+}: Omit<ResultCardVisualProps, "variant" | "cardRef" | "noDataMessage">) {
+  const rank = receiptRankFromPercent(percent ?? 0);
   const grade = getReceiptGrade(rank);
-  const scaled = (value: number) => `calc(100cqw / 360 * ${value})`;
-  const paper: CSSProperties = {
-    display: "flex",
-    width: "100%",
-    height: "100%",
-    flexDirection: "column",
-    justifyContent: "space-evenly",
-    gap: scaled(7),
-    position: "relative",
+  const displayGender = gender?.toUpperCase() ?? "—";
+  const displayAge = ageBand?.toUpperCase() ?? "—";
+  const displayLocation = location?.toUpperCase() ?? "UNITED STATES";
+  const displayDate = date ?? formatReceiptDate();
+  const activeScale = grade.label.startsWith("A") ? "A" : grade.label.startsWith("B") ? "B" : grade.label.startsWith("C") ? "C" : grade.label;
+  const paperStyle: CSSProperties = {
+    position: "absolute",
+    left: scaled(110 / 3),
+    top: scaled(56 / 3),
+    width: scaled(860 / 3),
+    height: scaled(1330 / 3),
     overflow: "hidden",
-    backgroundColor: "#f7f4ea",
-    color: "#1b1b18",
-    padding: `${scaled(16)} ${scaled(22)}`,
-    fontFamily: '"Courier Prime", "Courier New", monospace',
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    gap: scaled(1),
+    padding: `${scaled(14 / 3)} ${scaled(54 / 3)} 0`,
+    backgroundColor: PAPER,
+    color: INK,
     boxSizing: "border-box",
+    fontFamily: '"Courier Prime", "Courier New", monospace',
+  };
+  const dashedRule: CSSProperties = {
+    width: "100%",
+    flexShrink: 0,
+    borderTop: `${scaled(4 / 3)} dashed ${INK}`,
+    margin: `${scaled(12 / 3)} 0`,
+  };
+  const rowStyle: CSSProperties = {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: scaled(4),
+    fontSize: scaled(10),
+    lineHeight: 1.4,
+    textTransform: "uppercase",
+  };
+  const labelStyle: CSSProperties = {
+    display: "flex",
+    fontSize: scaled(8),
+    fontWeight: 700,
+    letterSpacing: "0.14em",
   };
 
   return (
-    <div style={paper}>
-      <div style={{ display: "flex", flexDirection: "column", gap: scaled(3), borderBottom: `${scaled(1)} dashed #9c998e`, paddingBottom: scaled(6) }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ display: "flex", fontFamily: '"Archivo Black", Impact, sans-serif', fontSize: scaled(20), letterSpacing: "0.01em" }}>
+    <div
+      data-receipt-card="true"
+      style={{
+        position: "relative",
+        width: "100%",
+        aspectRatio: "1080 / 1350",
+        overflow: "hidden",
+        containerType: "inline-size",
+        backgroundColor: grade.background,
+      }}
+    >
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          zIndex: 1,
+          top: scaled((56 - 22) / 3),
+          left: scaled(110 / 3),
+          width: scaled(860 / 3),
+          height: scaled(22 / 3),
+          backgroundImage: `linear-gradient(135deg, transparent ${scaled(11 / 3)}, ${PAPER} 0) 0 0 / ${scaled(22 / 3)} ${scaled(22 / 3)}, linear-gradient(-135deg, transparent ${scaled(11 / 3)}, ${PAPER} 0) 0 0 / ${scaled(22 / 3)} ${scaled(22 / 3)}`,
+        }}
+      />
+      <div style={paperStyle}>
+        <header style={{ display: "flex", flexDirection: "column", textAlign: "center" }}>
+          <div style={{ display: "flex", justifyContent: "center", fontFamily: '"Archivo Black", Impact, sans-serif', fontSize: scaled(58 / 3), lineHeight: 1, letterSpacing: "0.02em" }}>
             INCOME RECEIPT
-          </span>
-          <span style={{ display: "flex", fontSize: scaled(9), fontWeight: 700 }}>US · 001</span>
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: scaled(8.5), fontWeight: 700, textTransform: "uppercase" }}>
-          <span style={{ display: "flex" }}>SHOPPER</span>
-          <span style={{ display: "flex" }}>100 AMERICANS</span>
-        </div>
-      </div>
-
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: scaled(8), paddingTop: scaled(4) }}>
-        <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-          <span style={{ display: "flex", fontSize: scaled(9), fontWeight: 700, letterSpacing: "0.05em" }}>YOUR PLACE IN LINE</span>
-          <div style={{ display: "flex", alignItems: "baseline", gap: scaled(5), fontFamily: '"Archivo Black", Impact, sans-serif', lineHeight: 1 }}>
-            <span style={{ display: "flex", fontSize: scaled(64), letterSpacing: "-0.06em" }}>#{rank}</span>
-            <span style={{ display: "flex", fontSize: scaled(17) }}>/ 100</span>
           </div>
-          <span style={{ display: "flex", fontSize: scaled(9) }}>{100 - rank} behind you</span>
+          <div style={{ display: "flex", justifyContent: "center", marginTop: scaled(10 / 3), color: "#5a5a52", fontSize: scaled(24 / 3), letterSpacing: "0.04em" }}>
+            RANK MART · NO. {String(rank).padStart(3, "0")} · {displayDate}
+          </div>
+        </header>
+
+        <div style={dashedRule} />
+        <div style={rowStyle}>
+          <span>SHOPPER</span>
+          <strong>{displayGender} · {displayAge}</strong>
+        </div>
+        <div style={rowStyle}>
+          <span>LOCATION</span>
+          <strong>{displayLocation}</strong>
+        </div>
+        <div style={dashedRule} />
+
+        <div style={{ display: "flex", alignItems: "center", gap: scaled(34 / 3) }}>
+          <div style={{ display: "flex", flex: 1, minWidth: 0, flexDirection: "column" }}>
+            <span style={labelStyle}>YOUR SPOT IN LINE</span>
+            <span style={{ display: "flex", marginTop: scaled(6 / 3), fontFamily: '"Archivo Black", Impact, sans-serif', fontSize: scaled(190 / 3), lineHeight: 0.9, letterSpacing: "-0.04em", whiteSpace: "nowrap" }}>
+              #{rank}
+            </span>
+            <strong style={{ display: "flex", marginTop: scaled(6 / 3), fontSize: scaled(28 / 3), whiteSpace: "nowrap" }}>OUT OF 100 AMERICANS</strong>
+            <span style={{ display: "flex", marginTop: scaled(12 / 3), color: "#3d3d37", fontSize: scaled(26 / 3), lineHeight: 1.3, whiteSpace: "nowrap" }}>{100 - rank} are behind you.</span>
+          </div>
+          <div
+            aria-label={`${rank} out of 100 position`}
+            style={{
+              display: "flex",
+              width: scaled(310 / 3),
+              flex: "0 0 auto",
+              flexWrap: "wrap",
+              alignContent: "center",
+            }}
+          >
+            {Array.from({ length: 100 }, (_, index) => {
+              const position = index + 1;
+              const isYou = position === rank;
+              const ahead = position < rank;
+              return (
+                <span key={position} style={{ display: "flex", width: "10%", height: scaled(25 / 3), alignItems: "center", justifyContent: "center" }}>
+                  <span
+                    style={{
+                      display: "flex",
+                      width: scaled(isYou ? 20 / 3 : 18 / 3),
+                      height: scaled(isYou ? 20 / 3 : 18 / 3),
+                      borderRadius: "50%",
+                      backgroundColor: isYou ? grade.background : ahead ? INK : "#d9d4c3",
+                      ...(isYou ? { boxShadow: `0 0 0 ${scaled(5 / 3)} ${PAPER}, 0 0 0 ${scaled(9 / 3)} ${grade.background}`, transform: "scale(1.25)", zIndex: 2 } : {}),
+                    }}
+                  />
+                </span>
+              );
+            })}
+          </div>
         </div>
 
-        <div
-          aria-label={`${rank} out of 100 position`}
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignContent: "center",
-            justifyContent: "center",
-            width: scaled(110),
-            height: scaled(66),
-            flexShrink: 0,
-            gap: `${scaled(2)} ${scaled(4)}`,
-          }}
-        >
-          {Array.from({ length: 100 }, (_, index) => {
-            const position = index + 1;
-            const isYou = position === rank;
-            const ahead = position < rank;
+        <div style={dashedRule} />
+        <div style={{ display: "flex", flexDirection: "column", gap: scaled(3 / 3) }}>
+          {rows.map((row) => {
+            const rowRank = receiptRankFromPercent(row.percent);
             return (
-              <span
-                key={position}
-                style={{
-                  display: "flex",
-                  flex: "0 0 auto",
-                  width: scaled(isYou ? 8 : 6),
-                  height: scaled(isYou ? 8 : 6),
-                  borderRadius: "50%",
-                  backgroundColor: isYou ? grade.background : ahead ? "#25251f" : "#d7d0bd",
-                  border: isYou ? `${scaled(1.5)} solid #1b1b18` : undefined,
-                  boxShadow: isYou ? `0 0 0 ${scaled(1.5)} ${grade.background}` : undefined,
-                  boxSizing: "border-box",
-                }}
-              />
+              <div key={row.label} style={rowStyle}>
+                <span>{row.label}</span>
+                <strong>#{rowRank} / 100</strong>
+              </div>
             );
           })}
         </div>
-      </div>
+        <div style={dashedRule} />
 
-      <div style={{ display: "flex", flexDirection: "column", gap: scaled(4), borderTop: `${scaled(1)} dashed #9c998e`, borderBottom: `${scaled(1)} dashed #9c998e`, padding: `${scaled(6)} 0` }}>
-        <div style={{ display: "flex", alignItems: "center", gap: scaled(9) }}>
-          <div style={{ display: "flex", width: scaled(64), height: scaled(64), flexShrink: 0, alignItems: "center", justifyContent: "center", transform: "rotate(-8deg)", border: `${scaled(2.5)} solid ${grade.background}`, color: grade.background, fontFamily: '"Archivo Black", Impact, sans-serif', fontSize: scaled(40), lineHeight: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: scaled(36 / 3) }}>
+          <div style={{ display: "flex", width: scaled(200 / 3), height: scaled(200 / 3), flex: "0 0 auto", alignItems: "center", justifyContent: "center", border: `${scaled(8 / 3)} solid ${INK}`, fontFamily: '"Archivo Black", Impact, sans-serif', fontSize: scaled(130 / 3), lineHeight: 1 }}>
             {grade.label}
           </div>
-          <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0, gap: scaled(2) }}>
-            <span style={{ display: "flex", fontSize: scaled(8), fontWeight: 700, letterSpacing: "0.06em" }}>INCOME GRADE</span>
-            <span style={{ display: "flex", fontSize: scaled(9.5), fontWeight: 700, lineHeight: 1.15 }}>{grade.line}</span>
-            <div style={{ display: "flex", gap: scaled(2), marginTop: scaled(1) }}>
-              {["S", "A+", "A", "B+", "B", "C+", "C", "D"].map((label) => (
-                <span key={label} style={{ display: "flex", minWidth: scaled(10), justifyContent: "center", border: `${scaled(0.5)} solid #77746b`, padding: `0 ${scaled(1)}`, fontSize: scaled(6.5), fontWeight: label === grade.label ? 700 : 400, backgroundColor: label === grade.label ? grade.background : "transparent", color: label === grade.label ? "#fff" : "#1b1b18" }}>
-                  {label}
-                </span>
-              ))}
+          <div style={{ display: "flex", minWidth: 0, flex: 1, flexDirection: "column" }}>
+            <span style={{ ...labelStyle, marginBottom: scaled(8 / 3) }}>INCOME GRADE</span>
+            <strong style={{ display: "flex", fontSize: scaled(34 / 3), lineHeight: 1.2 }}>{grade.line}</strong>
+            <div style={{ display: "flex", gap: scaled(10 / 3), marginTop: scaled(18 / 3) }}>
+              {["S", "A", "B", "C", "D"].map((label) => {
+                const selected = label === activeScale;
+                return (
+                  <span key={label} style={{ display: "flex", width: scaled(54 / 3), height: scaled(46 / 3), alignItems: "center", justifyContent: "center", border: `${scaled(3 / 3)} solid ${INK}`, backgroundColor: selected ? INK : "transparent", color: selected ? PAPER : INK, fontSize: scaled(26 / 3), fontWeight: 700 }}>
+                    {label}
+                  </span>
+                );
+              })}
             </div>
           </div>
         </div>
-      </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: scaled(2), padding: `${scaled(1)} 0` }}>
-        {rows.map((row) => {
-          const rowRank = receiptRankFromPercent(row.percent);
-          return (
-            <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: scaled(6), fontSize: scaled(11.5) }}>
-              <span style={{ display: "flex", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.label}</span>
-              <span style={{ display: "flex", flexShrink: 0, fontWeight: 700 }}>#{rowRank} / 100</span>
-            </div>
-          );
-        })}
-      </div>
-
-      <div style={{ display: "flex", justifyContent: "space-between", position: "relative", minHeight: scaled(28), alignItems: "center", overflow: "hidden" }}>
-        <div aria-hidden="true" style={{ display: "flex", width: "100%", height: scaled(22), alignItems: "stretch", gap: scaled(1) }}>
-          {Array.from({ length: 64 }, (_, index) => (
-            <span key={index} style={{ display: "flex", width: scaled(index % 7 === 0 ? 2 : index % 3 === 0 ? 1.5 : 1), backgroundColor: "#1b1b18", flexShrink: 0 }} />
-          ))}
+        <div style={{ position: "relative", borderTop: `${scaled(4 / 3)} dashed ${INK}`, paddingTop: scaled(14 / 3) }}>
+          <div aria-hidden="true" style={{ display: "flex", width: "100%", height: scaled(56 / 3), background: `repeating-linear-gradient(90deg, ${INK} 0 ${scaled(4 / 3)}, transparent ${scaled(4 / 3)} ${scaled(9 / 3)}, ${INK} ${scaled(9 / 3)} ${scaled(11 / 3)}, transparent ${scaled(11 / 3)} ${scaled(18 / 3)}, ${INK} ${scaled(18 / 3)} ${scaled(24 / 3)}, transparent ${scaled(24 / 3)} ${scaled(28 / 3)})` }} />
+          <span style={{ display: "flex", position: "absolute", right: scaled(20), top: scaled(-54 / 3), transform: "rotate(-9deg)", border: `${scaled(7 / 3)} solid ${grade.background}`, borderRadius: scaled(12 / 3), padding: `${scaled(6 / 3)} ${scaled(20 / 3)}`, background: "rgba(247,244,234,.88)", color: grade.background, fontFamily: '"Archivo Black", Impact, sans-serif', fontSize: scaled(40 / 3), letterSpacing: "0.04em", whiteSpace: "nowrap" }}>
+            {grade.stamp}
+          </span>
         </div>
-        <span
-          style={{
-            display: "flex",
-            position: "absolute",
-            right: scaled(8),
-            top: scaled(1),
-            transform: "rotate(-9deg)",
-            border: `${scaled(2)} solid ${grade.background}`,
-            color: grade.background,
-            backgroundColor: "#f7f4ea",
-            padding: `${scaled(4)} ${scaled(7)}`,
-            fontFamily: '"Archivo Black", Impact, sans-serif',
-            fontSize: scaled(10),
-            lineHeight: 1,
-            whiteSpace: "nowrap",
-          }}
-        >
-          {grade.stamp}
-        </span>
+        <div style={{ display: "flex", justifyContent: "center", fontSize: scaled(28 / 3), fontWeight: 700, textAlign: "center" }}>THANK YOU. COME RANK AGAIN.</div>
+        <div style={{ display: "flex", flexDirection: "column", marginTop: scaled(8 / 3), color: "#5a5a52", fontSize: scaled(24 / 3), lineHeight: 1.35, textAlign: "center" }}>
+          <span>WHERE DO YOU RANK?</span>
+          <strong style={{ display: "flex", justifyContent: "center", fontSize: scaled(24 / 3) }}>{siteHost()}/us</strong>
+        </div>
+        <div style={{ display: "flex", justifyContent: "center", marginTop: scaled(8 / 3), color: "#77776d", fontSize: scaled(19 / 3), textAlign: "center" }}>
+          For fun. Grades are not a measure of your worth.
+        </div>
       </div>
-
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: scaled(7.5), lineHeight: 1.1 }}>
-        <span style={{ display: "flex" }}>THANK YOU. COME RANK AGAIN.</span>
-        <span style={{ display: "flex", fontFamily: '"Archivo Black", Impact, sans-serif', fontSize: scaled(8) }}>{siteHost()}</span>
-      </div>
-      <span style={{ display: "flex", justifyContent: "center", fontSize: scaled(6), lineHeight: 1.1, textAlign: "center" }}>
-        For fun. Grades are not a measure of your worth.
-      </span>
     </div>
   );
 }
 
-export default function ResultCardVisual({ variant, cardRef, percent, rows, noDataMessage }: ResultCardVisualProps) {
+export default function ResultCardVisual({
+  variant,
+  cardRef,
+  percent,
+  rows,
+  gender,
+  ageBand,
+  location,
+  date,
+  noDataMessage,
+}: ResultCardVisualProps) {
+  const hasResult = percent != null;
+  const backgroundColor = hasResult ? getReceiptGrade(receiptRankFromPercent(percent)).background : "#2f55ff";
   const isStory = variant === "story";
-  const backgroundColor = percent == null ? "#2f55ff" : getReceiptGrade(receiptRankFromPercent(percent)).background;
-  const rootStyle: CSSProperties = {
-    containerType: "inline-size",
-    width: "100%",
-    height: "auto",
-    aspectRatio: isStory ? `${STORY_WIDTH} / ${STORY_HEIGHT}` : `${WIDE_WIDTH} / ${WIDE_HEIGHT}`,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-    backgroundColor,
-    padding: isStory ? "0" : "calc(100cqw / 360 * 12)",
-    boxSizing: "border-box",
-  };
-
   return (
-    <div ref={cardRef} data-receipt-card="true" style={rootStyle}>
-      {percent == null ? (
-        <div style={{ display: "flex", color: "#f7f4ea", fontFamily: '"Courier Prime", monospace', fontSize: 16 }}>{noDataMessage}</div>
-      ) : isStory ? (
-        <div style={{ display: "flex", width: "100%", height: "70.3125%", maxHeight: "calc(100% - 190px)", aspectRatio: "360 / 450", containerType: "inline-size" }}>
-          <ReceiptCard percent={percent} rows={rows} />
-        </div>
+    <div
+      ref={cardRef}
+      data-receipt-capture="true"
+      style={{
+        containerType: "inline-size",
+        position: "relative",
+        width: "100%",
+        aspectRatio: isStory ? `${STORY_WIDTH} / ${STORY_HEIGHT}` : `${WIDE_WIDTH} / ${WIDE_HEIGHT}`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+        backgroundColor,
+      }}
+    >
+      {hasResult ? (
+        isStory ? (
+          <div style={{ position: "absolute", top: "13.02%", left: 0, width: "100%", height: "70.31%", containerType: "inline-size" }}>
+            <ReceiptCard percent={percent} rows={rows} gender={gender} ageBand={ageBand} location={location} date={date} />
+          </div>
+        ) : (
+          <ReceiptCard percent={percent} rows={rows} gender={gender} ageBand={ageBand} location={location} date={date} />
+        )
       ) : (
-        <div style={{ display: "flex", width: "100%", height: "100%", containerType: "inline-size" }}>
-          <ReceiptCard percent={percent} rows={rows} />
-        </div>
+        <div style={{ display: "flex", color: PAPER, fontFamily: '"Courier Prime", monospace', fontSize: 16 }}>{noDataMessage}</div>
       )}
     </div>
   );

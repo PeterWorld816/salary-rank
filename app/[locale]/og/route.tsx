@@ -1,7 +1,13 @@
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
 import { getStateByAbbr } from "@/data/us/stateMeta";
-import { getReceiptGrade, receiptRankFromPercent, RECEIPT_IMAGE_HEIGHT, RECEIPT_IMAGE_WIDTH } from "@/lib/receiptCard";
+import ShieldShareCard, {
+  SHARE_IMAGE_HEIGHT,
+  SHARE_IMAGE_WIDTH,
+  STORY_IMAGE_HEIGHT,
+  STORY_IMAGE_WIDTH,
+  type ShieldRankRow,
+} from "@/components/us/ShieldShareCard";
 import { getSiteUrl } from "@/lib/site-url";
 import { formatUsd } from "@/lib/usFormat";
 
@@ -16,33 +22,6 @@ const COPY = {
   en: { fallback: "What's Your Income Percentile?", top: (p: number) => `Top ${p}%` },
   ko: { fallback: "미국 소득 상위 몇 %?", top: (p: number) => `상위 ${p}%` },
 } as const;
-
-let receiptFontsPromise:
-  | Promise<{ name: string; data: ArrayBuffer; weight: 400 | 700; style: "normal" }[]>
-  | undefined;
-
-async function loadReceiptFonts() {
-  receiptFontsPromise ??= Promise.all([
-    fetch(new URL("/fonts/archivo-black.ttf", getSiteUrl())),
-    fetch(new URL("/fonts/courier-prime-regular.ttf", getSiteUrl())),
-    fetch(new URL("/fonts/courier-prime-bold.ttf", getSiteUrl())),
-  ]).then(async ([archivo, courierRegular, courierBold]) => {
-    for (const response of [archivo, courierRegular, courierBold]) {
-      if (!response.ok) throw new Error(`Receipt font request failed: ${response.status}`);
-    }
-    const [archivoData, courierRegularData, courierBoldData] = await Promise.all([
-      archivo.arrayBuffer(),
-      courierRegular.arrayBuffer(),
-      courierBold.arrayBuffer(),
-    ]);
-    return [
-      { name: "Archivo Black", data: archivoData, weight: 400 as const, style: "normal" as const },
-      { name: "Courier Prime", data: courierRegularData, weight: 400 as const, style: "normal" as const },
-      { name: "Courier Prime", data: courierBoldData, weight: 700 as const, style: "normal" as const },
-    ];
-  });
-  return receiptFontsPromise;
-}
 
 async function loadKoreanFont(text: string) {
   try {
@@ -109,129 +88,37 @@ function LocationCard({ heading, location, detail }: { heading: string; location
   );
 }
 
-function ReceiptImage({
+function PersonalShareImage({
   percent,
   age,
   agePercent,
-  state,
+  stateAbbr,
+  location,
   statePercent,
+  variant,
 }: {
   percent: number;
   age: string | null;
   agePercent: number | null;
-  state: string | null;
+  stateAbbr: string | null;
+  location: string;
   statePercent: number | null;
+  variant: "wide" | "story";
 }) {
-  const rank = receiptRankFromPercent(percent);
-  const grade = getReceiptGrade(rank);
-  const rows = [
+  const rows: ShieldRankRow[] = [
     { label: "NATIONWIDE", percent },
-    age && agePercent != null ? { label: `AGE BAND · ${age.toUpperCase()}`, percent: agePercent } : null,
-    state && statePercent != null ? { label: `STATE · ${state}`, percent: statePercent } : null,
-  ].filter((row): row is { label: string; percent: number } => row != null);
-  const textStyle = { display: "flex", fontFamily: "Courier Prime", color: "#1b1b18" };
+    age && agePercent != null ? { label: `AGE ${age.replace("-", "–").toUpperCase()}`, percent: agePercent } : null,
+    stateAbbr && statePercent != null ? { label: `IN ${location.toUpperCase()}`, percent: statePercent } : null,
+  ].filter((row): row is ShieldRankRow => row != null);
 
   return (
-    <div style={{ display: "flex", width: "100%", height: "100%", backgroundColor: grade.background, padding: 36, boxSizing: "border-box" }}>
-      <div style={{ display: "flex", width: "100%", height: "100%", flexDirection: "column", justifyContent: "space-between", position: "relative", overflow: "hidden", backgroundColor: "#f7f4ea", color: "#1b1b18", padding: "48px 66px", boxSizing: "border-box" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: 9, borderBottom: "3px dashed #9c998e", paddingBottom: 18 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ ...textStyle, fontFamily: "Archivo Black", fontSize: 57 }}>INCOME RECEIPT</span>
-            <span style={{ ...textStyle, fontSize: 27, fontWeight: 700 }}>US · 001</span>
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 25, fontWeight: 700 }}>
-            <span style={{ ...textStyle }}>SHOPPER</span>
-            <span style={{ ...textStyle }}>100 AMERICANS</span>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 36 }}>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <span style={{ ...textStyle, fontSize: 27, fontWeight: 700, letterSpacing: "0.05em" }}>YOUR PLACE IN LINE</span>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 15, fontFamily: "Archivo Black", lineHeight: 1 }}>
-              <span style={{ display: "flex", fontSize: 192, letterSpacing: "-0.06em" }}>#{rank}</span>
-              <span style={{ display: "flex", fontSize: 51 }}>/ 100</span>
-            </div>
-            <span style={{ ...textStyle, fontSize: 27 }}>{100 - rank} behind you</span>
-          </div>
-
-          <div style={{ display: "flex", flexWrap: "wrap", alignContent: "center", justifyContent: "center", width: 330, height: 240, flexShrink: 0, gap: "6px 12px" }}>
-            {Array.from({ length: 100 }, (_, index) => {
-              const position = index + 1;
-              const isYou = position === rank;
-              const ahead = position < rank;
-              return (
-                <span
-                  key={position}
-                  style={{
-                    display: "flex",
-                    flex: "0 0 auto",
-                    width: isYou ? 24 : 18,
-                    height: isYou ? 24 : 18,
-                    borderRadius: "50%",
-                    backgroundColor: isYou ? grade.background : ahead ? "#25251f" : "#d7d0bd",
-                    ...(isYou
-                      ? {
-                          border: "4px solid #1b1b18",
-                          boxShadow: `0 0 0 4px ${grade.background}`,
-                        }
-                      : {}),
-                    boxSizing: "border-box",
-                  }}
-                />
-              );
-            })}
-          </div>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, borderTop: "3px dashed #9c998e", borderBottom: "3px dashed #9c998e", padding: "18px 0" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 27 }}>
-            <div style={{ display: "flex", width: 192, height: 192, flexShrink: 0, alignItems: "center", justifyContent: "center", transform: "rotate(-8deg)", border: `8px solid ${grade.background}`, color: grade.background, fontFamily: "Archivo Black", fontSize: 120, lineHeight: 1 }}>
-              {grade.label}
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", flex: 1, gap: 8 }}>
-              <span style={{ ...textStyle, fontSize: 25, fontWeight: 700, letterSpacing: "0.06em" }}>INCOME GRADE</span>
-              <span style={{ ...textStyle, fontSize: 30, fontWeight: 700, lineHeight: 1.2 }}>{grade.line}</span>
-              <div style={{ display: "flex", gap: 6, marginTop: 2 }}>
-                {["S", "A+", "A", "B+", "B", "C+", "C", "D"].map((label) => (
-                  <span key={label} style={{ ...textStyle, minWidth: 30, justifyContent: "center", border: "2px solid #77746b", padding: "1px 3px", fontSize: 19, fontWeight: label === grade.label ? 700 : 400, backgroundColor: label === grade.label ? grade.background : "transparent", color: label === grade.label ? "#fff" : "#1b1b18" }}>
-                    {label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          {rows.map((row) => (
-            <div key={row.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 18, fontSize: 29 }}>
-              <span style={{ ...textStyle, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.label}</span>
-              <span style={{ ...textStyle, flexShrink: 0, fontWeight: 700 }}>#{receiptRankFromPercent(row.percent)} / 100</span>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ display: "flex", minHeight: 72, position: "relative", alignItems: "center", overflow: "hidden" }}>
-          <div aria-hidden="true" style={{ display: "flex", width: "100%", height: 48, justifyContent: "space-between", alignItems: "stretch" }}>
-            {Array.from({ length: 96 }, (_, index) => (
-              <span key={index} style={{ display: "flex", width: index % 7 === 0 ? 4 : index % 3 === 0 ? 3 : 2, backgroundColor: "#1b1b18", flexShrink: 0 }} />
-            ))}
-          </div>
-          <span style={{ display: "flex", position: "absolute", right: 12, bottom: 0, transform: "rotate(-11deg)", border: `6px solid ${grade.background}`, color: grade.background, padding: "9px 15px", fontFamily: "Archivo Black", fontSize: 28, lineHeight: 1, whiteSpace: "nowrap" }}>
-            {grade.stamp}
-          </span>
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 20, lineHeight: 1.1 }}>
-          <span style={{ ...textStyle }}>THANK YOU. COME RANK AGAIN.</span>
-          <span style={{ ...textStyle, fontFamily: "Archivo Black", fontSize: 21 }}>salary-statistics.netlify.app</span>
-        </div>
-        <span style={{ ...textStyle, justifyContent: "center", fontSize: 16, lineHeight: 1.1, textAlign: "center" }}>
-          For fun. Grades are not a measure of your worth.
-        </span>
-      </div>
-    </div>
+    <ShieldShareCard
+      variant={variant}
+      percent={percent}
+      rows={rows}
+      location={stateAbbr ? `${location}, ${stateAbbr}` : location}
+      renderScale={3}
+    />
   );
 }
 
@@ -273,13 +160,24 @@ export async function GET(request: NextRequest) {
       const ageRaw = searchParams.get("age");
       const age = ageRaw && /^[a-z0-9-]{1,12}$/i.test(ageRaw) ? ageRaw : null;
       const stateRaw = searchParams.get("st")?.toUpperCase() ?? "";
-      const state = getStateByAbbr(stateRaw)?.abbr ?? null;
+      const stateMeta = getStateByAbbr(stateRaw) ?? null;
+      const state = stateMeta?.abbr ?? null;
       const agePercent = age ? readOptionalPercent(searchParams, "pa") : null;
       const statePercent = state ? readOptionalPercent(searchParams, "ps") : null;
-      node = <ReceiptImage percent={percentile} age={age} agePercent={agePercent} state={state} statePercent={statePercent} />;
-      width = RECEIPT_IMAGE_WIDTH;
-      height = RECEIPT_IMAGE_HEIGHT;
-      fonts = await loadReceiptFonts();
+      const variant = searchParams.get("card") === "story" ? "story" : "wide";
+      node = (
+        <PersonalShareImage
+          percent={percentile}
+          age={age}
+          agePercent={agePercent}
+          stateAbbr={state}
+          location={stateMeta?.name ?? "United States"}
+          statePercent={statePercent}
+          variant={variant}
+        />
+      );
+      width = variant === "story" ? STORY_IMAGE_WIDTH : SHARE_IMAGE_WIDTH;
+      height = variant === "story" ? STORY_IMAGE_HEIGHT : SHARE_IMAGE_HEIGHT;
     }
   }
 
