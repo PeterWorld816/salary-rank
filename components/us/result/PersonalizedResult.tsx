@@ -92,6 +92,10 @@ import { CompareBarChart, type CompareBarItem } from "@/components/us/result/Com
 import CityPickerChip from "@/components/us/result/CityPickerChip";
 import CoachingInsightCard from "@/components/us/result/CoachingInsightCard";
 import { buildCoachingInsight } from "@/lib/insightMessages";
+import ResultGuideTabs from "@/components/us/result/ResultGuideTabs";
+import { useDetailedEarnings } from "@/components/us/result/useDetailedEarnings";
+import { buildNetWorthShareAlternate } from "@/components/us/result/netWorthShare";
+import type { HeadlineKey, IncomeScopeKey } from "@/lib/resultGuide";
 
 type Metric = { key: string; percent: number };
 type GridCard = { key: string; label: string; displayValue: string; fillPercent: number; sub?: string; highlight: boolean };
@@ -333,7 +337,13 @@ function PersonalizedResultContent({
           occupationStateData
         )
       : null;
-  const occupationPercentile = occupationResult?.percentile ?? null;
+  // Detailed occupation / education / estimated experience — personal
+  // earnings curves loaded on demand (see useDetailedEarnings.ts). A detailed
+  // occupation replaces the major-group occupation card.
+  const { rows: detailedRows } = useDetailedEarnings(input, state);
+  const detailed = detailedRows.map((r) => ({ ...r, percent: getIncomePercentileFromAnchors(r.anchors, input.annualIncome) }));
+  const hasOccupationDetail = detailed.some((r) => r.key === "occupationDetail");
+  const occupationPercentile = hasOccupationDetail ? null : occupationResult?.percentile ?? null;
   const occupationLabel = occupationCategory ? tr(occupationCategory.label) : "";
 
   // ── Auto-narrative headline: find the metric with the best (lowest "top
@@ -348,6 +358,7 @@ function PersonalizedResultContent({
     netWorth: t.usDashboardNetWorthLabel,
     ageNetWorth: formatTemplate(t.usDashboardAgeNetWorthLabelTemplate, { age: ageBandLabel }),
     occupation: formatTemplate(t.usDashboardOccupationIncomeLabelTemplate, { occupation: occupationLabel }),
+    ...Object.fromEntries(detailed.map((r) => [r.key, r.label])),
   };
   const metrics: Metric[] = [
     placePercentile != null && { key: "place", percent: placePercentile },
@@ -358,6 +369,7 @@ function PersonalizedResultContent({
     netWorthPercentile != null && { key: "netWorth", percent: netWorthPercentile },
     ageNetWorthPercentile != null && { key: "ageNetWorth", percent: ageNetWorthPercentile },
     occupationPercentile != null && { key: "occupation", percent: occupationPercentile },
+    ...detailed.filter((r) => r.percent != null).map((r) => ({ key: r.key, percent: r.percent as number })),
   ].filter((m): m is Metric => Boolean(m));
 
   // Place outranks county as the "income basis" reference when selected —
@@ -492,6 +504,16 @@ function PersonalizedResultContent({
       sub: occupationResult?.usedFallback ? t.usOccupationFallbackNotice : undefined,
       highlight: best?.key === "occupation",
     },
+    ...detailed
+      .filter((r) => r.percent != null)
+      .map((r) => ({
+        key: r.key,
+        label: r.label,
+        displayValue: formatTemplate(t.topPercentTemplate, { percent: r.percent as number }),
+        fillPercent: 100 - (r.percent as number),
+        sub: r.key === "experience" ? t.usExperienceEstimatedShort : r.note ?? undefined,
+        highlight: best?.key === r.key,
+      })),
   ].filter((c): c is GridCard => Boolean(c));
 
   // ── Compare chart rows (percentile metrics only — 401k is a ratio, not a
@@ -520,6 +542,9 @@ function PersonalizedResultContent({
       percent: occupationPercentile,
       valueLabel: formatTemplate(t.topPercentTemplate, { percent: occupationPercentile }),
     },
+    ...detailed
+      .filter((r) => r.percent != null)
+      .map((r) => ({ key: r.key, label: r.label, percent: r.percent as number, valueLabel: formatTemplate(t.topPercentTemplate, { percent: r.percent as number }) })),
   ].filter((m): m is CompareBarItem => Boolean(m));
 
   // ── Friend challenge banner (ported from the old overall step) ──
@@ -549,6 +574,20 @@ function PersonalizedResultContent({
       : ready && state && locationName
         ? `${locationName}, ${state.name}`
         : t.usAppTitle;
+  const netWorthAlternate =
+    ready && state
+      ? buildNetWorthShareAlternate({
+          input,
+          netWorthPercent: netWorthPercentile,
+          ageNetWorthPercent: ageNetWorthPercentile,
+          ageLabel: input.ageBand.replace("-", "–"),
+          location: `${locationName ?? state.name}, ${state.abbr.toUpperCase()}`,
+          cardRef,
+          storyCardRef,
+          labels: { income: t.usShareCardIncomeOption, netWorth: t.usShareCardNetWorthOption },
+          downloadName: `us-${state.abbr}-${countyFips}.png`,
+        })
+      : undefined;
   const getShareUrl = () => {
     const shareUrl = new URL(buildUsShareHref(base, new URLSearchParams(), input, lang), window.location.origin);
     if (state) shareUrl.searchParams.set("st", state.abbr);
@@ -661,6 +700,19 @@ function PersonalizedResultContent({
               </p>
             )}
             </div>
+            {best && incomeBaseline && (
+              <ResultGuideTabs
+                input={input}
+                headlineKey={best.key as HeadlineKey}
+                headlinePercent={best.percent}
+                incomeKey={incomeBaseline.key as IncomeScopeKey}
+                state={state}
+                county={county}
+                place={place}
+                countyName={county && state ? stripStateSuffix(county.name, state.name) : null}
+                placeName={place && state ? stripStateSuffix(place.name, state.name) : null}
+              />
+            )}
           </>
         )}
       </div>
@@ -700,6 +752,7 @@ function PersonalizedResultContent({
               }
               downloadImageUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary) : undefined}
               downloadStoryUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary, "story") : undefined}
+              alternate={netWorthAlternate}
             />
           </div>
 

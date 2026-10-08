@@ -1,0 +1,9 @@
+{
+ "meta": {
+  "source": "US Census Bureau, ACS 2020-2024 5-Year PUMS (PERNP > 0, ADJINC to 2024 dollars, PWGTP-weighted) — computed by scripts/buildDetailedEarnings.ts (report: scripts/output/detailedEarningsReport.json). Cross-checked against published table B20004 (total, 25+ with earnings): $52,696.",
+  "generatedAt": "2026-10-08T19:33:59.486Z"
+ },
+ "allEarners25Plus": {
+  "median": 52508
+ }
+}

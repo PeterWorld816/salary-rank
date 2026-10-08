@@ -9,6 +9,9 @@ export default function Footer({ className }: { className?: string }) {
 
   const links = [
     { href: `${base}/insights`, label: t.footerInsights },
+    // English-only data pages (the /kr paths redirect to them).
+    { href: "/us/occupations", label: t.footerOccupations },
+    { href: "/us/net-worth", label: t.footerNetWorth },
     { href: `${base}/about`, label: t.footerAbout },
     { href: `${base}/privacy`, label: t.footerPrivacy },
     { href: `${base}/contact`, label: t.footerContact },

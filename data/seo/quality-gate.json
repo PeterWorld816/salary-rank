@@ -1,0 +1,1579 @@
+{
+ "generatedAt": "2026-10-08T19:55:32.166Z",
+ "rules": {
+  "minWords": 400,
+  "minWordsHub": 200,
+  "maxSimilarity": 0.6,
+  "shingle": 5,
+  "comparedAgainstInsights": 8
+ },
+ "summary": {
+  "pages": 109,
+  "passed": 109,
+  "failed": 0,
+  "minWords": 229,
+  "minWordsPage": "/us/net-worth",
+  "mostSimilarPair": {
+   "a": "/us/ak",
+   "b": "/us/fl",
+   "raw": 0.24,
+   "masked": 0.541
+  },
+  "kinds": {
+   "occupation": {
+    "pages": 50,
+    "failed": 0,
+    "minWords": 441
+   },
+   "occupationHub": {
+    "pages": 1,
+    "failed": 0,
+    "minWords": 267
+   },
+   "netWorth": {
+    "pages": 6,
+    "failed": 0,
+    "minWords": 405
+   },
+   "netWorthHub": {
+    "pages": 1,
+    "failed": 0,
+    "minWords": 229
+   },
+   "state": {
+    "pages": 51,
+    "failed": 0,
+    "minWords": 410
+   }
+  }
+ },
+ "failed": [],
+ "results": [
+  {
+   "path": "/us/occupations/registered-nurses",
+   "kind": "occupation",
+   "words": 465,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/receptionists",
+    "raw": 0.1668757841907152,
+    "masked": 0.22666666666666666
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/elementary-and-middle-school-teachers",
+   "kind": "occupation",
+   "words": 467,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/stockers-and-order-fillers",
+    "raw": 0.1820480404551201,
+    "masked": 0.2503364737550471
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/truck-drivers",
+   "kind": "occupation",
+   "words": 470,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/bookkeepers",
+    "raw": 0.16791979949874686,
+    "masked": 0.2618724559023066
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/retail-sales-supervisors",
+   "kind": "occupation",
+   "words": 508,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/office-supervisors",
+    "raw": 0.22375,
+    "masked": 0.28269484808454426
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/customer-service-representatives",
+   "kind": "occupation",
+   "words": 458,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/administrative-assistants",
+    "raw": 0.19115734720416125,
+    "masked": 0.25864453665283543
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/administrative-assistants",
+   "kind": "occupation",
+   "words": 461,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/electricians",
+    "raw": 0.19791666666666666,
+    "masked": 0.28651685393258425
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/software-developers",
+   "kind": "occupation",
+   "words": 475,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/maintenance-workers",
+    "raw": 0.18829516539440203,
+    "masked": 0.24697986577181208
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/janitors",
+   "kind": "occupation",
+   "words": 484,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/auto-mechanics",
+    "raw": 0.168944099378882,
+    "masked": 0.27671232876712326
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/retail-salespersons",
+   "kind": "occupation",
+   "words": 477,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/management-analysts",
+    "raw": 0.20099255583126552,
+    "masked": 0.2724867724867725
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/freight-and-material-movers",
+   "kind": "occupation",
+   "words": 487,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/waiters-and-waitresses",
+    "raw": 0.15795868772782504,
+    "masked": 0.24538258575197888
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/accountants-and-auditors",
+   "kind": "occupation",
+   "words": 450,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/sales-supervisors",
+    "raw": 0.21148825065274152,
+    "masked": 0.27816411682892905
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/chief-executives",
+   "kind": "occupation",
+   "words": 472,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/construction-laborers",
+    "raw": 0.1850443599493029,
+    "masked": 0.24096385542168675
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/construction-laborers",
+   "kind": "occupation",
+   "words": 467,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/management-analysts",
+    "raw": 0.20251572327044026,
+    "masked": 0.2759084791386272
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/cashiers",
+   "kind": "occupation",
+   "words": 473,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/auto-mechanics",
+    "raw": 0.19005102040816327,
+    "masked": 0.2615803814713896
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/financial-managers",
+   "kind": "occupation",
+   "words": 483,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/general-and-operations-managers",
+    "raw": 0.26240208877284593,
+    "masked": 0.36909871244635195
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/cooks",
+   "kind": "occupation",
+   "words": 450,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/maintenance-workers",
+    "raw": 0.17117117117117117,
+    "masked": 0.24517906336088155
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/high-school-teachers",
+   "kind": "occupation",
+   "words": 470,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/construction-laborers",
+    "raw": 0.14901477832512317,
+    "masked": 0.21465968586387435
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/college-professors",
+   "kind": "occupation",
+   "words": 485,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/bookkeepers",
+    "raw": 0.15789473684210525,
+    "masked": 0.2529960053262317
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/teaching-assistants",
+   "kind": "occupation",
+   "words": 460,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/lawyers",
+    "raw": 0.1864406779661017,
+    "masked": 0.2328767123287671
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/general-and-operations-managers",
+   "kind": "occupation",
+   "words": 487,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/financial-managers",
+    "raw": 0.26240208877284593,
+    "masked": 0.36909871244635195
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/lawyers",
+   "kind": "occupation",
+   "words": 453,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/teaching-assistants",
+    "raw": 0.1864406779661017,
+    "masked": 0.2328767123287671
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/personal-care-aides",
+   "kind": "occupation",
+   "words": 466,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/carpenters",
+    "raw": 0.1318407960199005,
+    "masked": 0.20911528150134048
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/stockers-and-order-fillers",
+   "kind": "occupation",
+   "words": 474,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/elementary-and-middle-school-teachers",
+    "raw": 0.1820480404551201,
+    "masked": 0.2503364737550471
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/bookkeepers",
+   "kind": "occupation",
+   "words": 469,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/real-estate-agents",
+    "raw": 0.17331670822942644,
+    "masked": 0.28005464480874315
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/office-supervisors",
+   "kind": "occupation",
+   "words": 475,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/retail-sales-supervisors",
+    "raw": 0.22375,
+    "masked": 0.28269484808454426
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/wholesale-sales-representatives",
+   "kind": "occupation",
+   "words": 479,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/registered-nurses",
+    "raw": 0.1608910891089109,
+    "masked": 0.20155038759689922
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/office-clerks",
+   "kind": "occupation",
+   "words": 441,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/receptionists",
+    "raw": 0.13801756587202008,
+    "masked": 0.21515561569688768
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/school-administrators",
+   "kind": "occupation",
+   "words": 470,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/project-managers",
+    "raw": 0.21019108280254778,
+    "masked": 0.292749658002736
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/carpenters",
+   "kind": "occupation",
+   "words": 448,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/administrative-assistants",
+    "raw": 0.17098445595854922,
+    "masked": 0.23895027624309392
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/housekeeping-cleaners",
+   "kind": "occupation",
+   "words": 483,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/truck-drivers",
+    "raw": 0.16482164821648215,
+    "masked": 0.23398692810457516
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/construction-managers",
+   "kind": "occupation",
+   "words": 467,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/cooks",
+    "raw": 0.16751918158567775,
+    "masked": 0.22795115332428764
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/management-analysts",
+   "kind": "occupation",
+   "words": 495,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/construction-laborers",
+    "raw": 0.20251572327044026,
+    "masked": 0.2759084791386272
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/sales-supervisors",
+   "kind": "occupation",
+   "words": 480,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/accountants-and-auditors",
+    "raw": 0.21148825065274152,
+    "masked": 0.27816411682892905
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/project-managers",
+   "kind": "occupation",
+   "words": 482,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/school-administrators",
+    "raw": 0.21019108280254778,
+    "masked": 0.292749658002736
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/human-resources-specialists",
+   "kind": "occupation",
+   "words": 469,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/elementary-and-middle-school-teachers",
+    "raw": 0.18797953964194372,
+    "masked": 0.24561403508771928
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/nursing-assistants",
+   "kind": "occupation",
+   "words": 457,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/sales-supervisors",
+    "raw": 0.13180169286577992,
+    "masked": 0.2051948051948052
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/waiters-and-waitresses",
+   "kind": "occupation",
+   "words": 473,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/freight-and-material-movers",
+    "raw": 0.15795868772782504,
+    "masked": 0.24538258575197888
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/physicians",
+   "kind": "occupation",
+   "words": 449,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/production-supervisors",
+    "raw": 0.17670157068062828,
+    "masked": 0.24512534818941503
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/receptionists",
+   "kind": "occupation",
+   "words": 470,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/registered-nurses",
+    "raw": 0.1668757841907152,
+    "masked": 0.22666666666666666
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/landscapers",
+   "kind": "occupation",
+   "words": 507,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/project-managers",
+    "raw": 0.1953883495145631,
+    "masked": 0.25256410256410255
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/electricians",
+   "kind": "occupation",
+   "words": 464,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/administrative-assistants",
+    "raw": 0.19791666666666666,
+    "masked": 0.28651685393258425
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/real-estate-agents",
+   "kind": "occupation",
+   "words": 479,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/bookkeepers",
+    "raw": 0.17331670822942644,
+    "masked": 0.28005464480874315
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/police-officers",
+   "kind": "occupation",
+   "words": 455,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/accountants-and-auditors",
+    "raw": 0.15620998719590268,
+    "masked": 0.2130257801899593
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/healthcare-managers",
+   "kind": "occupation",
+   "words": 501,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/auto-mechanics",
+    "raw": 0.14354066985645933,
+    "masked": 0.21666666666666667
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/production-supervisors",
+   "kind": "occupation",
+   "words": 455,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/quality-inspectors",
+    "raw": 0.1702127659574468,
+    "masked": 0.24765729585006693
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/quality-inspectors",
+   "kind": "occupation",
+   "words": 486,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/construction-laborers",
+    "raw": 0.17202970297029702,
+    "masked": 0.2613941018766756
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/food-service-managers",
+   "kind": "occupation",
+   "words": 481,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/waiters-and-waitresses",
+    "raw": 0.1548780487804878,
+    "masked": 0.23544973544973544
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/preschool-teachers",
+   "kind": "occupation",
+   "words": 465,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/financial-managers",
+    "raw": 0.16399506781750925,
+    "masked": 0.22733245729303547
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/maintenance-workers",
+   "kind": "occupation",
+   "words": 468,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/software-developers",
+    "raw": 0.18829516539440203,
+    "masked": 0.24697986577181208
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations/auto-mechanics",
+   "kind": "occupation",
+   "words": 463,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/janitors",
+    "raw": 0.168944099378882,
+    "masked": 0.27671232876712326
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/occupations",
+   "kind": "occupationHub",
+   "words": 267,
+   "minWords": 200,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/occupations/physicians",
+    "raw": 0.020086083213773313,
+    "masked": 0.021739130434782608
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/net-worth/under-35",
+   "kind": "netWorth",
+   "words": 457,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/net-worth/55-64",
+    "raw": 0.1848404255319149,
+    "masked": 0.22612359550561797
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/net-worth/35-44",
+   "kind": "netWorth",
+   "words": 459,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/net-worth/55-64",
+    "raw": 0.2124492557510149,
+    "masked": 0.2873900293255132
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/net-worth/45-54",
+   "kind": "netWorth",
+   "words": 405,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/net-worth/55-64",
+    "raw": 0.19858156028368795,
+    "masked": 0.29375
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/net-worth/55-64",
+   "kind": "netWorth",
+   "words": 428,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/net-worth/45-54",
+    "raw": 0.19858156028368795,
+    "masked": 0.29375
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/net-worth/65-74",
+   "kind": "netWorth",
+   "words": 474,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/net-worth/35-44",
+    "raw": 0.22091503267973855,
+    "masked": 0.2669432918395574
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/net-worth/75-plus",
+   "kind": "netWorth",
+   "words": 423,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/net-worth/45-54",
+    "raw": 0.22566371681415928,
+    "masked": 0.275
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/net-worth",
+   "kind": "netWorthHub",
+   "words": 229,
+   "minWords": 200,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/net-worth/35-44",
+    "raw": 0.013293943870014771,
+    "masked": 0.008955223880597015
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/al",
+   "kind": "state",
+   "words": 427,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/sc",
+    "raw": 0.21237693389592124,
+    "masked": 0.44565217391304346
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/ak",
+   "kind": "state",
+   "words": 454,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/fl",
+    "raw": 0.24033149171270718,
+    "masked": 0.5409836065573771
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/az",
+   "kind": "state",
+   "words": 477,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/tn",
+    "raw": 0.17413572343149808,
+    "masked": 0.3724247226624406
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/ar",
+   "kind": "state",
+   "words": 419,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/me",
+    "raw": 0.17755681818181818,
+    "masked": 0.39679715302491103
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/ca",
+   "kind": "state",
+   "words": 454,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/ms",
+    "raw": 0.20026881720430106,
+    "masked": 0.4073455759599332
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/co",
+   "kind": "state",
+   "words": 449,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/la",
+    "raw": 0.2032520325203252,
+    "masked": 0.46503496503496505
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/ct",
+   "kind": "state",
+   "words": 427,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/mn",
+    "raw": 0.21843971631205675,
+    "masked": 0.3695652173913043
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/de",
+   "kind": "state",
+   "words": 414,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/sc",
+    "raw": 0.227994227994228,
+    "masked": 0.44727272727272727
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/dc",
+   "kind": "state",
+   "words": 410,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/or",
+    "raw": 0.20476858345021037,
+    "masked": 0.2704791344667697
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/fl",
+   "kind": "state",
+   "words": 442,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/ak",
+    "raw": 0.24033149171270718,
+    "masked": 0.5409836065573771
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/ga",
+   "kind": "state",
+   "words": 428,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/ky",
+    "raw": 0.1878453038674033,
+    "masked": 0.377326565143824
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/hi",
+   "kind": "state",
+   "words": 416,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/fl",
+    "raw": 0.18319559228650137,
+    "masked": 0.3269230769230769
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/id",
+   "kind": "state",
+   "words": 441,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/or",
+    "raw": 0.19328859060402684,
+    "masked": 0.39600665557404324
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/il",
+   "kind": "state",
+   "words": 443,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/ri",
+    "raw": 0.2266857962697274,
+    "masked": 0.4379432624113475
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/in",
+   "kind": "state",
+   "words": 448,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/or",
+    "raw": 0.24238227146814403,
+    "masked": 0.42978003384094754
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/ia",
+   "kind": "state",
+   "words": 431,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/mn",
+    "raw": 0.201949860724234,
+    "masked": 0.40308747855917665
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/ks",
+   "kind": "state",
+   "words": 430,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/ak",
+    "raw": 0.23916083916083916,
+    "masked": 0.4937388193202147
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/ky",
+   "kind": "state",
+   "words": 430,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/ga",
+    "raw": 0.1878453038674033,
+    "masked": 0.377326565143824
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/la",
+   "kind": "state",
+   "words": 435,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/co",
+    "raw": 0.2032520325203252,
+    "masked": 0.46503496503496505
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/me",
+   "kind": "state",
+   "words": 411,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/ar",
+    "raw": 0.17755681818181818,
+    "masked": 0.39679715302491103
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/md",
+   "kind": "state",
+   "words": 473,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/ms",
+    "raw": 0.19553805774278216,
+    "masked": 0.40226171243941844
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/ma",
+   "kind": "state",
+   "words": 443,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/wi",
+    "raw": 0.20241286863270777,
+    "masked": 0.3931484502446982
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/mi",
+   "kind": "state",
+   "words": 455,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/mo",
+    "raw": 0.21798365122615804,
+    "masked": 0.464471403812825
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/mn",
+   "kind": "state",
+   "words": 432,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/nh",
+    "raw": 0.20861372812920592,
+    "masked": 0.4056761268781302
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/ms",
+   "kind": "state",
+   "words": 437,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/ca",
+    "raw": 0.20026881720430106,
+    "masked": 0.4073455759599332
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/mo",
+   "kind": "state",
+   "words": 436,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/wa",
+    "raw": 0.21769662921348315,
+    "masked": 0.5139146567717996
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/mt",
+   "kind": "state",
+   "words": 452,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/fl",
+    "raw": 0.20945945945945946,
+    "masked": 0.40594059405940597
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/ne",
+   "kind": "state",
+   "words": 439,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/ok",
+    "raw": 0.18473895582329317,
+    "masked": 0.40540540540540543
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/nv",
+   "kind": "state",
+   "words": 441,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/il",
+    "raw": 0.18926174496644296,
+    "masked": 0.34726688102893893
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/nh",
+   "kind": "state",
+   "words": 464,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/va",
+    "raw": 0.21744791666666666,
+    "masked": 0.4144
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/nj",
+   "kind": "state",
+   "words": 467,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/nc",
+    "raw": 0.19870967741935483,
+    "masked": 0.36666666666666664
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/nm",
+   "kind": "state",
+   "words": 436,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/mo",
+    "raw": 0.18513513513513513,
+    "masked": 0.41074523396880414
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/ny",
+   "kind": "state",
+   "words": 451,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/nc",
+    "raw": 0.20502645502645503,
+    "masked": 0.3953871499176277
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/nc",
+   "kind": "state",
+   "words": 463,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/ny",
+    "raw": 0.20502645502645503,
+    "masked": 0.3953871499176277
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/nd",
+   "kind": "state",
+   "words": 460,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/la",
+    "raw": 0.21159029649595687,
+    "masked": 0.43373493975903615
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/oh",
+   "kind": "state",
+   "words": 436,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/mn",
+    "raw": 0.1588785046728972,
+    "masked": 0.3469721767594108
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/ok",
+   "kind": "state",
+   "words": 444,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/ne",
+    "raw": 0.18473895582329317,
+    "masked": 0.40540540540540543
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/or",
+   "kind": "state",
+   "words": 447,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/in",
+    "raw": 0.24238227146814403,
+    "masked": 0.42978003384094754
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/pa",
+   "kind": "state",
+   "words": 437,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/nc",
+    "raw": 0.18469656992084432,
+    "masked": 0.3629032258064516
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/ri",
+   "kind": "state",
+   "words": 414,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/il",
+    "raw": 0.2266857962697274,
+    "masked": 0.4379432624113475
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/sc",
+   "kind": "state",
+   "words": 437,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/de",
+    "raw": 0.227994227994228,
+    "masked": 0.44727272727272727
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/sd",
+   "kind": "state",
+   "words": 454,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/fl",
+    "raw": 0.22070844686648503,
+    "masked": 0.4134453781512605
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/tn",
+   "kind": "state",
+   "words": 436,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/in",
+    "raw": 0.2184065934065934,
+    "masked": 0.4036850921273032
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/tx",
+   "kind": "state",
+   "words": 422,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/ca",
+    "raw": 0.18758434547908232,
+    "masked": 0.39327731092436974
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/ut",
+   "kind": "state",
+   "words": 455,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/co",
+    "raw": 0.20772303595206393,
+    "masked": 0.38461538461538464
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/vt",
+   "kind": "state",
+   "words": 432,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/ok",
+    "raw": 0.22083333333333333,
+    "masked": 0.39195979899497485
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/va",
+   "kind": "state",
+   "words": 469,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/nh",
+    "raw": 0.21744791666666666,
+    "masked": 0.4144
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/wa",
+   "kind": "state",
+   "words": 428,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/mo",
+    "raw": 0.21769662921348315,
+    "masked": 0.5139146567717996
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/wv",
+   "kind": "state",
+   "words": 473,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/mt",
+    "raw": 0.22002635046113306,
+    "masked": 0.40483870967741936
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/wi",
+   "kind": "state",
+   "words": 452,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/ma",
+    "raw": 0.20241286863270777,
+    "masked": 0.3931484502446982
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/wy",
+   "kind": "state",
+   "words": 430,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/mn",
+    "raw": 0.1390728476821192,
+    "masked": 0.343801652892562
+   },
+   "pass": true,
+   "reasons": []
+  }
+ ]
+}

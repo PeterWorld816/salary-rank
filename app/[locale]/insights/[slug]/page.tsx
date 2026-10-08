@@ -93,6 +93,25 @@ export default function InsightArticlePage({ params }: { params: Params }) {
           </Link>
         </div>
 
+        {/* Related data pages — English only, so /us links even from /kr. */}
+        <nav aria-label="Related data pages" className="mt-10">
+          <h2 className="mb-3 text-[15px] font-bold text-white/85">{lang === "ko" ? "관련 데이터 페이지" : "Explore the data"}</h2>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {[
+              { href: "/us/occupations", label: lang === "ko" ? "직업별 연봉 중위값 (영문)" : "Salary by occupation" },
+              { href: "/us/net-worth", label: lang === "ko" ? "나이별 순자산 (영문)" : "Net worth by age" },
+              { href: "/us/occupations/registered-nurses", label: "Registered nurse salary" },
+              { href: "/us/occupations/software-developers", label: "Software developer salary" },
+            ].map((l) => (
+              <li key={l.href}>
+                <Link href={l.href} className="flex min-h-11 items-center rounded-lg border border-white/10 bg-white/[0.03] px-3 text-[13px] text-white/75 hover:border-[#34D399]/40 hover:text-white">
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
         <Footer />
       </div>
     </UsShell>

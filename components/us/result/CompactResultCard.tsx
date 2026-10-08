@@ -22,6 +22,8 @@ import { stripStateSuffix } from "@/lib/usFormat";
 import { buildUsShareHref, US_AGE_BANDS } from "@/lib/usInput";
 import { shieldShareImagePath, shieldShareText } from "@/lib/shieldShare";
 import { formatTemplate } from "@/lib/i18n";
+import ResultGuideTabs from "@/components/us/result/ResultGuideTabs";
+import { buildNetWorthShareAlternate } from "@/components/us/result/netWorthShare";
 
 function CompactResultCardInner({
   presetState,
@@ -97,6 +99,19 @@ function CompactResultCardInner({
       }
     : null;
   const shareLocation = locationName && presetState ? `${locationName}, ${presetState.abbr.toUpperCase()}` : presetState?.abbr.toUpperCase() ?? "United States";
+  const netWorthAlternate = result.ready
+    ? buildNetWorthShareAlternate({
+        input: result.input,
+        netWorthPercent: result.netWorthPercentile,
+        ageNetWorthPercent: result.ageNetWorthPercentile,
+        ageLabel: ageBand ? ageBand.label.en : result.input.ageBand,
+        location: shareLocation,
+        cardRef,
+        storyCardRef,
+        labels: { income: t.usShareCardIncomeOption, netWorth: t.usShareCardNetWorthOption },
+        downloadName,
+      })
+    : undefined;
   const cardPreview = (
     <ShieldShareCard
       variant="wide"
@@ -154,6 +169,16 @@ function CompactResultCardInner({
               </p>
             </div>
 
+            <ResultGuideTabs
+              input={result.input}
+              headlineKey={result.level}
+              headlinePercent={result.incomePercent}
+              incomeKey={result.level}
+              state={presetState}
+              county={presetCounty}
+              countyName={presetCounty ? locationName : null}
+            />
+
             {shareTarget
               ? createPortal(
                   <div className="mx-auto w-full" style={{ maxWidth: 440 }}>
@@ -173,6 +198,7 @@ function CompactResultCardInner({
                       storyPreview={storyPreview}
                       downloadImageUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary) : undefined}
                       downloadStoryUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary, "story") : undefined}
+                      alternate={netWorthAlternate}
                     />
                   </div>,
                   shareTarget
@@ -195,6 +221,7 @@ function CompactResultCardInner({
                       storyPreview={storyPreview}
                       downloadImageUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary) : undefined}
                       downloadStoryUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary, "story") : undefined}
+                      alternate={netWorthAlternate}
                     />
                   </div>
                 )}

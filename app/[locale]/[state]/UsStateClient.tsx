@@ -13,6 +13,7 @@ import UsMap, { type UsMapFeatureProps } from "@/components/us/UsMap";
 import MapNavBar from "@/components/us/MapNavBar";
 import GeoCombobox from "@/components/us/GeoCombobox";
 import IncomeLegend from "@/components/us/IncomeLegend";
+import MapFilterNotes from "@/components/us/MapFilterNotes";
 import MapBasisControl, { MapBasisCaption } from "@/components/us/MapBasisControl";
 import {
   basisForLens,
@@ -38,7 +39,7 @@ import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
 import { PercentileThresholds } from "@/components/us/PercentileThresholds";
 
 function UsStateContent({
-  state, geo, counties, countyListAdSlot,
+  state, geo, counties, countyListAdSlot, deepDive,
 }: {
   state: StateMeta;
   geo: FeatureCollection<Geometry, UsMapFeatureProps>;
@@ -48,6 +49,8 @@ function UsStateContent({
   // every /us/[state] visitor just to render one state's map.
   counties: UsCountyIncome[];
   countyListAdSlot?: React.ReactNode;
+  // Server-rendered "deep dive" (components/seo/StateDeepDive.tsx), /us only.
+  deepDive?: React.ReactNode;
 }) {
   const { t } = useLanguage();
   const router = useRouter();
@@ -311,6 +314,7 @@ function UsStateContent({
               />
               <UsMap geo={geo} fit onSelect={handleSelect} getFill={getFill} getLabel={getLabel} height={520} zoomable />
               <p className="mt-2 text-center text-[11px] text-white/35 sm:hidden">{t.usZoomHint}</p>
+              <MapFilterNotes showOccupation={false} />
               <MapBasisCaption lens={basisLens} basis={basis}>
                 <IncomeLegend min={min} max={max} />
               </MapBasisCaption>
@@ -318,6 +322,8 @@ function UsStateContent({
             </>
           )}
         </div>
+
+        {deepDive && <div className="order-3 mt-8">{deepDive}</div>}
 
         <div className="order-3 mt-8">{countyListAdSlot}</div>
 
@@ -341,6 +347,7 @@ export default function UsStateClient(props: {
   geo: FeatureCollection<Geometry, UsMapFeatureProps>;
   counties: UsCountyIncome[];
   countyListAdSlot?: React.ReactNode;
+  deepDive?: React.ReactNode;
 }) {
   return (
     <Suspense

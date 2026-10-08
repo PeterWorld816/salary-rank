@@ -310,8 +310,8 @@ export function getK401Comparison(ageBand: UsAgeBandId, balance: number): K401Co
 const incomeMedianByAgeBand = new Map<UsAgeBandId, number>(
   incomeByAgeData.bands.map((b) => [b.id as UsAgeBandId, b.median])
 );
-const netWorthAverageByAgeBand = new Map<UsAgeBandId, number>(
-  netWorthByAgeData.bands.map((b) => [b.id as UsAgeBandId, b.average])
+const netWorthMedianByAgeBand = new Map<UsAgeBandId, number>(
+  netWorthByAgeData.bands.map((b) => [b.id as UsAgeBandId, b.median])
 );
 
 // "Top X% nationwide among people your age" — rescales the user's income by
@@ -344,11 +344,18 @@ export function getAgeBandIncomeRatio(ageBand: UsAgeBandId): number {
   return subgroupMedian / nationalMedianHouseholdIncome;
 }
 
-// Same idea for net worth, but mean-based (data/us/netWorthByAge.json), to
-// match overallUsNetWorth.average and the SCF's own reporting.
+// Same idea for net worth — median-based, like income by age above, so the
+// age band's own "Top 50%" line lands exactly on the SCF's published median
+// for that band. (It used to rescale by the mean, which put the modeled 50%
+// line 15-27% away from the published median and disagreed with the
+// /us/net-worth/* pages; changed for consistency.)
+export function netWorthScaleForMedian(subgroupMedian: number): number {
+  return overallUsNetWorth.median / subgroupMedian;
+}
+
 export function getUsNetWorthPercentileForAgeBand(ageBand: UsAgeBandId, netWorth: number): number | null {
-  const subgroupAverage = netWorthAverageByAgeBand.get(ageBand);
+  const subgroupMedian = netWorthMedianByAgeBand.get(ageBand);
   const anchors = netWorthPercentilesUS.percentileAnchors as PercentileAnchor[];
-  if (subgroupAverage == null || anchors.length < 2) return null;
-  return clampDisplayPercent(getPercentileRankRelativeTo(anchors, overallUsNetWorth.average, subgroupAverage, netWorth));
+  if (subgroupMedian == null || anchors.length < 2) return null;
+  return clampDisplayPercent(getPercentileRankRelativeTo(anchors, overallUsNetWorth.median, subgroupMedian, netWorth));
 }

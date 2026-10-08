@@ -21,6 +21,7 @@ import Footer from "@/components/us/Footer";
 import Spinner from "@/components/Spinner";
 import CompactResultCard from "@/components/us/result/CompactResultCard";
 import CompactInsightSection from "@/components/us/result/CompactInsightSection";
+import MapFilterNotes from "@/components/us/MapFilterNotes";
 import { getStateByFips } from "@/data/us/stateMeta";
 import {
   getAllStateIncomes,
@@ -272,6 +273,7 @@ function UsHomeContent({
             )}
           </div>
           <p className="mt-2 text-center text-[11px] text-white/35 sm:hidden">{t.usZoomHint}</p>
+          <MapFilterNotes showOccupation={usingOccupationFill} />
           <MapBasisCaption
             lens={basisLens}
             basis={basis}

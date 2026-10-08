@@ -11,6 +11,10 @@ type UsInputContextValue = {
   mapLens: UsMapBasisLens;
   setMapLens: (lens: UsMapBasisLens) => void;
   inputUrlCleaned: boolean;
+  // One-shot "open the input panel" request (e.g. arriving from an
+  // occupation or net worth page's calculator link); UsInputPanel consumes it.
+  panelRequest: "main" | "netWorth" | null;
+  requestPanel: (which: "main" | "netWorth" | null) => void;
 };
 
 const UsInputContext = createContext<UsInputContextValue | null>(null);
@@ -19,6 +23,7 @@ export function UsInputProvider({ children, pathname }: { children: ReactNode; p
   const [input, setInput] = useState<UsInput>(DEFAULT_US_INPUT);
   const [mapLens, setMapLens] = useState<UsMapBasisLens>("marital");
   const [inputUrlCleaned, setInputUrlCleaned] = useState(false);
+  const [panelRequest, requestPanel] = useState<"main" | "netWorth" | null>(null);
 
   useEffect(() => {
     const isUsRoute = pathname === "/us" || pathname.startsWith("/us/") || pathname === "/kr" || pathname.startsWith("/kr/");
@@ -53,7 +58,7 @@ export function UsInputProvider({ children, pathname }: { children: ReactNode; p
     setInputUrlCleaned(true);
   }, [pathname]);
 
-  return <UsInputContext.Provider value={{ input, setInput, mapLens, setMapLens, inputUrlCleaned }}>{children}</UsInputContext.Provider>;
+  return <UsInputContext.Provider value={{ input, setInput, mapLens, setMapLens, inputUrlCleaned, panelRequest, requestPanel }}>{children}</UsInputContext.Provider>;
 }
 
 export function useUsInput(): UsInputContextValue {

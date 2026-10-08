@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run seo:gate && next build",
     "start": "next start",
     "lint": "next lint",
-    "fetch:census": "tsx scripts/fetchCensusData.ts"
+    "fetch:census": "tsx scripts/fetchCensusData.ts",
+    "seo:gate": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/seoQualityGate.ts"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
@@ -22,6 +23,7 @@
     "react-simple-maps": "^3.0.0",
     "server-only": "^0.0.1",
     "topojson-client": "^3.1.0",
+    "tsx": "^4.23.1",
     "us-atlas": "^3.0.1"
   },
   "devDependencies": {
@@ -37,7 +39,6 @@
     "eslint-config-next": "14.2.5",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "tsx": "^4.23.1",
     "typescript": "^5"
   }
 }

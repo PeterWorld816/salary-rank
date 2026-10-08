@@ -48,6 +48,7 @@ export type CompactResult =
       ageIncomePercentile: number | null;
       tier: Tier;
       netWorthPercentile: number | null;
+      ageNetWorthPercentile: number | null;
       medianForChart: number;
       input: UsInput;
       coachingInsight: CoachingInsight;
@@ -170,6 +171,7 @@ export function useCompactResult(presetState: StateMeta | null, presetCounty: Us
     ageIncomePercentile,
     tier: getTier(incomePercent),
     netWorthPercentile,
+    ageNetWorthPercentile,
     medianForChart,
     input,
     coachingInsight,

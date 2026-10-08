@@ -96,6 +96,7 @@ function PersonalShareImage({
   location,
   statePercent,
   variant,
+  metric,
 }: {
   percent: number;
   age: string | null;
@@ -104,6 +105,7 @@ function PersonalShareImage({
   location: string;
   statePercent: number | null;
   variant: "wide" | "story";
+  metric: "income" | "netWorth";
 }) {
   const rows: ShieldRankRow[] = [
     { label: "NATIONWIDE", percent },
@@ -118,6 +120,7 @@ function PersonalShareImage({
       rows={rows}
       location={stateAbbr ? `${location}, ${stateAbbr}` : location}
       renderScale={3}
+      metric={metric}
     />
   );
 }
@@ -165,6 +168,7 @@ export async function GET(request: NextRequest) {
       const agePercent = age ? readOptionalPercent(searchParams, "pa") : null;
       const statePercent = state ? readOptionalPercent(searchParams, "ps") : null;
       const variant = searchParams.get("card") === "story" ? "story" : "wide";
+      const metric = searchParams.get("m") === "nw" ? "netWorth" : "income";
       node = (
         <PersonalShareImage
           percent={percentile}
@@ -174,6 +178,7 @@ export async function GET(request: NextRequest) {
           location={stateMeta?.name ?? "United States"}
           statePercent={statePercent}
           variant={variant}
+          metric={metric}
         />
       );
       width = variant === "story" ? STORY_IMAGE_WIDTH : SHARE_IMAGE_WIDTH;

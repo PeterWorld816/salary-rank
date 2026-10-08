@@ -10,6 +10,12 @@ import { formatTemplate, translations } from "@/lib/i18n";
 import { formatUsd } from "@/lib/usFormat";
 import UsStateClient from "./UsStateClient";
 import AdSlot from "@/components/ads/AdSlot";
+import { buildStateDeepDive } from "@/lib/seo-pages/stateDeepDive";
+import { isWithheldFromSearch } from "@/lib/seo-pages/gate";
+import StateDeepDive from "@/components/seo/StateDeepDive";
+import { BreadcrumbJsonLd } from "@/components/seo/SeoArticle";
+import { getNearbyRankedStates } from "@/lib/usIncomeCalc";
+import { getStateByFips } from "@/data/us/stateMeta";
 
 // Prerenders all 51 states, per locale, at build time — the [locale] segment
 // above supplies { locale } and Next.js crosses it with these state slugs
@@ -52,7 +58,10 @@ export function generateMetadata({ params }: { params: Params }): Metadata {
   // Canonical uses the state's own (lowercase) slug rather than the raw param,
   // so an uppercase /us/CA hit still points at the /us/ca the sitemap lists.
   const path = `${localeBase(locale)}/${state ? state.abbr : params.state}`;
-  return pageMetadata(locale, path, title, description, { image });
+  const meta = pageMetadata(locale, path, title, description, { image });
+  // The quality gate (scripts/seoQualityGate.ts) withholds a state page from
+  // search if its deep-dive block fails; it's still served.
+  return locale === "us" && state && isWithheldFromSearch(`/us/${state.abbr}`) ? { ...meta, robots: { index: false, follow: true } } : meta;
 }
 
 export default function UsStatePage({ params }: { params: Params }) {
@@ -61,8 +70,24 @@ export default function UsStatePage({ params }: { params: Params }) {
 
   const geo = getUsCountiesGeoForState(state.fips);
   const counties = getCountiesForState(state.fips);
+  // English deep dive for the indexed /us page only (see lib/seo-pages/).
+  const deepDivePage = localeFromParams(params) === "us" ? buildStateDeepDive(state, counties) : null;
+  const links = [
+    ...getNearbyRankedStates(state.fips, 2)
+      .map((s) => getStateByFips(s.fips))
+      .filter((s): s is NonNullable<typeof s> => Boolean(s))
+      .map((s) => ({ href: `/us/${s.abbr}`, label: `${s.name} income` })),
+    { href: "/us/occupations", label: "Salary by occupation" },
+    { href: "/us/net-worth", label: "Net worth by age" },
+    { href: "/us/insights/state-median-income-rankings", label: "State median income rankings" },
+  ];
   return (
+    <>
+    {localeFromParams(params) === "us" && (
+      <BreadcrumbJsonLd items={[{ name: "Home", path: "/us" }, { name: state.name, path: `/us/${state.abbr}` }]} />
+    )}
     <UsStateClient
+      deepDive={deepDivePage ? <StateDeepDive page={deepDivePage} links={links} /> : null}
       state={state}
       geo={geo}
       counties={counties}
@@ -71,5 +96,6 @@ export default function UsStatePage({ params }: { params: Params }) {
       // so it's rendered here and threaded down as a prop instead.
       countyListAdSlot={<AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_GEO!} className="mb-8" />}
     />
+    </>
   );
 }

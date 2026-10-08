@@ -25,7 +25,7 @@ const COPY = {
         heading: "Information we collect",
         body: [
           "We do not require an account, and we do not collect names, email addresses, or financial account information through the Site's calculator.",
-          "The values you enter (income, net worth, age band, gender, marital status, and occupation) stay in browser memory while you use the Site. If you deliberately use the “compare with a friend” or “share” features, relevant answers are encoded into the URL you choose to share. Anyone with that link can view those answers; the Site does not save them separately.",
+          "The values you enter (income, net worth, age band, gender, marital status, occupation, education, and experience band) stay in browser memory while you use the Site. If you deliberately use the “compare with a friend” or “share” features, relevant answers are encoded into the URL you choose to share. Anyone with that link can view those answers; the Site does not save them separately.",
           "Like most websites, our hosting provider and any third-party services described below (advertising, analytics) may automatically collect standard technical data such as IP address, browser type, device type, and pages visited.",
         ],
       },
@@ -85,14 +85,14 @@ const COPY = {
       {
         heading: "개요",
         body: [
-          "이 개인정보처리방침은 본 사이트(이하 “사이트”)가 수집하는 정보와 그 사용 방식을 설명합니다. 입력한 소득, 순자산, 성별, 결혼 여부, 연령대, 직업 정보는 백분위 계산을 위해 브라우저 메모리에서만 처리하며 사이트에 저장하지 않습니다. 사용자가 공유 또는 친구 비교 기능을 직접 사용할 때에만 필요한 입력값을 URL에 포함하며, 해당 링크를 가진 사람은 URL에 인코딩된 정보를 볼 수 있습니다.",
+          "이 개인정보처리방침은 본 사이트(이하 “사이트”)가 수집하는 정보와 그 사용 방식을 설명합니다. 입력한 소득, 순자산, 성별, 결혼 여부, 연령대, 직업, 학력, 경력 구간 정보는 백분위 계산을 위해 브라우저 메모리에서만 처리하며 사이트에 저장하지 않습니다. 사용자가 공유 또는 친구 비교 기능을 직접 사용할 때에만 필요한 입력값을 URL에 포함하며, 해당 링크를 가진 사람은 URL에 인코딩된 정보를 볼 수 있습니다.",
         ],
       },
       {
         heading: "수집하는 정보",
         body: [
           "이 사이트는 별도의 회원가입을 요구하지 않으며, 계산기를 통해 이름·이메일·금융계좌 정보를 수집하지 않습니다.",
-          "입력하신 값(소득, 순자산, 성별, 결혼 여부, 연령대, 직업)은 사이트 이용 중 브라우저 메모리에만 유지됩니다. “친구와 비교하기” 또는 “공유하기”를 직접 누르면 관련 입력값이 공유 URL에 인코딩됩니다. 해당 링크를 가진 사람은 입력 정보를 볼 수 있으며, 사이트는 입력값을 별도로 저장하지 않습니다.",
+          "입력하신 값(소득, 순자산, 성별, 결혼 여부, 연령대, 직업, 학력, 경력 구간)은 사이트 이용 중 브라우저 메모리에만 유지됩니다. “친구와 비교하기” 또는 “공유하기”를 직접 누르면 관련 입력값이 공유 URL에 인코딩됩니다. 해당 링크를 가진 사람은 입력 정보를 볼 수 있으며, 사이트는 입력값을 별도로 저장하지 않습니다.",
           "대부분의 웹사이트와 마찬가지로, 호스팅 제공업체 및 아래 설명하는 제3자 서비스(광고, 애널리틱스)가 IP 주소, 브라우저 종류, 기기 종류, 방문한 페이지 등 일반적인 기술 정보를 자동으로 수집할 수 있습니다.",
         ],
       },

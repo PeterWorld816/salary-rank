@@ -3,6 +3,7 @@ import { localeFromParams, localeBase } from "@/lib/serverLocale";
 import { pageMetadata } from "@/lib/seo";
 import { LegalPage, LegalSection } from "@/components/us/LegalPage";
 import { acs1Vintage, acs5YearRange } from "@/lib/usIncomeCalc";
+import { SCHOOLING_YEARS_NOTE } from "@/lib/usEarningsDetail";
 
 const COPY = {
   us: {
@@ -18,7 +19,7 @@ const COPY = {
     sources: [
       {
         name: `US Census Bureau — American Community Survey (ACS) ${acs5YearRange} 5-Year Estimates`,
-        detail: `Median household income by state, county, and town (tables B19013, B19001), median earnings by sex (B20017), and the latest ${acs1Vintage} 1-Year estimate for states. Occupation figures come from the same ${acs5YearRange} ACS Public Use Microdata Sample (PUMS).`,
+        detail: `Median household income by state, county, and town (tables B19013, B19001), median earnings by sex (B20017), and the latest ${acs1Vintage} 1-Year estimate for states. Occupation, education and estimated-experience figures come from the same ${acs5YearRange} ACS Public Use Microdata Sample (PUMS): personal earnings (PERNP, adjusted to 2024 dollars with ADJINC), person-weighted (PWGTP). Any combination with fewer than 100 survey records falls back to a broader group, and the result says so.`,
       },
       {
         name: "Federal Reserve — 2022 Survey of Consumer Finances (SCF)",
@@ -29,6 +30,8 @@ const COPY = {
         detail: "Average and median 401(k) balances by age band.",
       },
     ],
+    experienceHeading: "Estimated experience",
+    experienceBody: `The ACS doesn't ask how many years someone has worked, so the experience filter uses "potential experience", a standard estimate from age and education. ${SCHOOLING_YEARS_NOTE.en} It's an estimate, not actual years worked: career breaks, part-time years, and later degrees aren't captured.`,
     howHeading: "How it works",
     howBody:
       "All calculations run locally in your browser. The numbers you enter are never sent to a server — they're only used to look up your position on the percentile curves built from the sources above.",
@@ -49,7 +52,7 @@ const COPY = {
     sources: [
       {
         name: `미국 인구조사국(US Census Bureau) — ACS ${acs5YearRange} 5년 추정치(American Community Survey 5-Year Estimates)`,
-        detail: `주·카운티·타운별 가구 중위소득(B19013, B19001 테이블), 성별 근로소득 중앙값(B20017), 주 단위 ${acs1Vintage} 1년 추정치. 직업별 수치는 같은 ${acs5YearRange} ACS 표본 마이크로데이터(PUMS)에서 계산합니다.`,
+        detail: `주·카운티·타운별 가구 중위소득(B19013, B19001 테이블), 성별 근로소득 중앙값(B20017), 주 단위 ${acs1Vintage} 1년 추정치. 직업·학력·추정 경력별 수치는 같은 ${acs5YearRange} ACS 표본 마이크로데이터(PUMS)의 개인 근로소득(PERNP, ADJINC로 2024년 달러 환산)을 개인 가중치(PWGTP)로 계산합니다. 표본이 100건 미만인 조합은 더 넓은 그룹으로 대체하고 화면에 표시합니다.`,
       },
       {
         name: "미국 연방준비제도(Federal Reserve) — 2022 소비자금융조사(Survey of Consumer Finances, SCF)",
@@ -60,6 +63,8 @@ const COPY = {
         detail: "연령대별 401(k) 평균·중앙값 잔액.",
       },
     ],
+    experienceHeading: "추정 경력",
+    experienceBody: `ACS에는 근무 연수 항목이 없어서, 경력 필터는 나이와 학력으로 계산하는 표준 방식인 "잠재 경력(potential experience)"을 씁니다. ${SCHOOLING_YEARS_NOTE.ko} 실제 근무 연수가 아니며, 경력 공백·파트타임·늦은 학위 취득 등은 반영되지 않습니다.`,
     howHeading: "작동 방식",
     howBody:
       "모든 계산은 사용자의 브라우저 안에서만 이뤄집니다. 입력한 숫자는 서버로 전송되지 않으며, 위 출처로 만든 백분위 곡선에서 당신의 위치를 찾는 데만 사용됩니다.",
@@ -99,6 +104,10 @@ export default function AboutPage({ params }: { params: Params }) {
             </li>
           ))}
         </ul>
+      </LegalSection>
+
+      <LegalSection heading={c.experienceHeading}>
+        <p>{c.experienceBody}</p>
       </LegalSection>
 
       <LegalSection heading={c.howHeading}>

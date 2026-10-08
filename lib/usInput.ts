@@ -7,6 +7,7 @@
 // income/net worth/401k.
 import k401Data from "@/data/us/401kByAge.json";
 import type { Localized } from "@/lib/i18n";
+import { EDUCATION_IDS, EXPERIENCE_IDS, type UsEducationId, type UsExperienceId } from "@/lib/usEarningsDetail";
 
 export type UsGenderId = "male" | "female";
 export type UsMaritalStatusId = "single" | "married";
@@ -35,6 +36,15 @@ export type UsInput = {
   // for "Overall" (no occupation filter) — optional, adds the state-level-
   // only "occupation" card to the result page. See lib/usOccupationIncome.ts.
   occupation: string | null;
+  // Detailed occupation id (data/us/occupationDetails.json) inside
+  // `occupation`'s major group, or null for "the whole major group". The
+  // major group stays set alongside it so map shading (major-group only)
+  // keeps working unchanged.
+  occupationDetail: string | null;
+  // Optional result-card-only filters (never used for map shading) — see
+  // lib/usEarningsDetail.ts.
+  education: UsEducationId | null;
+  experience: UsExperienceId | null; // *estimated* (potential) experience band
 };
 
 // The answer set a fresh visitor starts from — shared with UsInputPanel.tsx
@@ -51,6 +61,9 @@ export const DEFAULT_US_INPUT: UsInput = {
   netWorth: null,
   k401: null,
   occupation: null,
+  occupationDetail: null,
+  education: null,
+  experience: null,
 };
 
 // True only when every field SHADING's "Personalized" combination cares
@@ -94,13 +107,19 @@ export function encodeUsInput(input: UsInput): string {
     // still accepts the old 6-part form (occupation just comes back null),
     // so links shared before this existed keep working.
     input.occupation ?? "",
+    // 8th-10th segments, appended for detailed occupation / education /
+    // estimated experience — older 6- and 7-part links still decode below
+    // with these as null.
+    input.occupationDetail ?? "",
+    input.education ?? "",
+    input.experience ?? "",
   ].join(".");
 }
 
 export function decodeUsInput(raw: string): UsInput | null {
   const parts = raw.split(".");
-  if (parts.length !== 6 && parts.length !== 7) return null;
-  const [gender, maritalStatus, ageBand, incomeRaw, netWorthRaw, k401Raw, occupationRaw] = parts;
+  if (parts.length < 6 || parts.length > 10) return null;
+  const [gender, maritalStatus, ageBand, incomeRaw, netWorthRaw, k401Raw, occupationRaw, detailRaw, educationRaw, experienceRaw] = parts;
 
   const annualIncome = Number(incomeRaw);
   const netWorth = decodeOptional(netWorthRaw);
@@ -126,6 +145,11 @@ export function decodeUsInput(raw: string): UsInput | null {
     netWorth: netWorth.value,
     k401: k401.value,
     occupation: occupationRaw ? occupationRaw : null,
+    occupationDetail: detailRaw && occupationRaw ? detailRaw : null,
+    // Unknown ids (e.g. a future level) are dropped rather than failing the
+    // whole link.
+    education: educationRaw && EDUCATION_IDS.includes(educationRaw) ? (educationRaw as UsEducationId) : null,
+    experience: experienceRaw && EXPERIENCE_IDS.includes(experienceRaw) ? (experienceRaw as UsExperienceId) : null,
   };
 }
 

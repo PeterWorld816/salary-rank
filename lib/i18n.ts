@@ -140,6 +140,26 @@ export interface Translations {
   usOccupationOverall: string;
   usOccupationSearchPlaceholder: string;
   usOccupationFallbackNotice: string;
+  usOccupationAllOfGroupTemplate: string; // template: {group}
+  usMoreFiltersShow: string;
+  usMoreFiltersHide: string;
+  usFieldEducation: string;
+  usFieldExperience: string;
+  usFilterNotSet: string;
+  usExperienceEstimatedNote: string;
+  usExperienceEstimatedShort: string;
+  usShareCardIncomeOption: string;
+  footerOccupations: string;
+  footerNetWorth: string;
+  usShareCardNetWorthOption: string;
+  usEducationMapNote: string;
+  usOccupationDetailMapNoteTemplate: string; // template: {group}
+  usEducationPercentileLabelTemplate: string; // template: {education}, {age}
+  usEducationStatePercentileLabelTemplate: string; // template: {education}, {state}, {age}
+  usEducationMajorPercentileLabelTemplate: string; // template: {education}, {group}
+  usExperiencePercentileLabelTemplate: string; // template: {experience}
+  usOccupationDetailPercentileLabelTemplate: string; // template: {occupation}
+  usOccupationDetailStatePercentileLabelTemplate: string; // template: {occupation}, {state}
   usNetWorthMissingTitle: string;
   usNetWorthMissingDesc: string;
   usK401SectionTitle: string;
@@ -361,6 +381,26 @@ export const translations: Record<LangCode, Translations> = {
     usOccupationOverall: "전체 (직업 필터 없음)",
     usOccupationSearchPlaceholder: "직업 검색...",
     usOccupationFallbackNotice: "표본이 적어 전국 평균 기준으로 표시됩니다",
+    usOccupationAllOfGroupTemplate: "{group} 전체",
+    usMoreFiltersShow: "+ 필터 더 보기 (학력·경력)",
+    usMoreFiltersHide: "− 필터 접기",
+    usFieldEducation: "학력 (선택)",
+    usFieldExperience: "경력 (추정, 선택)",
+    usFilterNotSet: "선택 안 함",
+    usExperienceEstimatedNote: "추정 경력: 나이와 학력으로 계산한 값이며 실제 근무 연수가 아닙니다.",
+    usExperienceEstimatedShort: "추정치 (나이·학력 기준)",
+    usShareCardIncomeOption: "소득 카드",
+    footerOccupations: "직업별 연봉 (영문)",
+    footerNetWorth: "나이별 순자산 (영문)",
+    usShareCardNetWorthOption: "순자산 카드",
+    usEducationMapNote: "학력 필터는 지도 색칠에는 적용되지 않습니다.",
+    usOccupationDetailMapNoteTemplate: "지도는 세부 직업이 아닌 대분류({group}) 기준으로 표시됩니다.",
+    usEducationPercentileLabelTemplate: "{education}, {age} (전국)",
+    usEducationStatePercentileLabelTemplate: "{state} {education}, {age}",
+    usEducationMajorPercentileLabelTemplate: "{education} · {group} (전국)",
+    usExperiencePercentileLabelTemplate: "추정 경력 {experience} (전국)",
+    usOccupationDetailPercentileLabelTemplate: "{occupation} (전국)",
+    usOccupationDetailStatePercentileLabelTemplate: "{state}의 {occupation}",
     usK401SectionTitle: "401(k) 비교",
     usK401Helper: "지역별 데이터가 없어 같은 연령대 전국 평균·중앙값과만 비교해요",
     usK401VsAverageTemplate: "같은 연령대 평균 대비 {percent}%",
@@ -570,6 +610,26 @@ export const translations: Record<LangCode, Translations> = {
     usOccupationOverall: "Overall (no occupation filter)",
     usOccupationSearchPlaceholder: "Search occupations...",
     usOccupationFallbackNotice: "Sample too small here — showing the nationwide average instead",
+    usOccupationAllOfGroupTemplate: "All {group}",
+    usMoreFiltersShow: "+ More filters (education, experience)",
+    usMoreFiltersHide: "− Fewer filters",
+    usFieldEducation: "Education (optional)",
+    usFieldExperience: "Experience (estimated, optional)",
+    usFilterNotSet: "Not set",
+    usExperienceEstimatedNote: "Estimated experience — calculated from age and education, not actual years worked.",
+    usExperienceEstimatedShort: "Estimated (from age + education)",
+    usShareCardIncomeOption: "Income card",
+    footerOccupations: "Salary by occupation",
+    footerNetWorth: "Net worth by age",
+    usShareCardNetWorthOption: "Net worth card",
+    usEducationMapNote: "The education filter isn't applied to map shading.",
+    usOccupationDetailMapNoteTemplate: "The map shows the major group ({group}), not the detailed occupation.",
+    usEducationPercentileLabelTemplate: "{education}, {age} (nationwide)",
+    usEducationStatePercentileLabelTemplate: "{education} in {state}, {age}",
+    usEducationMajorPercentileLabelTemplate: "{education} · {group} (nationwide)",
+    usExperiencePercentileLabelTemplate: "Est. experience {experience} (nationwide)",
+    usOccupationDetailPercentileLabelTemplate: "{occupation} (nationwide)",
+    usOccupationDetailStatePercentileLabelTemplate: "{occupation} in {state}",
     usK401SectionTitle: "401(k) comparison",
     usK401Helper: "No regional data exists, so this only compares against the nationwide average/median for your age band",
     usK401VsAverageTemplate: "{percent}% of same-age average",

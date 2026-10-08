@@ -89,6 +89,34 @@ export function fetchStateOccupationData(stateAbbr: string): Promise<StateOccupa
   return pending;
 }
 
+export type OccupationAnchorsResult = {
+  anchors: PercentileAnchor[];
+  usedFallback: boolean;
+  rawCount: number;
+};
+
+// The distribution itself behind getOccupationIncomePercentile/
+// getOccupationMedianIncome below — same state-first, national-fallback
+// rule — for callers that need more than one number off the same curve
+// (the result guide's cutoffs and "what if" slider, see
+// lib/resultGuide.ts). Pass stateData null for the nationwide combo.
+export function getOccupationIncomeAnchors(
+  occId: string,
+  ageBucket: string,
+  sex: "1" | "2",
+  stateData: StateOccupationFile | null
+): OccupationAnchorsResult | null {
+  const stateCombo = stateData?.combos.find((c) => c.occId === occId && c.ageBand === ageBucket && c.sex === sex);
+  const nationalCombo = nationalByKey.get(`${occId}|${ageBucket}|${sex}`);
+  if (stateCombo && !stateCombo.fallback && stateCombo.anchors && stateCombo.anchors.length > 0) {
+    return { anchors: stateCombo.anchors, usedFallback: false, rawCount: stateCombo.rawCount };
+  }
+  if (nationalCombo && nationalCombo.anchors.length > 0) {
+    return { anchors: nationalCombo.anchors, usedFallback: true, rawCount: stateCombo?.rawCount ?? nationalCombo.rawCount };
+  }
+  return null;
+}
+
 export type OccupationPercentileResult = {
   percentile: number | null;
   usedFallback: boolean;

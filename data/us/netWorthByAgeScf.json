@@ -1,0 +1,73 @@
+{
+  "meta": {
+    "source": "Federal Reserve, Changes in U.S. Family Finances from 2019 to 2022: Evidence from the Survey of Consumer Finances, Table 2 (family median and mean net worth by age of reference person)",
+    "sourceUrl": "https://www.federalreserve.gov/publications/files/scf23.pdf",
+    "unit": "USD (thousands in the source, stored here in dollars), 2022 dollars",
+    "year": 2022,
+    "comparisonYear": 2019,
+    "note": "Values transcribed from Table 2 of scf23.pdf (text extracted with pdftotext -raw) — the SCF's own six age-of-reference-person brackets. The calculator's data/us/netWorthByAge.json maps onto these: under25 and 25-34 use 'Less than 35'; 65plus is the unweighted average of 65-74 and 75 or more (matches that file exactly: median 372,750, mean 1,709,350).",
+    "transcribedAt": "2026-10-08"
+  },
+  "brackets": [
+    {
+      "id": "under-35",
+      "label": "Under 35",
+      "appBand": "25-34",
+      "median2022": 39000,
+      "mean2022": 183500,
+      "median2019": 16100,
+      "mean2019": 88500
+    },
+    {
+      "id": "35-44",
+      "label": "35–44",
+      "appBand": "35-44",
+      "median2022": 135600,
+      "mean2022": 549600,
+      "median2019": 105900,
+      "mean2019": 505600
+    },
+    {
+      "id": "45-54",
+      "label": "45–54",
+      "appBand": "45-54",
+      "median2022": 247200,
+      "mean2022": 975800,
+      "median2019": 195400,
+      "mean2019": 965900
+    },
+    {
+      "id": "55-64",
+      "label": "55–64",
+      "appBand": "55-64",
+      "median2022": 364500,
+      "mean2022": 1566900,
+      "median2019": 246300,
+      "mean2019": 1363100
+    },
+    {
+      "id": "65-74",
+      "label": "65–74",
+      "appBand": "65plus",
+      "median2022": 409900,
+      "mean2022": 1794600,
+      "median2019": 308800,
+      "mean2019": 1411600
+    },
+    {
+      "id": "75-plus",
+      "label": "75 and older",
+      "appBand": "65plus",
+      "median2022": 335600,
+      "mean2022": 1624100,
+      "median2019": 295400,
+      "mean2019": 1133200
+    }
+  ],
+  "allFamilies": {
+    "median2022": 192900,
+    "mean2022": 1063700,
+    "median2019": 141100,
+    "mean2019": 868000
+  }
+}

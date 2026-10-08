@@ -20,6 +20,7 @@ import {
   type UsInput,
 } from "@/lib/usInput";
 import OccupationField from "@/components/us/OccupationField";
+import { EDUCATION_LEVELS, EXPERIENCE_BANDS, type UsEducationId, type UsExperienceId } from "@/lib/usEarningsDetail";
 import { useUsInput } from "@/components/us/UsInputContext";
 
 // Height of the fixed slim bar (collapsed state) — the spacer below it must
@@ -168,7 +169,7 @@ function CurrencyField({
 
 export default function UsInputPanel() {
   const { t, tr } = useLanguage();
-  const { input: form, setInput: setForm, setMapLens } = useUsInput();
+  const { input: form, setInput: setForm, setMapLens, panelRequest, requestPanel } = useUsInput();
   const pathname = usePathname();
   const sp = useSearchParams();
   // Keep the first viewport focused on the result card and map. The compact
@@ -182,9 +183,23 @@ export default function UsInputPanel() {
   // expanded instead, so it stays visible rather than hiding data the
   // visitor already entered.
   const [assetsExpanded, setAssetsExpanded] = useState(false);
+  // Education/experience live behind their own "More filters" fold so the
+  // panel doesn't grow for the majority who never touch them; a shared link
+  // that already sets one starts unfolded.
+  const [moreFilters, setMoreFilters] = useState(false);
+  useEffect(() => {
+    if (form.education != null || form.experience != null) setMoreFilters(true);
+  }, [form.education, form.experience]);
   useEffect(() => {
     if (form.netWorth != null || form.k401 != null) setAssetsExpanded(true);
   }, [form.netWorth, form.k401]);
+
+  useEffect(() => {
+    if (!panelRequest) return;
+    setExpanded(true);
+    if (panelRequest === "netWorth") setAssetsExpanded(true);
+    requestPanel(null);
+  }, [panelRequest, requestPanel]);
 
   // A pending "compare with a friend" challenge (see lib/usInput.ts) lives in
   // its own query param, independent of the in-memory calculator answers.
@@ -323,8 +338,9 @@ export default function UsInputPanel() {
                     overallLabel={t.usOccupationOverall}
                     searchPlaceholder={t.usOccupationSearchPlaceholder}
                     emptyText={t.usListNoResults}
-                    value={form.occupation}
-                    onChange={(occupation) => apply({ ...form, occupation })}
+                    allOfGroupTemplate={t.usOccupationAllOfGroupTemplate}
+                    value={{ occupation: form.occupation, occupationDetail: form.occupationDetail }}
+                    onChange={(sel) => apply({ ...form, ...sel })}
                     tr={tr}
                   />
                   <CurrencyField
@@ -333,6 +349,49 @@ export default function UsInputPanel() {
                     onCommit={(v) => apply({ ...form, annualIncome: v ?? form.annualIncome })}
                   />
                 </div>
+              </div>
+
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setMoreFilters((v) => !v)}
+                  aria-expanded={moreFilters}
+                  className="text-[12px] font-semibold text-white/50 transition-colors hover:text-white"
+                >
+                  {moreFilters ? t.usMoreFiltersHide : t.usMoreFiltersShow}
+                </button>
+                {moreFilters && (
+                  <div className="mt-2.5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div>
+                      <FieldLabel>{t.usFieldEducation}</FieldLabel>
+                      <select
+                        value={form.education ?? ""}
+                        onChange={(e) => apply({ ...form, education: (e.target.value || null) as UsEducationId | null })}
+                        className={fieldClass}
+                      >
+                        <option value="" className="bg-[#101316] text-white">{t.usFilterNotSet}</option>
+                        {EDUCATION_LEVELS.map((e) => (
+                          <option key={e.id} value={e.id} className="bg-[#101316] text-white">{tr(e.label)}</option>
+                        ))}
+                      </select>
+                      <p className="mt-1 text-[11px] text-white/35">{t.usEducationMapNote}</p>
+                    </div>
+                    <div>
+                      <FieldLabel>{t.usFieldExperience}</FieldLabel>
+                      <select
+                        value={form.experience ?? ""}
+                        onChange={(e) => apply({ ...form, experience: (e.target.value || null) as UsExperienceId | null })}
+                        className={fieldClass}
+                      >
+                        <option value="" className="bg-[#101316] text-white">{t.usFilterNotSet}</option>
+                        {EXPERIENCE_BANDS.map((b) => (
+                          <option key={b.id} value={b.id} className="bg-[#101316] text-white">{tr(b.label)}</option>
+                        ))}
+                      </select>
+                      <p className="mt-1 text-[11px] text-white/35">{t.usExperienceEstimatedNote}</p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div>

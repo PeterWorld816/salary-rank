@@ -73,6 +73,7 @@ export default function ShareButtons({
   storyPreview,
   downloadImageUrl,
   downloadStoryUrl,
+  alternate,
 }: {
   cardRef: RefObject<HTMLDivElement>;
   shareTitle: string;
@@ -92,6 +93,19 @@ export default function ShareButtons({
   storyPreview?: ReactNode;
   downloadImageUrl?: string;
   downloadStoryUrl?: string;
+  // Optional second card (the net worth card) — adds an "Income card / Net
+  // worth card" switch at the top of the modal. Its previews must reuse the
+  // same cardRef/storyCardRef (only one card is mounted at a time).
+  alternate?: {
+    primaryLabel: string;
+    label: string;
+    cardPreview: ReactNode;
+    storyPreview?: ReactNode;
+    downloadImageUrl?: string;
+    downloadStoryUrl?: string;
+    shareText: string;
+    downloadName: string;
+  };
 }) {
   const { t } = useLanguage();
   const [saving, setSaving] = useState(false);
@@ -99,6 +113,14 @@ export default function ShareButtons({
   const [toast, setToast] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const hasStory = Boolean(storyCardRef && storyWidth && storyHeight);
+  const [useAlternate, setUseAlternate] = useState(false);
+  const alt = useAlternate && alternate ? alternate : null;
+  const activeShareText = alt ? alt.shareText : shareText;
+  const activeCardPreview = alt ? alt.cardPreview : cardPreview;
+  const activeStoryPreview = alt ? alt.storyPreview ?? storyPreview : storyPreview;
+  const activeImageUrl = alt ? alt.downloadImageUrl : downloadImageUrl;
+  const activeStoryUrl = alt ? alt.downloadStoryUrl : downloadStoryUrl;
+  const activeDownloadName = alt ? alt.downloadName : downloadName;
 
   useEffect(() => {
     if (!previewOpen) return;
@@ -118,12 +140,12 @@ export default function ShareButtons({
     const url = `${window.location.origin}${getShareUrl()}`;
     if (navigator.share) {
       try {
-        await navigator.share({ title: shareTitle, text: shareText, url });
+        await navigator.share({ title: shareTitle, text: activeShareText, url });
         return;
       } catch {}
     }
     try {
-      await navigator.clipboard.writeText(`${shareText}\n${url}`);
+      await navigator.clipboard.writeText(`${activeShareText}\n${url}`);
       showToast(t.copied);
     } catch {
       showToast(t.shareFailed);
@@ -133,7 +155,7 @@ export default function ShareButtons({
   const handleCopyLink = async () => {
     try {
       const url = `${window.location.origin}${getShareUrl()}`;
-      await navigator.clipboard.writeText(`${shareText}\n${url}`);
+      await navigator.clipboard.writeText(`${activeShareText}\n${url}`);
       showToast(t.copied);
     } catch {
       showToast(t.shareFailed);
@@ -144,10 +166,10 @@ export default function ShareButtons({
     if (!cardRef.current || saving) return;
     setSaving(true);
     try {
-      if (downloadImageUrl) {
-        await saveUrl(downloadImageUrl, downloadName);
+      if (activeImageUrl) {
+        await saveUrl(activeImageUrl, activeDownloadName);
       } else {
-        await saveNode(cardRef.current, width, height, downloadName);
+        await saveNode(cardRef.current, width, height, activeDownloadName);
       }
     } catch {
       showToast(t.saveFailed);
@@ -160,10 +182,11 @@ export default function ShareButtons({
     if (!storyCardRef?.current || !storyWidth || !storyHeight || savingStory) return;
     setSavingStory(true);
     try {
-      if (downloadStoryUrl) {
-        await saveUrl(downloadStoryUrl, storyDownloadName ?? `story-${downloadName}`);
+      const storyName = alt ? `story-${activeDownloadName}` : storyDownloadName ?? `story-${downloadName}`;
+      if (activeStoryUrl) {
+        await saveUrl(activeStoryUrl, storyName);
       } else {
-        await saveNode(storyCardRef.current, storyWidth, storyHeight, storyDownloadName ?? `story-${downloadName}`);
+        await saveNode(storyCardRef.current, storyWidth, storyHeight, storyName);
       }
     } catch {
       showToast(t.saveFailed);
@@ -222,6 +245,25 @@ export default function ShareButtons({
               <X className="h-5 w-5" />
             </button>
             <h2 className="mb-3 pr-10 text-center text-base font-bold text-white">{t.shareCardTitle}</h2>
+            {alternate && (
+              <div role="radiogroup" aria-label={t.shareCardTitle} className="mb-3 grid w-full max-w-xs grid-cols-2 gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1">
+                {[
+                  { on: !useAlternate, label: alternate.primaryLabel, set: false },
+                  { on: useAlternate, label: alternate.label, set: true },
+                ].map((o) => (
+                  <button
+                    key={o.label}
+                    type="button"
+                    role="radio"
+                    aria-checked={o.on}
+                    onClick={() => setUseAlternate(o.set)}
+                    className={`rounded-full px-3 py-1.5 text-[12px] font-semibold transition-colors ${o.on ? "bg-[#34D399] text-[#04120C]" : "text-white/60 hover:text-white"}`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="mb-4 flex w-full flex-1 items-center justify-center overflow-hidden">
               <div
                 className="overflow-hidden rounded-md"
@@ -230,7 +272,7 @@ export default function ShareButtons({
                   width: `min(100%, 430px, ${68 * (width / height)}dvh)`,
                 }}
               >
-                {cardPreview}
+                {activeCardPreview}
               </div>
             </div>
             <p className="mb-3 text-center text-xs text-white/50">{t.shareCardDescription}</p>
@@ -255,9 +297,9 @@ export default function ShareButtons({
               </button>
             </div>
           </section>
-          {hasStory && storyPreview && (
+          {hasStory && activeStoryPreview && (
             <div className="pointer-events-none absolute left-[-9999px] top-0 overflow-hidden" aria-hidden="true">
-              <div style={{ width: `${storyWidth}px` }}>{storyPreview}</div>
+              <div style={{ width: `${storyWidth}px` }}>{activeStoryPreview}</div>
             </div>
           )}
         </div>,

@@ -1,0 +1,2532 @@
+{
+ "generatedAt": "2026-10-08T19:33:59.486Z",
+ "rowsRead": 16095728,
+ "recordsKept": 8107276,
+ "thresholdTable": [
+  {
+   "threshold": 1500,
+   "groups": 434
+  },
+  {
+   "threshold": 3000,
+   "groups": 331
+  },
+  {
+   "threshold": 5000,
+   "groups": 250
+  },
+  {
+   "threshold": 8000,
+   "groups": 197
+  },
+  {
+   "threshold": 10000,
+   "groups": 171
+  },
+  {
+   "threshold": 12000,
+   "groups": 154
+  },
+  {
+   "threshold": 14000,
+   "groups": 144
+  },
+  {
+   "threshold": 16000,
+   "groups": 125
+  },
+  {
+   "threshold": 18000,
+   "groups": 116
+  },
+  {
+   "threshold": 20000,
+   "groups": 108
+  },
+  {
+   "threshold": 25000,
+   "groups": 93
+  },
+  {
+   "threshold": 30000,
+   "groups": 81
+  }
+ ],
+ "detailThreshold": 10000,
+ "watchCounts2564": {
+  "800": {
+   "label": "Accountants And Auditors",
+   "raw": 75368,
+   "detail": "accountants_and_auditors_800"
+  },
+  "845": {
+   "label": "Financial And Investment Analysts",
+   "raw": 14794,
+   "detail": "financial_and_investment_analysts_845"
+  },
+  "850": {
+   "label": "Personal Financial Advisors",
+   "raw": 19137,
+   "detail": "personal_financial_advisors_850"
+  },
+  "1021": {
+   "label": "Software Developers",
+   "raw": 89031,
+   "detail": "software_developers_1021"
+  },
+  "1022": {
+   "label": "Software Quality Assurance Analysts and Testers",
+   "raw": 4086,
+   "detail": "other_computer_math"
+  },
+  "1305": {
+   "label": "Architects, Except Landscape And Naval",
+   "raw": 10156,
+   "detail": "architects_except_landscape_and_naval_1305"
+  },
+  "1320": {
+   "label": "Aerospace Engineers",
+   "raw": 7180,
+   "detail": "other_architecture_engineering"
+  },
+  "1360": {
+   "label": "Civil Engineers",
+   "raw": 20341,
+   "detail": "civil_engineers_1360"
+  },
+  "1410": {
+   "label": "Electrical And Electronics Engineers",
+   "raw": 11929,
+   "detail": "electrical_and_electronics_engineers_1410"
+  },
+  "1430": {
+   "label": "Industrial Engineers, Including Health And Safety",
+   "raw": 12738,
+   "detail": "industrial_engineers_including_health_and_safety_1430"
+  },
+  "1460": {
+   "label": "Mechanical Engineers",
+   "raw": 15464,
+   "detail": "mechanical_engineers_1460"
+  },
+  "2100": {
+   "label": "Lawyers, And Judges, Magistrates, And Other Judicial Workers",
+   "raw": 55372,
+   "detail": "lawyers_and_judges_magistrates_and_other_judicia_2100"
+  },
+  "2205": {
+   "label": "Postsecondary Teachers",
+   "raw": 60834,
+   "detail": "postsecondary_teachers_2205"
+  },
+  "2300": {
+   "label": "Preschool And Kindergarten Teachers",
+   "raw": 33650,
+   "detail": "preschool_and_kindergarten_teachers_2300"
+  },
+  "2310": {
+   "label": "Elementary And Middle School Teachers",
+   "raw": 145282,
+   "detail": "elementary_and_middle_school_teachers_2310"
+  },
+  "2320": {
+   "label": "Secondary School Teachers",
+   "raw": 63475,
+   "detail": "secondary_school_teachers_2320"
+  },
+  "3090": {
+   "label": "Physicians",
+   "raw": 42037,
+   "detail": "physicians_3090"
+  },
+  "3255": {
+   "label": "Registered Nurses",
+   "raw": 151581,
+   "detail": "registered_nurses_3255"
+  },
+  "3258": {
+   "label": "Nurse Practitioners, And Nurse Midwives",
+   "raw": 14045,
+   "detail": "nurse_practitioners_and_nurse_midwives_3258"
+  },
+  "4020": {
+   "label": "Cooks",
+   "raw": 64045,
+   "detail": "cooks_4020"
+  },
+  "4110": {
+   "label": "Waiters And Waitresses",
+   "raw": 42044,
+   "detail": "waiters_and_waitresses_4110"
+  }
+ },
+ "detailCount": 171,
+ "details": [
+  {
+   "id": "chief_executives_and_legislators_10",
+   "majorId": "management",
+   "label": "Chief Executives And Legislators",
+   "rawCount2564": 71135,
+   "codes": 1
+  },
+  {
+   "id": "general_and_operations_managers_20",
+   "majorId": "management",
+   "label": "General And Operations Managers",
+   "rawCount2564": 55752,
+   "codes": 1
+  },
+  {
+   "id": "marketing_managers_51",
+   "majorId": "management",
+   "label": "Marketing Managers",
+   "rawCount2564": 27852,
+   "codes": 1
+  },
+  {
+   "id": "sales_managers_52",
+   "majorId": "management",
+   "label": "Sales Managers",
+   "rawCount2564": 25961,
+   "codes": 1
+  },
+  {
+   "id": "computer_and_information_systems_managers_110",
+   "majorId": "management",
+   "label": "Computer And Information Systems Managers",
+   "rawCount2564": 31152,
+   "codes": 1
+  },
+  {
+   "id": "financial_managers_120",
+   "majorId": "management",
+   "label": "Financial Managers",
+   "rawCount2564": 65774,
+   "codes": 1
+  },
+  {
+   "id": "human_resources_managers_136",
+   "majorId": "management",
+   "label": "Human Resources Managers",
+   "rawCount2564": 13281,
+   "codes": 1
+  },
+  {
+   "id": "industrial_production_managers_140",
+   "majorId": "management",
+   "label": "Industrial Production Managers",
+   "rawCount2564": 14330,
+   "codes": 1
+  },
+  {
+   "id": "purchasing_managers_150",
+   "majorId": "management",
+   "label": "Purchasing Managers",
+   "rawCount2564": 11240,
+   "codes": 1
+  },
+  {
+   "id": "transportation_storage_and_distribution_managers_160",
+   "majorId": "management",
+   "label": "Transportation, Storage, And Distribution Managers",
+   "rawCount2564": 14154,
+   "codes": 1
+  },
+  {
+   "id": "farmers_ranchers_and_other_agricultural_managers_205",
+   "majorId": "management",
+   "label": "Farmers, Ranchers, And Other Agricultural Managers",
+   "rawCount2564": 30623,
+   "codes": 1
+  },
+  {
+   "id": "construction_managers_220",
+   "majorId": "management",
+   "label": "Construction Managers",
+   "rawCount2564": 45892,
+   "codes": 1
+  },
+  {
+   "id": "education_and_childcare_administrators_230",
+   "majorId": "management",
+   "label": "Education And Childcare Administrators",
+   "rawCount2564": 47477,
+   "codes": 1
+  },
+  {
+   "id": "architectural_and_engineering_managers_300",
+   "majorId": "management",
+   "label": "Architectural And Engineering Managers",
+   "rawCount2564": 11071,
+   "codes": 1
+  },
+  {
+   "id": "food_service_managers_310",
+   "majorId": "management",
+   "label": "Food Service Managers",
+   "rawCount2564": 33996,
+   "codes": 1
+  },
+  {
+   "id": "medical_and_health_services_managers_350",
+   "majorId": "management",
+   "label": "Medical And Health Services Managers",
+   "rawCount2564": 34788,
+   "codes": 1
+  },
+  {
+   "id": "property_real_estate_and_community_association_m_410",
+   "majorId": "management",
+   "label": "Property, Real Estate, And Community Association Managers",
+   "rawCount2564": 24153,
+   "codes": 1
+  },
+  {
+   "id": "social_and_community_service_managers_420",
+   "majorId": "management",
+   "label": "Social And Community Service Managers",
+   "rawCount2564": 22133,
+   "codes": 1
+  },
+  {
+   "id": "other_managers_440",
+   "majorId": "management",
+   "label": "Other Managers",
+   "rawCount2564": 205479,
+   "codes": 1
+  },
+  {
+   "id": "other_management",
+   "majorId": "management",
+   "label": "Other Management occupations",
+   "rawCount2564": 31571,
+   "codes": 10
+  },
+  {
+   "id": "purchasing_agents_except_wholesale_retail_and_fa_530",
+   "majorId": "business_financial",
+   "label": "Purchasing Agents, Except Wholesale, Retail, And Farm Products",
+   "rawCount2564": 13227,
+   "codes": 1
+  },
+  {
+   "id": "claims_adjusters_appraisers_examiners_and_invest_540",
+   "majorId": "business_financial",
+   "label": "Claims Adjusters, Appraisers, Examiners, And Investigators",
+   "rawCount2564": 15640,
+   "codes": 1
+  },
+  {
+   "id": "compliance_officers_565",
+   "majorId": "business_financial",
+   "label": "Compliance Officers",
+   "rawCount2564": 15431,
+   "codes": 1
+  },
+  {
+   "id": "human_resources_workers_630",
+   "majorId": "business_financial",
+   "label": "Human Resources Workers",
+   "rawCount2564": 42270,
+   "codes": 1
+  },
+  {
+   "id": "project_management_specialists_705",
+   "majorId": "business_financial",
+   "label": "Project Management Specialists",
+   "rawCount2564": 42693,
+   "codes": 1
+  },
+  {
+   "id": "management_analysts_710",
+   "majorId": "business_financial",
+   "label": "Management Analysts",
+   "rawCount2564": 45515,
+   "codes": 1
+  },
+  {
+   "id": "market_research_analysts_and_marketing_specialis_735",
+   "majorId": "business_financial",
+   "label": "Market Research Analysts And Marketing Specialists",
+   "rawCount2564": 19296,
+   "codes": 1
+  },
+  {
+   "id": "business_operations_specialists_all_other_750",
+   "majorId": "business_financial",
+   "label": "Business Operations Specialists, All Other",
+   "rawCount2564": 25016,
+   "codes": 1
+  },
+  {
+   "id": "accountants_and_auditors_800",
+   "majorId": "business_financial",
+   "label": "Accountants And Auditors",
+   "rawCount2564": 75368,
+   "codes": 1
+  },
+  {
+   "id": "financial_and_investment_analysts_845",
+   "majorId": "business_financial",
+   "label": "Financial And Investment Analysts",
+   "rawCount2564": 14794,
+   "codes": 1
+  },
+  {
+   "id": "personal_financial_advisors_850",
+   "majorId": "business_financial",
+   "label": "Personal Financial Advisors",
+   "rawCount2564": 19137,
+   "codes": 1
+  },
+  {
+   "id": "credit_counselors_and_loan_officers_910",
+   "majorId": "business_financial",
+   "label": "Credit Counselors And Loan Officers",
+   "rawCount2564": 15525,
+   "codes": 1
+  },
+  {
+   "id": "other_business_financial",
+   "majorId": "business_financial",
+   "label": "Other Business & Financial Operations occupations",
+   "rawCount2564": 73018,
+   "codes": 17
+  },
+  {
+   "id": "computer_systems_analysts_1006",
+   "majorId": "computer_math",
+   "label": "Computer Systems Analysts",
+   "rawCount2564": 25918,
+   "codes": 1
+  },
+  {
+   "id": "computer_programmers_1010",
+   "majorId": "computer_math",
+   "label": "Computer Programmers",
+   "rawCount2564": 13114,
+   "codes": 1
+  },
+  {
+   "id": "software_developers_1021",
+   "majorId": "computer_math",
+   "label": "Software Developers",
+   "rawCount2564": 89031,
+   "codes": 1
+  },
+  {
+   "id": "computer_support_specialists_1050",
+   "majorId": "computer_math",
+   "label": "Computer Support Specialists",
+   "rawCount2564": 28608,
+   "codes": 1
+  },
+  {
+   "id": "network_and_computer_systems_administrators_1105",
+   "majorId": "computer_math",
+   "label": "Network And Computer Systems Administrators",
+   "rawCount2564": 10477,
+   "codes": 1
+  },
+  {
+   "id": "computer_occupations_all_other_1108",
+   "majorId": "computer_math",
+   "label": "Computer Occupations, All Other",
+   "rawCount2564": 34883,
+   "codes": 1
+  },
+  {
+   "id": "other_mathematical_science_occupations_1240",
+   "majorId": "computer_math",
+   "label": "Other Mathematical Science Occupations",
+   "rawCount2564": 17221,
+   "codes": 1
+  },
+  {
+   "id": "other_computer_math",
+   "majorId": "computer_math",
+   "label": "Other Computer & Mathematical occupations",
+   "rawCount2564": 43956,
+   "codes": 9
+  },
+  {
+   "id": "architects_except_landscape_and_naval_1305",
+   "majorId": "architecture_engineering",
+   "label": "Architects, Except Landscape And Naval",
+   "rawCount2564": 10156,
+   "codes": 1
+  },
+  {
+   "id": "civil_engineers_1360",
+   "majorId": "architecture_engineering",
+   "label": "Civil Engineers",
+   "rawCount2564": 20341,
+   "codes": 1
+  },
+  {
+   "id": "electrical_and_electronics_engineers_1410",
+   "majorId": "architecture_engineering",
+   "label": "Electrical And Electronics Engineers",
+   "rawCount2564": 11929,
+   "codes": 1
+  },
+  {
+   "id": "industrial_engineers_including_health_and_safety_1430",
+   "majorId": "architecture_engineering",
+   "label": "Industrial Engineers, Including Health And Safety",
+   "rawCount2564": 12738,
+   "codes": 1
+  },
+  {
+   "id": "mechanical_engineers_1460",
+   "majorId": "architecture_engineering",
+   "label": "Mechanical Engineers",
+   "rawCount2564": 15464,
+   "codes": 1
+  },
+  {
+   "id": "other_engineers_1530",
+   "majorId": "architecture_engineering",
+   "label": "Other Engineers",
+   "rawCount2564": 29953,
+   "codes": 1
+  },
+  {
+   "id": "other_engineering_technologists_and_technicians__1555",
+   "majorId": "architecture_engineering",
+   "label": "Other Engineering Technologists And Technicians, Except Drafters",
+   "rawCount2564": 18550,
+   "codes": 1
+  },
+  {
+   "id": "other_architecture_engineering",
+   "majorId": "architecture_engineering",
+   "label": "Other Architecture & Engineering occupations",
+   "rawCount2564": 37109,
+   "codes": 14
+  },
+  {
+   "id": "physical_scientists_all_other_1760",
+   "majorId": "life_physical_social_science",
+   "label": "Physical Scientists, All Other",
+   "rawCount2564": 17887,
+   "codes": 1
+  },
+  {
+   "id": "other_life_physical_social_science",
+   "majorId": "life_physical_social_science",
+   "label": "Other Life, Physical & Social Science occupations",
+   "rawCount2564": 63479,
+   "codes": 21
+  },
+  {
+   "id": "educational_guidance_and_career_counselors_and_a_2002",
+   "majorId": "community_social_service",
+   "label": "Educational, Guidance, And Career Counselors And Advisors",
+   "rawCount2564": 16851,
+   "codes": 1
+  },
+  {
+   "id": "social_workers_all_other_2014",
+   "majorId": "community_social_service",
+   "label": "Social Workers, All Other",
+   "rawCount2564": 25249,
+   "codes": 1
+  },
+  {
+   "id": "clergy_2040",
+   "majorId": "community_social_service",
+   "label": "Clergy",
+   "rawCount2564": 20037,
+   "codes": 1
+  },
+  {
+   "id": "other_community_social_service",
+   "majorId": "community_social_service",
+   "label": "Other Community & Social Service occupations",
+   "rawCount2564": 58239,
+   "codes": 13
+  },
+  {
+   "id": "lawyers_and_judges_magistrates_and_other_judicia_2100",
+   "majorId": "legal",
+   "label": "Lawyers, And Judges, Magistrates, And Other Judicial Workers",
+   "rawCount2564": 55372,
+   "codes": 1
+  },
+  {
+   "id": "paralegals_and_legal_assistants_2145",
+   "majorId": "legal",
+   "label": "Paralegals And Legal Assistants",
+   "rawCount2564": 19343,
+   "codes": 1
+  },
+  {
+   "id": "other_legal",
+   "majorId": "legal",
+   "label": "Other Legal occupations",
+   "rawCount2564": 7778,
+   "codes": 3
+  },
+  {
+   "id": "postsecondary_teachers_2205",
+   "majorId": "education",
+   "label": "Postsecondary Teachers",
+   "rawCount2564": 60834,
+   "codes": 1
+  },
+  {
+   "id": "preschool_and_kindergarten_teachers_2300",
+   "majorId": "education",
+   "label": "Preschool And Kindergarten Teachers",
+   "rawCount2564": 33650,
+   "codes": 1
+  },
+  {
+   "id": "elementary_and_middle_school_teachers_2310",
+   "majorId": "education",
+   "label": "Elementary And Middle School Teachers",
+   "rawCount2564": 145282,
+   "codes": 1
+  },
+  {
+   "id": "secondary_school_teachers_2320",
+   "majorId": "education",
+   "label": "Secondary School Teachers",
+   "rawCount2564": 63475,
+   "codes": 1
+  },
+  {
+   "id": "special_education_teachers_2330",
+   "majorId": "education",
+   "label": "Special Education Teachers",
+   "rawCount2564": 20705,
+   "codes": 1
+  },
+  {
+   "id": "other_teachers_and_instructors_2360",
+   "majorId": "education",
+   "label": "Other Teachers and Instructors",
+   "rawCount2564": 30095,
+   "codes": 1
+  },
+  {
+   "id": "teaching_assistants_2545",
+   "majorId": "education",
+   "label": "Teaching Assistants",
+   "rawCount2564": 59127,
+   "codes": 1
+  },
+  {
+   "id": "other_education",
+   "majorId": "education",
+   "label": "Other Educational Instruction & Library occupations",
+   "rawCount2564": 27366,
+   "codes": 5
+  },
+  {
+   "id": "artists_and_related_workers_2600",
+   "majorId": "arts_entertainment_media",
+   "label": "Artists And Related Workers",
+   "rawCount2564": 13394,
+   "codes": 1
+  },
+  {
+   "id": "graphic_designers_2634",
+   "majorId": "arts_entertainment_media",
+   "label": "Graphic Designers",
+   "rawCount2564": 14467,
+   "codes": 1
+  },
+  {
+   "id": "other_designers_2640",
+   "majorId": "arts_entertainment_media",
+   "label": "Other Designers",
+   "rawCount2564": 16203,
+   "codes": 1
+  },
+  {
+   "id": "writers_and_authors_2850",
+   "majorId": "arts_entertainment_media",
+   "label": "Writers And Authors",
+   "rawCount2564": 10757,
+   "codes": 1
+  },
+  {
+   "id": "other_arts_entertainment_media",
+   "majorId": "arts_entertainment_media",
+   "label": "Other Arts, Design, Entertainment, Sports & Media occupations",
+   "rawCount2564": 88734,
+   "codes": 26
+  },
+  {
+   "id": "pharmacists_3050",
+   "majorId": "healthcare_practitioner",
+   "label": "Pharmacists",
+   "rawCount2564": 16487,
+   "codes": 1
+  },
+  {
+   "id": "physicians_3090",
+   "majorId": "healthcare_practitioner",
+   "label": "Physicians",
+   "rawCount2564": 42037,
+   "codes": 1
+  },
+  {
+   "id": "physical_therapists_3160",
+   "majorId": "healthcare_practitioner",
+   "label": "Physical Therapists",
+   "rawCount2564": 14217,
+   "codes": 1
+  },
+  {
+   "id": "other_therapists_3245",
+   "majorId": "healthcare_practitioner",
+   "label": "Other Therapists",
+   "rawCount2564": 10203,
+   "codes": 1
+  },
+  {
+   "id": "registered_nurses_3255",
+   "majorId": "healthcare_practitioner",
+   "label": "Registered Nurses",
+   "rawCount2564": 151581,
+   "codes": 1
+  },
+  {
+   "id": "nurse_practitioners_and_nurse_midwives_3258",
+   "majorId": "healthcare_practitioner",
+   "label": "Nurse Practitioners, And Nurse Midwives",
+   "rawCount2564": 14045,
+   "codes": 1
+  },
+  {
+   "id": "clinical_laboratory_technologists_and_technician_3300",
+   "majorId": "healthcare_practitioner",
+   "label": "Clinical Laboratory Technologists And Technicians",
+   "rawCount2564": 12812,
+   "codes": 1
+  },
+  {
+   "id": "radiologic_technologists_and_technicians_3323",
+   "majorId": "healthcare_practitioner",
+   "label": "Radiologic Technologists And Technicians",
+   "rawCount2564": 10658,
+   "codes": 1
+  },
+  {
+   "id": "pharmacy_technicians_3421",
+   "majorId": "healthcare_practitioner",
+   "label": "Pharmacy Technicians",
+   "rawCount2564": 14425,
+   "codes": 1
+  },
+  {
+   "id": "licensed_practical_and_licensed_vocational_nurse_3500",
+   "majorId": "healthcare_practitioner",
+   "label": "Licensed Practical And Licensed Vocational Nurses",
+   "rawCount2564": 22889,
+   "codes": 1
+  },
+  {
+   "id": "other_healthcare_practitioner",
+   "majorId": "healthcare_practitioner",
+   "label": "Other Healthcare Practitioners & Technical occupations",
+   "rawCount2564": 130707,
+   "codes": 32
+  },
+  {
+   "id": "home_health_aides_3601",
+   "majorId": "healthcare_support",
+   "label": "Home Health Aides",
+   "rawCount2564": 20047,
+   "codes": 1
+  },
+  {
+   "id": "personal_care_aides_3602",
+   "majorId": "healthcare_support",
+   "label": "Personal Care Aides",
+   "rawCount2564": 55222,
+   "codes": 1
+  },
+  {
+   "id": "nursing_assistants_3603",
+   "majorId": "healthcare_support",
+   "label": "Nursing Assistants",
+   "rawCount2564": 42184,
+   "codes": 1
+  },
+  {
+   "id": "dental_assistants_3640",
+   "majorId": "healthcare_support",
+   "label": "Dental Assistants",
+   "rawCount2564": 11691,
+   "codes": 1
+  },
+  {
+   "id": "medical_assistants_3645",
+   "majorId": "healthcare_support",
+   "label": "Medical Assistants",
+   "rawCount2564": 22217,
+   "codes": 1
+  },
+  {
+   "id": "other_healthcare_support",
+   "majorId": "healthcare_support",
+   "label": "Other Healthcare Support occupations",
+   "rawCount2564": 34381,
+   "codes": 9
+  },
+  {
+   "id": "firefighters_3740",
+   "majorId": "protective_service",
+   "label": "Firefighters",
+   "rawCount2564": 14788,
+   "codes": 1
+  },
+  {
+   "id": "correctional_officers_and_jailers_3802",
+   "majorId": "protective_service",
+   "label": "Correctional Officers and Jailers",
+   "rawCount2564": 14520,
+   "codes": 1
+  },
+  {
+   "id": "police_officers_3870",
+   "majorId": "protective_service",
+   "label": "Police Officers",
+   "rawCount2564": 35020,
+   "codes": 1
+  },
+  {
+   "id": "security_guards_and_gambling_surveillance_office_3930",
+   "majorId": "protective_service",
+   "label": "Security Guards And Gambling Surveillance Officers",
+   "rawCount2564": 31240,
+   "codes": 1
+  },
+  {
+   "id": "other_protective_service",
+   "majorId": "protective_service",
+   "label": "Other Protective Service occupations",
+   "rawCount2564": 33524,
+   "codes": 14
+  },
+  {
+   "id": "chefs_and_head_cooks_4000",
+   "majorId": "food_service",
+   "label": "Chefs And Head Cooks",
+   "rawCount2564": 18576,
+   "codes": 1
+  },
+  {
+   "id": "first_line_supervisors_of_food_preparation_and_s_4010",
+   "majorId": "food_service",
+   "label": "First-Line Supervisors Of Food Preparation And Serving Workers",
+   "rawCount2564": 15730,
+   "codes": 1
+  },
+  {
+   "id": "cooks_4020",
+   "majorId": "food_service",
+   "label": "Cooks",
+   "rawCount2564": 64045,
+   "codes": 1
+  },
+  {
+   "id": "food_preparation_workers_4030",
+   "majorId": "food_service",
+   "label": "Food Preparation Workers",
+   "rawCount2564": 22458,
+   "codes": 1
+  },
+  {
+   "id": "bartenders_4040",
+   "majorId": "food_service",
+   "label": "Bartenders",
+   "rawCount2564": 15201,
+   "codes": 1
+  },
+  {
+   "id": "fast_food_and_counter_workers_4055",
+   "majorId": "food_service",
+   "label": "Fast Food And Counter Workers",
+   "rawCount2564": 12226,
+   "codes": 1
+  },
+  {
+   "id": "waiters_and_waitresses_4110",
+   "majorId": "food_service",
+   "label": "Waiters And Waitresses",
+   "rawCount2564": 42044,
+   "codes": 1
+  },
+  {
+   "id": "other_food_service",
+   "majorId": "food_service",
+   "label": "Other Food Preparation & Serving occupations",
+   "rawCount2564": 22832,
+   "codes": 5
+  },
+  {
+   "id": "janitors_and_building_cleaners_4220",
+   "majorId": "building_grounds_maintenance",
+   "label": "Janitors And Building Cleaners",
+   "rawCount2564": 88861,
+   "codes": 1
+  },
+  {
+   "id": "maids_and_housekeeping_cleaners_4230",
+   "majorId": "building_grounds_maintenance",
+   "label": "Maids And Housekeeping Cleaners",
+   "rawCount2564": 46851,
+   "codes": 1
+  },
+  {
+   "id": "landscaping_and_groundskeeping_workers_4251",
+   "majorId": "building_grounds_maintenance",
+   "label": "Landscaping And Groundskeeping Workers",
+   "rawCount2564": 40241,
+   "codes": 1
+  },
+  {
+   "id": "other_building_grounds_maintenance",
+   "majorId": "building_grounds_maintenance",
+   "label": "Other Building & Grounds Cleaning & Maintenance occupations",
+   "rawCount2564": 23888,
+   "codes": 5
+  },
+  {
+   "id": "animal_caretakers_4350",
+   "majorId": "personal_care_service",
+   "label": "Animal Caretakers",
+   "rawCount2564": 10883,
+   "codes": 1
+  },
+  {
+   "id": "hairdressers_hairstylists_and_cosmetologists_4510",
+   "majorId": "personal_care_service",
+   "label": "Hairdressers, Hairstylists, And Cosmetologists",
+   "rawCount2564": 29332,
+   "codes": 1
+  },
+  {
+   "id": "manicurists_and_pedicurists_4521",
+   "majorId": "personal_care_service",
+   "label": "Manicurists And Pedicurists",
+   "rawCount2564": 11175,
+   "codes": 1
+  },
+  {
+   "id": "childcare_workers_4600",
+   "majorId": "personal_care_service",
+   "label": "Childcare Workers",
+   "rawCount2564": 28741,
+   "codes": 1
+  },
+  {
+   "id": "exercise_trainers_and_group_fitness_instructors_4621",
+   "majorId": "personal_care_service",
+   "label": "Exercise Trainers And Group Fitness Instructors",
+   "rawCount2564": 10293,
+   "codes": 1
+  },
+  {
+   "id": "other_personal_care_service",
+   "majorId": "personal_care_service",
+   "label": "Other Personal Care & Service occupations",
+   "rawCount2564": 40406,
+   "codes": 15
+  },
+  {
+   "id": "first_line_supervisors_of_retail_sales_workers_4700",
+   "majorId": "sales",
+   "label": "First-Line Supervisors Of Retail Sales Workers",
+   "rawCount2564": 113454,
+   "codes": 1
+  },
+  {
+   "id": "first_line_supervisors_of_non_retail_sales_worke_4710",
+   "majorId": "sales",
+   "label": "First-Line Supervisors Of Non-Retail Sales Workers",
+   "rawCount2564": 43939,
+   "codes": 1
+  },
+  {
+   "id": "cashiers_4720",
+   "majorId": "sales",
+   "label": "Cashiers",
+   "rawCount2564": 65956,
+   "codes": 1
+  },
+  {
+   "id": "retail_salespersons_4760",
+   "majorId": "sales",
+   "label": "Retail Salespersons",
+   "rawCount2564": 88732,
+   "codes": 1
+  },
+  {
+   "id": "insurance_sales_agents_4810",
+   "majorId": "sales",
+   "label": "Insurance Sales Agents",
+   "rawCount2564": 24193,
+   "codes": 1
+  },
+  {
+   "id": "sales_representatives_of_services_except_adverti_4840",
+   "majorId": "sales",
+   "label": "Sales Representatives Of Services, Except Advertising, Insurance, Financial Services, And Travel",
+   "rawCount2564": 27889,
+   "codes": 1
+  },
+  {
+   "id": "sales_representatives_wholesale_and_manufacturin_4850",
+   "majorId": "sales",
+   "label": "Sales Representatives, Wholesale And Manufacturing",
+   "rawCount2564": 50246,
+   "codes": 1
+  },
+  {
+   "id": "real_estate_brokers_and_sales_agents_4920",
+   "majorId": "sales",
+   "label": "Real Estate Brokers And Sales Agents",
+   "rawCount2564": 37970,
+   "codes": 1
+  },
+  {
+   "id": "sales_and_related_workers_all_other_4965",
+   "majorId": "sales",
+   "label": "Sales And Related Workers, All Other",
+   "rawCount2564": 16054,
+   "codes": 1
+  },
+  {
+   "id": "other_sales",
+   "majorId": "sales",
+   "label": "Other Sales & Related occupations",
+   "rawCount2564": 31392,
+   "codes": 9
+  },
+  {
+   "id": "first_line_supervisors_of_office_and_administrat_5000",
+   "majorId": "office_admin_support",
+   "label": "First-Line Supervisors Of Office And Administrative Support Workers",
+   "rawCount2564": 50678,
+   "codes": 1
+  },
+  {
+   "id": "billing_and_posting_clerks_5110",
+   "majorId": "office_admin_support",
+   "label": "Billing And Posting Clerks",
+   "rawCount2564": 19393,
+   "codes": 1
+  },
+  {
+   "id": "bookkeeping_accounting_and_auditing_clerks_5120",
+   "majorId": "office_admin_support",
+   "label": "Bookkeeping, Accounting, And Auditing Clerks",
+   "rawCount2564": 51240,
+   "codes": 1
+  },
+  {
+   "id": "customer_service_representatives_5240",
+   "majorId": "office_admin_support",
+   "label": "Customer Service Representatives",
+   "rawCount2564": 99307,
+   "codes": 1
+  },
+  {
+   "id": "receptionists_and_information_clerks_5400",
+   "majorId": "office_admin_support",
+   "label": "Receptionists And Information Clerks",
+   "rawCount2564": 41795,
+   "codes": 1
+  },
+  {
+   "id": "couriers_and_messengers_5510",
+   "majorId": "office_admin_support",
+   "label": "Couriers And Messengers",
+   "rawCount2564": 20378,
+   "codes": 1
+  },
+  {
+   "id": "postal_service_mail_carriers_5550",
+   "majorId": "office_admin_support",
+   "label": "Postal Service Mail Carriers",
+   "rawCount2564": 15334,
+   "codes": 1
+  },
+  {
+   "id": "production_planning_and_expediting_clerks_5600",
+   "majorId": "office_admin_support",
+   "label": "Production, Planning, And Expediting Clerks",
+   "rawCount2564": 11669,
+   "codes": 1
+  },
+  {
+   "id": "shipping_receiving_and_inventory_clerks_5610",
+   "majorId": "office_admin_support",
+   "label": "Shipping, Receiving, And Inventory Clerks",
+   "rawCount2564": 22509,
+   "codes": 1
+  },
+  {
+   "id": "executive_secretaries_and_executive_administrati_5710",
+   "majorId": "office_admin_support",
+   "label": "Executive Secretaries And Executive Administrative Assistants",
+   "rawCount2564": 12353,
+   "codes": 1
+  },
+  {
+   "id": "secretaries_and_administrative_assistants_except_5740",
+   "majorId": "office_admin_support",
+   "label": "Secretaries And Administrative Assistants, Except Legal, Medical, And Executive",
+   "rawCount2564": 93184,
+   "codes": 1
+  },
+  {
+   "id": "data_entry_keyers_5810",
+   "majorId": "office_admin_support",
+   "label": "Data Entry Keyers",
+   "rawCount2564": 11354,
+   "codes": 1
+  },
+  {
+   "id": "office_clerks_general_5860",
+   "majorId": "office_admin_support",
+   "label": "Office Clerks, General",
+   "rawCount2564": 48357,
+   "codes": 1
+  },
+  {
+   "id": "other_office_and_administrative_support_workers_5940",
+   "majorId": "office_admin_support",
+   "label": "Other Office And Administrative Support Workers",
+   "rawCount2564": 30338,
+   "codes": 1
+  },
+  {
+   "id": "other_office_admin_support",
+   "majorId": "office_admin_support",
+   "label": "Other Office & Administrative Support occupations",
+   "rawCount2564": 127776,
+   "codes": 36
+  },
+  {
+   "id": "other_agricultural_workers_6050",
+   "majorId": "farming_fishing_forestry",
+   "label": "Other Agricultural Workers",
+   "rawCount2564": 29561,
+   "codes": 1
+  },
+  {
+   "id": "other_farming_fishing_forestry",
+   "majorId": "farming_fishing_forestry",
+   "label": "Other Farming, Fishing & Forestry occupations",
+   "rawCount2564": 9736,
+   "codes": 6
+  },
+  {
+   "id": "first_line_supervisors_of_construction_trades_an_6200",
+   "majorId": "construction_extraction",
+   "label": "First-Line Supervisors Of Construction Trades And Extraction Workers",
+   "rawCount2564": 28061,
+   "codes": 1
+  },
+  {
+   "id": "carpenters_6230",
+   "majorId": "construction_extraction",
+   "label": "Carpenters",
+   "rawCount2564": 47205,
+   "codes": 1
+  },
+  {
+   "id": "construction_laborers_6260",
+   "majorId": "construction_extraction",
+   "label": "Construction Laborers",
+   "rawCount2564": 66602,
+   "codes": 1
+  },
+  {
+   "id": "construction_equipment_operators_6305",
+   "majorId": "construction_extraction",
+   "label": "Construction Equipment Operators",
+   "rawCount2564": 18289,
+   "codes": 1
+  },
+  {
+   "id": "electricians_6355",
+   "majorId": "construction_extraction",
+   "label": "Electricians",
+   "rawCount2564": 38003,
+   "codes": 1
+  },
+  {
+   "id": "painters_and_paperhangers_6410",
+   "majorId": "construction_extraction",
+   "label": "Painters and Paperhangers",
+   "rawCount2564": 19985,
+   "codes": 1
+  },
+  {
+   "id": "plumbers_pipefitters_and_steamfitters_6442",
+   "majorId": "construction_extraction",
+   "label": "Plumbers, Pipefitters, And Steamfitters",
+   "rawCount2564": 24086,
+   "codes": 1
+  },
+  {
+   "id": "other_construction_extraction",
+   "majorId": "construction_extraction",
+   "label": "Other Construction & Extraction occupations",
+   "rawCount2564": 62853,
+   "codes": 26
+  },
+  {
+   "id": "first_line_supervisors_of_mechanics_installers_a_7000",
+   "majorId": "installation_maintenance_repair",
+   "label": "First-Line Supervisors Of Mechanics, Installers, And Repairers",
+   "rawCount2564": 11292,
+   "codes": 1
+  },
+  {
+   "id": "automotive_service_technicians_and_mechanics_7200",
+   "majorId": "installation_maintenance_repair",
+   "label": "Automotive Service Technicians And Mechanics",
+   "rawCount2564": 32695,
+   "codes": 1
+  },
+  {
+   "id": "bus_and_truck_mechanics_and_diesel_engine_specia_7210",
+   "majorId": "installation_maintenance_repair",
+   "label": "Bus And Truck Mechanics And Diesel Engine Specialists",
+   "rawCount2564": 12733,
+   "codes": 1
+  },
+  {
+   "id": "heating_air_conditioning_and_refrigeration_mecha_7315",
+   "majorId": "installation_maintenance_repair",
+   "label": "Heating, Air Conditioning, And Refrigeration Mechanics And Installers",
+   "rawCount2564": 17567,
+   "codes": 1
+  },
+  {
+   "id": "industrial_and_refractory_machinery_mechanics_7330",
+   "majorId": "installation_maintenance_repair",
+   "label": "Industrial And Refractory Machinery Mechanics",
+   "rawCount2564": 16171,
+   "codes": 1
+  },
+  {
+   "id": "maintenance_and_repair_workers_general_7340",
+   "majorId": "installation_maintenance_repair",
+   "label": "Maintenance And Repair Workers, General",
+   "rawCount2564": 32718,
+   "codes": 1
+  },
+  {
+   "id": "other_installation_maintenance_repair",
+   "majorId": "installation_maintenance_repair",
+   "label": "Other Installation, Maintenance & Repair occupations",
+   "rawCount2564": 76281,
+   "codes": 25
+  },
+  {
+   "id": "first_line_supervisors_of_production_and_operati_7700",
+   "majorId": "production",
+   "label": "First-Line Supervisors Of Production And Operating Workers",
+   "rawCount2564": 34506,
+   "codes": 1
+  },
+  {
+   "id": "other_assemblers_and_fabricators_7750",
+   "majorId": "production",
+   "label": "Other Assemblers And Fabricators",
+   "rawCount2564": 38794,
+   "codes": 1
+  },
+  {
+   "id": "machinists_8030",
+   "majorId": "production",
+   "label": "Machinists",
+   "rawCount2564": 15170,
+   "codes": 1
+  },
+  {
+   "id": "welding_soldering_and_brazing_workers_8140",
+   "majorId": "production",
+   "label": "Welding, Soldering, And Brazing Workers",
+   "rawCount2564": 23363,
+   "codes": 1
+  },
+  {
+   "id": "other_metal_workers_and_plastic_workers_8225",
+   "majorId": "production",
+   "label": "Other Metal Workers And Plastic Workers",
+   "rawCount2564": 15313,
+   "codes": 1
+  },
+  {
+   "id": "inspectors_testers_sorters_samplers_and_weighers_8740",
+   "majorId": "production",
+   "label": "Inspectors, Testers, Sorters, Samplers, And Weighers",
+   "rawCount2564": 34175,
+   "codes": 1
+  },
+  {
+   "id": "miscellaneous_production_workers_including_equip_8990",
+   "majorId": "production",
+   "label": "Miscellaneous Production Workers, Including Equipment Operators And Tenders",
+   "rawCount2564": 54135,
+   "codes": 1
+  },
+  {
+   "id": "other_production",
+   "majorId": "production",
+   "label": "Other Production occupations",
+   "rawCount2564": 127398,
+   "codes": 53
+  },
+  {
+   "id": "supervisors_of_transportation_and_material_movin_9005",
+   "majorId": "transportation_material_moving",
+   "label": "Supervisors Of Transportation And Material Moving Workers",
+   "rawCount2564": 12147,
+   "codes": 1
+  },
+  {
+   "id": "bus_drivers_school_9121",
+   "majorId": "transportation_material_moving",
+   "label": "Bus Drivers, School",
+   "rawCount2564": 10578,
+   "codes": 1
+  },
+  {
+   "id": "driver_sales_workers_and_truck_drivers_9130",
+   "majorId": "transportation_material_moving",
+   "label": "Driver/Sales Workers And Truck Drivers",
+   "rawCount2564": 143660,
+   "codes": 1
+  },
+  {
+   "id": "taxi_drivers_9142",
+   "majorId": "transportation_material_moving",
+   "label": "Taxi Drivers",
+   "rawCount2564": 14650,
+   "codes": 1
+  },
+  {
+   "id": "industrial_truck_and_tractor_operators_9600",
+   "majorId": "transportation_material_moving",
+   "label": "Industrial Truck And Tractor Operators",
+   "rawCount2564": 24906,
+   "codes": 1
+  },
+  {
+   "id": "cleaners_of_vehicles_and_equipment_9610",
+   "majorId": "transportation_material_moving",
+   "label": "Cleaners Of Vehicles And Equipment",
+   "rawCount2564": 10953,
+   "codes": 1
+  },
+  {
+   "id": "laborers_and_freight_stock_and_material_movers_h_9620",
+   "majorId": "transportation_material_moving",
+   "label": "Laborers And Freight, Stock, And Material Movers, Hand",
+   "rawCount2564": 86111,
+   "codes": 1
+  },
+  {
+   "id": "packers_and_packagers_hand_9640",
+   "majorId": "transportation_material_moving",
+   "label": "Packers And Packagers, Hand",
+   "rawCount2564": 17016,
+   "codes": 1
+  },
+  {
+   "id": "stockers_and_order_fillers_9645",
+   "majorId": "transportation_material_moving",
+   "label": "Stockers And Order Fillers",
+   "rawCount2564": 52019,
+   "codes": 1
+  },
+  {
+   "id": "other_transportation_material_moving",
+   "majorId": "transportation_material_moving",
+   "label": "Other Transportation & Material Moving occupations",
+   "rawCount2564": 62061,
+   "codes": 23
+  }
+ ],
+ "nationalMedians": {
+  "education25to64": {
+   "hs_or_less": 38830,
+   "some_college": 48224,
+   "bachelors": 71594,
+   "masters": 86296,
+   "professional": 121830,
+   "doctorate": 109982
+  },
+  "educationAge25plus": {
+   "hs_or_less": 37781,
+   "some_college": 47226,
+   "bachelors": 70383,
+   "masters": 83958,
+   "professional": 119324,
+   "doctorate": 106315
+  },
+  "detail": {
+   "chief_executives_and_legislators_10": 161306,
+   "general_and_operations_managers_20": 85541,
+   "marketing_managers_51": 94452,
+   "sales_managers_52": 111719,
+   "computer_and_information_systems_managers_110": 134063,
+   "financial_managers_120": 96449,
+   "human_resources_managers_136": 100232,
+   "industrial_production_managers_140": 95459,
+   "purchasing_managers_150": 91651,
+   "transportation_storage_and_distribution_managers_160": 67032,
+   "farmers_ranchers_and_other_agricultural_managers_205": 47730,
+   "construction_managers_220": 83527,
+   "education_and_childcare_administrators_230": 81220,
+   "architectural_and_engineering_managers_300": 167579,
+   "food_service_managers_310": 48881,
+   "medical_and_health_services_managers_350": 84907,
+   "property_real_estate_and_community_association_m_410": 61101,
+   "social_and_community_service_managers_420": 65991,
+   "other_managers_440": 91651,
+   "other_management": 77561,
+   "purchasing_agents_except_wholesale_retail_and_fa_530": 68022,
+   "claims_adjusters_appraisers_examiners_and_invest_540": 67032,
+   "compliance_officers_565": 81220,
+   "human_resources_workers_630": 71594,
+   "project_management_specialists_705": 100547,
+   "management_analysts_710": 96449,
+   "market_research_analysts_and_marketing_specialis_735": 79431,
+   "business_operations_specialists_all_other_750": 68149,
+   "accountants_and_auditors_800": 80205,
+   "financial_and_investment_analysts_845": 100547,
+   "personal_financial_advisors_850": 116188,
+   "credit_counselors_and_loan_officers_910": 76144,
+   "other_business_financial": 65991,
+   "computer_systems_analysts_1006": 93073,
+   "computer_programmers_1010": 102619,
+   "software_developers_1021": 134332,
+   "computer_support_specialists_1050": 68216,
+   "network_and_computer_systems_administrators_1105": 88155,
+   "computer_occupations_all_other_1108": 81220,
+   "other_mathematical_science_occupations_1240": 96551,
+   "other_computer_math": 101799,
+   "architects_except_landscape_and_naval_1305": 100749,
+   "civil_engineers_1360": 103871,
+   "electrical_and_electronics_engineers_1410": 119324,
+   "industrial_engineers_including_health_and_safety_1430": 99700,
+   "mechanical_engineers_1460": 106315,
+   "other_engineers_1530": 115744,
+   "other_engineering_technologists_and_technicians__1555": 65991,
+   "other_architecture_engineering": 93403,
+   "physical_scientists_all_other_1760": 95317,
+   "other_life_physical_social_science": 75765,
+   "educational_guidance_and_career_counselors_and_a_2002": 60915,
+   "social_workers_all_other_2014": 58094,
+   "clergy_2040": 48881,
+   "other_community_social_service": 50116,
+   "lawyers_and_judges_magistrates_and_other_judicia_2100": 144198,
+   "paralegals_and_legal_assistants_2145": 56854,
+   "other_legal": 54991,
+   "postsecondary_teachers_2205": 71594,
+   "preschool_and_kindergarten_teachers_2300": 31484,
+   "elementary_and_middle_school_teachers_2310": 59211,
+   "secondary_school_teachers_2320": 65628,
+   "special_education_teachers_2330": 60915,
+   "other_teachers_and_instructors_2360": 38184,
+   "teaching_assistants_2545": 24366,
+   "other_education": 47226,
+   "artists_and_related_workers_2600": 35534,
+   "graphic_designers_2634": 53696,
+   "other_designers_2640": 73098,
+   "writers_and_authors_2850": 51906,
+   "other_arts_entertainment_media": 48881,
+   "pharmacists_3050": 131257,
+   "physicians_3090": 233508,
+   "physical_therapists_3160": 85281,
+   "other_therapists_3245": 55839,
+   "registered_nurses_3255": 78204,
+   "nurse_practitioners_and_nurse_midwives_3258": 118536,
+   "clinical_laboratory_technologists_and_technician_3300": 55860,
+   "radiologic_technologists_and_technicians_3323": 67032,
+   "pharmacy_technicians_3421": 39595,
+   "licensed_practical_and_licensed_vocational_nurse_3500": 49156,
+   "other_healthcare_practitioner": 67032,
+   "home_health_aides_3601": 23388,
+   "personal_care_aides_3602": 24461,
+   "nursing_assistants_3603": 33181,
+   "dental_assistants_3640": 36731,
+   "medical_assistants_3645": 38184,
+   "other_healthcare_support": 36661,
+   "firefighters_3740": 83527,
+   "correctional_officers_and_jailers_3802": 61101,
+   "police_officers_3870": 81220,
+   "security_guards_and_gambling_surveillance_office_3930": 36661,
+   "other_protective_service": 67032,
+   "chefs_and_head_cooks_4000": 38580,
+   "first_line_supervisors_of_food_preparation_and_s_4010": 33503,
+   "cooks_4020": 24366,
+   "food_preparation_workers_4030": 21478,
+   "bartenders_4040": 29831,
+   "fast_food_and_counter_workers_4055": 20102,
+   "waiters_and_waitresses_4110": 23865,
+   "other_food_service": 18992,
+   "janitors_and_building_cleaners_4220": 28833,
+   "maids_and_housekeeping_cleaners_4230": 20989,
+   "landscaping_and_groundskeeping_workers_4251": 29328,
+   "other_building_grounds_maintenance": 44688,
+   "animal_caretakers_4350": 25381,
+   "hairdressers_hairstylists_and_cosmetologists_4510": 27496,
+   "manicurists_and_pedicurists_4521": 24440,
+   "childcare_workers_4600": 19092,
+   "exercise_trainers_and_group_fitness_instructors_4621": 22344,
+   "other_personal_care_service": 30905,
+   "first_line_supervisors_of_retail_sales_workers_4700": 50763,
+   "first_line_supervisors_of_non_retail_sales_worke_4710": 75562,
+   "cashiers_4720": 20285,
+   "retail_salespersons_4760": 32743,
+   "insurance_sales_agents_4810": 57869,
+   "sales_representatives_of_services_except_adverti_4840": 82334,
+   "sales_representatives_wholesale_and_manufacturin_4850": 78754,
+   "real_estate_brokers_and_sales_agents_4920": 59662,
+   "sales_and_related_workers_all_other_4965": 44150,
+   "other_sales": 55860,
+   "first_line_supervisors_of_office_and_administrat_5000": 56854,
+   "billing_and_posting_clerks_5110": 42641,
+   "bookkeeping_accounting_and_auditing_clerks_5120": 44078,
+   "customer_service_representatives_5240": 39880,
+   "receptionists_and_information_clerks_5400": 32218,
+   "couriers_and_messengers_5510": 28935,
+   "postal_service_mail_carriers_5550": 62049,
+   "production_planning_and_expediting_clerks_5600": 61101,
+   "shipping_receiving_and_inventory_clerks_5610": 39290,
+   "executive_secretaries_and_executive_administrati_5710": 68433,
+   "secretaries_and_administrative_assistants_except_5740": 40610,
+   "data_entry_keyers_5810": 36731,
+   "office_clerks_general_5860": 36867,
+   "other_office_and_administrative_support_workers_5940": 47730,
+   "other_office_admin_support": 43870,
+   "other_agricultural_workers_6050": 28595,
+   "other_farming_fishing_forestry": 38620,
+   "first_line_supervisors_of_construction_trades_an_6200": 68216,
+   "carpenters_6230": 43571,
+   "construction_laborers_6260": 37587,
+   "construction_equipment_operators_6305": 57276,
+   "electricians_6355": 62968,
+   "painters_and_paperhangers_6410": 35638,
+   "plumbers_pipefitters_and_steamfitters_6442": 57721,
+   "other_construction_extraction": 48881,
+   "first_line_supervisors_of_mechanics_installers_a_7000": 73981,
+   "automotive_service_technicians_and_mechanics_7200": 47730,
+   "bus_and_truck_mechanics_and_diesel_engine_specia_7210": 60915,
+   "heating_air_conditioning_and_refrigeration_mecha_7315": 56213,
+   "industrial_and_refractory_machinery_mechanics_7330": 63242,
+   "maintenance_and_repair_workers_general_7340": 53696,
+   "other_installation_maintenance_repair": 59211,
+   "first_line_supervisors_of_production_and_operati_7700": 67007,
+   "other_assemblers_and_fabricators_7750": 40570,
+   "machinists_8030": 57721,
+   "welding_soldering_and_brazing_workers_8140": 50763,
+   "other_metal_workers_and_plastic_workers_8225": 45343,
+   "inspectors_testers_sorters_samplers_and_weighers_8740": 48881,
+   "miscellaneous_production_workers_including_equip_8990": 41763,
+   "other_production": 40610,
+   "supervisors_of_transportation_and_material_movin_9005": 57721,
+   "bus_drivers_school_9121": 26237,
+   "driver_sales_workers_and_truck_drivers_9130": 49400,
+   "taxi_drivers_9142": 28280,
+   "industrial_truck_and_tractor_operators_9600": 40929,
+   "cleaners_of_vehicles_and_equipment_9610": 29328,
+   "laborers_and_freight_stock_and_material_movers_h_9620": 33583,
+   "packers_and_packagers_hand_9640": 29328,
+   "stockers_and_order_fillers_9645": 30458,
+   "other_transportation_material_moving": 48881
+  },
+  "b20004Comparable": {
+   "lths": 32534,
+   "hs": 40219,
+   "somecol": 47226,
+   "ba": 70383,
+   "grad": 90493,
+   "total": 52508
+  },
+  "fullTimeYearRoundByOccp": {
+   "800": {
+    "label": "Accountants And Auditors",
+    "median": 88327
+   },
+   "845": {
+    "label": "Financial And Investment Analysts",
+    "median": 103871
+   },
+   "850": {
+    "label": "Personal Financial Advisors",
+    "median": 122891
+   },
+   "1021": {
+    "label": "Software Developers",
+    "median": 139649
+   },
+   "1022": {
+    "label": "Software Quality Assurance Analysts and Testers",
+    "median": 94452
+   },
+   "1305": {
+    "label": "Architects, Except Landscape And Naval",
+    "median": 109778
+   },
+   "1320": {
+    "label": "Aerospace Engineers",
+    "median": 131184
+   },
+   "1360": {
+    "label": "Civil Engineers",
+    "median": 109485
+   },
+   "1410": {
+    "label": "Electrical And Electronics Engineers",
+    "median": 122891
+   },
+   "1430": {
+    "label": "Industrial Engineers, Including Health And Safety",
+    "median": 102619
+   },
+   "1460": {
+    "label": "Mechanical Engineers",
+    "median": 109982
+   },
+   "2100": {
+    "label": "Lawyers, And Judges, Magistrates, And Other Judicial Workers",
+    "median": 161088
+   },
+   "2205": {
+    "label": "Postsecondary Teachers",
+    "median": 89493
+   },
+   "2300": {
+    "label": "Preschool And Kindergarten Teachers",
+    "median": 40219
+   },
+   "2310": {
+    "label": "Elementary And Middle School Teachers",
+    "median": 63961
+   },
+   "2320": {
+    "label": "Secondary School Teachers",
+    "median": 69265
+   },
+   "3090": {
+    "label": "Physicians",
+    "median": 253813
+   },
+   "3255": {
+    "label": "Registered Nurses",
+    "median": 85541
+   },
+   "3258": {
+    "label": "Nurse Practitioners, And Nurse Midwives",
+    "median": 125868
+   },
+   "4020": {
+    "label": "Cooks",
+    "median": 31484
+   },
+   "4110": {
+    "label": "Waiters And Waitresses",
+    "median": 33516
+   }
+  },
+  "experienceAll": {
+   "0-4": 18545,
+   "5-9": 42957,
+   "10-19": 53696,
+   "20-29": 59662,
+   "30plus": 49997
+  }
+ },
+ "occupationAgeSexFallbacks": [
+  {
+   "file": "occupation:bus_and_truck_mechanics_and_diesel_engine_specia_7210",
+   "combo": "65-99|female",
+   "rawCount": 8
+  },
+  {
+   "file": "occupation:firefighters_3740",
+   "combo": "65-99|female",
+   "rawCount": 14
+  },
+  {
+   "file": "occupation:heating_air_conditioning_and_refrigeration_mecha_7315",
+   "combo": "65-99|female",
+   "rawCount": 16
+  },
+  {
+   "file": "occupation:plumbers_pipefitters_and_steamfitters_6442",
+   "combo": "65-99|female",
+   "rawCount": 24
+  },
+  {
+   "file": "occupation:bus_and_truck_mechanics_and_diesel_engine_specia_7210",
+   "combo": "45-54|female",
+   "rawCount": 27
+  },
+  {
+   "file": "occupation:mechanical_engineers_1460",
+   "combo": "65-99|female",
+   "rawCount": 28
+  },
+  {
+   "file": "occupation:industrial_and_refractory_machinery_mechanics_7330",
+   "combo": "65-99|female",
+   "rawCount": 30
+  },
+  {
+   "file": "occupation:automotive_service_technicians_and_mechanics_7200",
+   "combo": "65-99|female",
+   "rawCount": 34
+  },
+  {
+   "file": "occupation:electrical_and_electronics_engineers_1410",
+   "combo": "65-99|female",
+   "rawCount": 35
+  },
+  {
+   "file": "occupation:machinists_8030",
+   "combo": "65-99|female",
+   "rawCount": 36
+  },
+  {
+   "file": "occupation:bus_and_truck_mechanics_and_diesel_engine_specia_7210",
+   "combo": "35-44|female",
+   "rawCount": 37
+  },
+  {
+   "file": "occupation:electricians_6355",
+   "combo": "65-99|female",
+   "rawCount": 38
+  },
+  {
+   "file": "occupation:construction_equipment_operators_6305",
+   "combo": "65-99|female",
+   "rawCount": 39
+  },
+  {
+   "file": "occupation:heating_air_conditioning_and_refrigeration_mecha_7315",
+   "combo": "55-64|female",
+   "rawCount": 40
+  },
+  {
+   "file": "occupation:architectural_and_engineering_managers_300",
+   "combo": "65-99|female",
+   "rawCount": 41
+  },
+  {
+   "file": "occupation:dental_assistants_3640",
+   "combo": "65-99|male",
+   "rawCount": 44
+  },
+  {
+   "file": "occupation:firefighters_3740",
+   "combo": "55-64|female",
+   "rawCount": 48
+  },
+  {
+   "file": "occupation:bus_and_truck_mechanics_and_diesel_engine_specia_7210",
+   "combo": "55-64|female",
+   "rawCount": 49
+  },
+  {
+   "file": "occupation:manicurists_and_pedicurists_4521",
+   "combo": "65-99|male",
+   "rawCount": 51
+  },
+  {
+   "file": "occupation:carpenters_6230",
+   "combo": "65-99|female",
+   "rawCount": 58
+  },
+  {
+   "file": "occupation:first_line_supervisors_of_mechanics_installers_a_7000",
+   "combo": "65-99|female",
+   "rawCount": 60
+  },
+  {
+   "file": "occupation:executive_secretaries_and_executive_administrati_5710",
+   "combo": "65-99|male",
+   "rawCount": 61
+  },
+  {
+   "file": "occupation:heating_air_conditioning_and_refrigeration_mecha_7315",
+   "combo": "45-54|female",
+   "rawCount": 61
+  },
+  {
+   "file": "occupation:preschool_and_kindergarten_teachers_2300",
+   "combo": "65-99|male",
+   "rawCount": 66
+  },
+  {
+   "file": "occupation:bus_and_truck_mechanics_and_diesel_engine_specia_7210",
+   "combo": "25-34|female",
+   "rawCount": 69
+  },
+  {
+   "file": "occupation:dental_assistants_3640",
+   "combo": "55-64|male",
+   "rawCount": 70
+  },
+  {
+   "file": "occupation:heating_air_conditioning_and_refrigeration_mecha_7315",
+   "combo": "35-44|female",
+   "rawCount": 79
+  },
+  {
+   "file": "occupation:industrial_truck_and_tractor_operators_9600",
+   "combo": "65-99|female",
+   "rawCount": 80
+  },
+  {
+   "file": "occupation:welding_soldering_and_brazing_workers_8140",
+   "combo": "65-99|female",
+   "rawCount": 86
+  },
+  {
+   "file": "occupation:heating_air_conditioning_and_refrigeration_mecha_7315",
+   "combo": "25-34|female",
+   "rawCount": 95
+  },
+  {
+   "file": "occupation:first_line_supervisors_of_construction_trades_an_6200",
+   "combo": "65-99|female",
+   "rawCount": 96
+  }
+ ],
+ "occupationStateCoverage": [
+  {
+   "id": "other_legal",
+   "statesWithOwnData": 26
+  },
+  {
+   "id": "manicurists_and_pedicurists_4521",
+   "statesWithOwnData": 27
+  },
+  {
+   "id": "taxi_drivers_9142",
+   "statesWithOwnData": 27
+  },
+  {
+   "id": "architectural_and_engineering_managers_300",
+   "statesWithOwnData": 28
+  },
+  {
+   "id": "financial_and_investment_analysts_845",
+   "statesWithOwnData": 28
+  },
+  {
+   "id": "architects_except_landscape_and_naval_1305",
+   "statesWithOwnData": 28
+  },
+  {
+   "id": "writers_and_authors_2850",
+   "statesWithOwnData": 28
+  },
+  {
+   "id": "other_therapists_3245",
+   "statesWithOwnData": 28
+  },
+  {
+   "id": "purchasing_managers_150",
+   "statesWithOwnData": 30
+  },
+  {
+   "id": "exercise_trainers_and_group_fitness_instructors_4621",
+   "statesWithOwnData": 30
+  },
+  {
+   "id": "executive_secretaries_and_executive_administrati_5710",
+   "statesWithOwnData": 30
+  },
+  {
+   "id": "network_and_computer_systems_administrators_1105",
+   "statesWithOwnData": 31
+  },
+  {
+   "id": "other_mathematical_science_occupations_1240",
+   "statesWithOwnData": 31
+  },
+  {
+   "id": "physical_scientists_all_other_1760",
+   "statesWithOwnData": 31
+  },
+  {
+   "id": "cleaners_of_vehicles_and_equipment_9610",
+   "statesWithOwnData": 31
+  },
+  {
+   "id": "computer_programmers_1010",
+   "statesWithOwnData": 32
+  },
+  {
+   "id": "electrical_and_electronics_engineers_1410",
+   "statesWithOwnData": 32
+  },
+  {
+   "id": "industrial_engineers_including_health_and_safety_1430",
+   "statesWithOwnData": 32
+  },
+  {
+   "id": "mechanical_engineers_1460",
+   "statesWithOwnData": 32
+  },
+  {
+   "id": "artists_and_related_workers_2600",
+   "statesWithOwnData": 32
+  },
+  {
+   "id": "dental_assistants_3640",
+   "statesWithOwnData": 32
+  },
+  {
+   "id": "animal_caretakers_4350",
+   "statesWithOwnData": 32
+  },
+  {
+   "id": "graphic_designers_2634",
+   "statesWithOwnData": 33
+  },
+  {
+   "id": "other_designers_2640",
+   "statesWithOwnData": 33
+  },
+  {
+   "id": "radiologic_technologists_and_technicians_3323",
+   "statesWithOwnData": 33
+  },
+  {
+   "id": "bartenders_4040",
+   "statesWithOwnData": 33
+  },
+  {
+   "id": "other_metal_workers_and_plastic_workers_8225",
+   "statesWithOwnData": 33
+  },
+  {
+   "id": "human_resources_managers_136",
+   "statesWithOwnData": 34
+  },
+  {
+   "id": "purchasing_agents_except_wholesale_retail_and_fa_530",
+   "statesWithOwnData": 34
+  },
+  {
+   "id": "market_research_analysts_and_marketing_specialis_735",
+   "statesWithOwnData": 34
+  },
+  {
+   "id": "home_health_aides_3601",
+   "statesWithOwnData": 34
+  },
+  {
+   "id": "fast_food_and_counter_workers_4055",
+   "statesWithOwnData": 34
+  },
+  {
+   "id": "production_planning_and_expediting_clerks_5600",
+   "statesWithOwnData": 34
+  },
+  {
+   "id": "data_entry_keyers_5810",
+   "statesWithOwnData": 34
+  },
+  {
+   "id": "other_farming_fishing_forestry",
+   "statesWithOwnData": 34
+  },
+  {
+   "id": "supervisors_of_transportation_and_material_movin_9005",
+   "statesWithOwnData": 34
+  },
+  {
+   "id": "industrial_production_managers_140",
+   "statesWithOwnData": 35
+  },
+  {
+   "id": "transportation_storage_and_distribution_managers_160",
+   "statesWithOwnData": 35
+  },
+  {
+   "id": "claims_adjusters_appraisers_examiners_and_invest_540",
+   "statesWithOwnData": 35
+  },
+  {
+   "id": "nurse_practitioners_and_nurse_midwives_3258",
+   "statesWithOwnData": 35
+  },
+  {
+   "id": "clinical_laboratory_technologists_and_technician_3300",
+   "statesWithOwnData": 35
+  },
+  {
+   "id": "machinists_8030",
+   "statesWithOwnData": 35
+  },
+  {
+   "id": "packers_and_packagers_hand_9640",
+   "statesWithOwnData": 35
+  },
+  {
+   "id": "pharmacy_technicians_3421",
+   "statesWithOwnData": 36
+  },
+  {
+   "id": "licensed_practical_and_licensed_vocational_nurse_3500",
+   "statesWithOwnData": 36
+  },
+  {
+   "id": "correctional_officers_and_jailers_3802",
+   "statesWithOwnData": 36
+  },
+  {
+   "id": "chefs_and_head_cooks_4000",
+   "statesWithOwnData": 36
+  },
+  {
+   "id": "sales_and_related_workers_all_other_4965",
+   "statesWithOwnData": 36
+  },
+  {
+   "id": "first_line_supervisors_of_mechanics_installers_a_7000",
+   "statesWithOwnData": 36
+  },
+  {
+   "id": "bus_and_truck_mechanics_and_diesel_engine_specia_7210",
+   "statesWithOwnData": 36
+  },
+  {
+   "id": "heating_air_conditioning_and_refrigeration_mecha_7315",
+   "statesWithOwnData": 36
+  },
+  {
+   "id": "compliance_officers_565",
+   "statesWithOwnData": 37
+  },
+  {
+   "id": "credit_counselors_and_loan_officers_910",
+   "statesWithOwnData": 37
+  },
+  {
+   "id": "pharmacists_3050",
+   "statesWithOwnData": 37
+  },
+  {
+   "id": "physical_therapists_3160",
+   "statesWithOwnData": 37
+  },
+  {
+   "id": "firefighters_3740",
+   "statesWithOwnData": 37
+  },
+  {
+   "id": "first_line_supervisors_of_food_preparation_and_s_4010",
+   "statesWithOwnData": 37
+  },
+  {
+   "id": "couriers_and_messengers_5510",
+   "statesWithOwnData": 37
+  },
+  {
+   "id": "industrial_truck_and_tractor_operators_9600",
+   "statesWithOwnData": 37
+  },
+  {
+   "id": "sales_managers_52",
+   "statesWithOwnData": 38
+  },
+  {
+   "id": "personal_financial_advisors_850",
+   "statesWithOwnData": 38
+  },
+  {
+   "id": "educational_guidance_and_career_counselors_and_a_2002",
+   "statesWithOwnData": 38
+  },
+  {
+   "id": "sales_representatives_of_services_except_adverti_4840",
+   "statesWithOwnData": 38
+  },
+  {
+   "id": "postal_service_mail_carriers_5550",
+   "statesWithOwnData": 38
+  },
+  {
+   "id": "shipping_receiving_and_inventory_clerks_5610",
+   "statesWithOwnData": 38
+  },
+  {
+   "id": "industrial_and_refractory_machinery_mechanics_7330",
+   "statesWithOwnData": 38
+  },
+  {
+   "id": "marketing_managers_51",
+   "statesWithOwnData": 39
+  },
+  {
+   "id": "computer_systems_analysts_1006",
+   "statesWithOwnData": 39
+  },
+  {
+   "id": "other_engineering_technologists_and_technicians__1555",
+   "statesWithOwnData": 39
+  },
+  {
+   "id": "bus_drivers_school_9121",
+   "statesWithOwnData": 39
+  },
+  {
+   "id": "civil_engineers_1360",
+   "statesWithOwnData": 40
+  },
+  {
+   "id": "other_engineers_1530",
+   "statesWithOwnData": 40
+  },
+  {
+   "id": "painters_and_paperhangers_6410",
+   "statesWithOwnData": 40
+  },
+  {
+   "id": "paralegals_and_legal_assistants_2145",
+   "statesWithOwnData": 41
+  },
+  {
+   "id": "medical_assistants_3645",
+   "statesWithOwnData": 41
+  },
+  {
+   "id": "security_guards_and_gambling_surveillance_office_3930",
+   "statesWithOwnData": 41
+  },
+  {
+   "id": "billing_and_posting_clerks_5110",
+   "statesWithOwnData": 41
+  },
+  {
+   "id": "business_operations_specialists_all_other_750",
+   "statesWithOwnData": 42
+  },
+  {
+   "id": "computer_support_specialists_1050",
+   "statesWithOwnData": 42
+  },
+  {
+   "id": "special_education_teachers_2330",
+   "statesWithOwnData": 42
+  },
+  {
+   "id": "other_building_grounds_maintenance",
+   "statesWithOwnData": 42
+  },
+  {
+   "id": "insurance_sales_agents_4810",
+   "statesWithOwnData": 42
+  },
+  {
+   "id": "welding_soldering_and_brazing_workers_8140",
+   "statesWithOwnData": 42
+  },
+  {
+   "id": "computer_and_information_systems_managers_110",
+   "statesWithOwnData": 43
+  },
+  {
+   "id": "property_real_estate_and_community_association_m_410",
+   "statesWithOwnData": 43
+  },
+  {
+   "id": "food_preparation_workers_4030",
+   "statesWithOwnData": 43
+  },
+  {
+   "id": "other_food_service",
+   "statesWithOwnData": 43
+  },
+  {
+   "id": "first_line_supervisors_of_production_and_operati_7700",
+   "statesWithOwnData": 43
+  },
+  {
+   "id": "other_assemblers_and_fabricators_7750",
+   "statesWithOwnData": 43
+  },
+  {
+   "id": "inspectors_testers_sorters_samplers_and_weighers_8740",
+   "statesWithOwnData": 43
+  },
+  {
+   "id": "farmers_ranchers_and_other_agricultural_managers_205",
+   "statesWithOwnData": 44
+  },
+  {
+   "id": "social_and_community_service_managers_420",
+   "statesWithOwnData": 44
+  },
+  {
+   "id": "social_workers_all_other_2014",
+   "statesWithOwnData": 44
+  },
+  {
+   "id": "clergy_2040",
+   "statesWithOwnData": 44
+  },
+  {
+   "id": "preschool_and_kindergarten_teachers_2300",
+   "statesWithOwnData": 44
+  },
+  {
+   "id": "childcare_workers_4600",
+   "statesWithOwnData": 44
+  },
+  {
+   "id": "other_agricultural_workers_6050",
+   "statesWithOwnData": 44
+  },
+  {
+   "id": "project_management_specialists_705",
+   "statesWithOwnData": 45
+  },
+  {
+   "id": "computer_occupations_all_other_1108",
+   "statesWithOwnData": 45
+  },
+  {
+   "id": "other_computer_math",
+   "statesWithOwnData": 45
+  },
+  {
+   "id": "waiters_and_waitresses_4110",
+   "statesWithOwnData": 45
+  },
+  {
+   "id": "hairdressers_hairstylists_and_cosmetologists_4510",
+   "statesWithOwnData": 45
+  },
+  {
+   "id": "other_sales",
+   "statesWithOwnData": 45
+  },
+  {
+   "id": "other_office_and_administrative_support_workers_5940",
+   "statesWithOwnData": 45
+  },
+  {
+   "id": "plumbers_pipefitters_and_steamfitters_6442",
+   "statesWithOwnData": 45
+  },
+  {
+   "id": "food_service_managers_310",
+   "statesWithOwnData": 46
+  },
+  {
+   "id": "medical_and_health_services_managers_350",
+   "statesWithOwnData": 46
+  },
+  {
+   "id": "human_resources_workers_630",
+   "statesWithOwnData": 46
+  },
+  {
+   "id": "other_architecture_engineering",
+   "statesWithOwnData": 46
+  },
+  {
+   "id": "other_teachers_and_instructors_2360",
+   "statesWithOwnData": 46
+  },
+  {
+   "id": "other_education",
+   "statesWithOwnData": 46
+  },
+  {
+   "id": "other_healthcare_support",
+   "statesWithOwnData": 46
+  },
+  {
+   "id": "real_estate_brokers_and_sales_agents_4920",
+   "statesWithOwnData": 46
+  },
+  {
+   "id": "management_analysts_710",
+   "statesWithOwnData": 47
+  },
+  {
+   "id": "software_developers_1021",
+   "statesWithOwnData": 47
+  },
+  {
+   "id": "lawyers_and_judges_magistrates_and_other_judicia_2100",
+   "statesWithOwnData": 47
+  },
+  {
+   "id": "physicians_3090",
+   "statesWithOwnData": 47
+  },
+  {
+   "id": "other_protective_service",
+   "statesWithOwnData": 47
+  },
+  {
+   "id": "landscaping_and_groundskeeping_workers_4251",
+   "statesWithOwnData": 47
+  },
+  {
+   "id": "first_line_supervisors_of_non_retail_sales_worke_4710",
+   "statesWithOwnData": 47
+  },
+  {
+   "id": "sales_representatives_wholesale_and_manufacturin_4850",
+   "statesWithOwnData": 47
+  },
+  {
+   "id": "receptionists_and_information_clerks_5400",
+   "statesWithOwnData": 47
+  },
+  {
+   "id": "first_line_supervisors_of_construction_trades_an_6200",
+   "statesWithOwnData": 47
+  },
+  {
+   "id": "construction_equipment_operators_6305",
+   "statesWithOwnData": 47
+  },
+  {
+   "id": "automotive_service_technicians_and_mechanics_7200",
+   "statesWithOwnData": 47
+  },
+  {
+   "id": "miscellaneous_production_workers_including_equip_8990",
+   "statesWithOwnData": 47
+  },
+  {
+   "id": "other_management",
+   "statesWithOwnData": 48
+  },
+  {
+   "id": "personal_care_aides_3602",
+   "statesWithOwnData": 48
+  },
+  {
+   "id": "police_officers_3870",
+   "statesWithOwnData": 48
+  },
+  {
+   "id": "maids_and_housekeeping_cleaners_4230",
+   "statesWithOwnData": 48
+  },
+  {
+   "id": "electricians_6355",
+   "statesWithOwnData": 48
+  },
+  {
+   "id": "financial_managers_120",
+   "statesWithOwnData": 49
+  },
+  {
+   "id": "nursing_assistants_3603",
+   "statesWithOwnData": 49
+  },
+  {
+   "id": "other_personal_care_service",
+   "statesWithOwnData": 49
+  },
+  {
+   "id": "maintenance_and_repair_workers_general_7340",
+   "statesWithOwnData": 49
+  },
+  {
+   "id": "construction_managers_220",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "education_and_childcare_administrators_230",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "accountants_and_auditors_800",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "postsecondary_teachers_2205",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "cooks_4020",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "first_line_supervisors_of_retail_sales_workers_4700",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "cashiers_4720",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "bookkeeping_accounting_and_auditing_clerks_5120",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "office_clerks_general_5860",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "carpenters_6230",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "construction_laborers_6260",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "other_construction_extraction",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "other_installation_maintenance_repair",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "other_production",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "driver_sales_workers_and_truck_drivers_9130",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "laborers_and_freight_stock_and_material_movers_h_9620",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "stockers_and_order_fillers_9645",
+   "statesWithOwnData": 50
+  },
+  {
+   "id": "chief_executives_and_legislators_10",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "general_and_operations_managers_20",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "other_managers_440",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "other_business_financial",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "other_life_physical_social_science",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "other_community_social_service",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "elementary_and_middle_school_teachers_2310",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "secondary_school_teachers_2320",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "teaching_assistants_2545",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "other_arts_entertainment_media",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "registered_nurses_3255",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "other_healthcare_practitioner",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "janitors_and_building_cleaners_4220",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "retail_salespersons_4760",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "first_line_supervisors_of_office_and_administrat_5000",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "customer_service_representatives_5240",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "secretaries_and_administrative_assistants_except_5740",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "other_office_admin_support",
+   "statesWithOwnData": 51
+  },
+  {
+   "id": "other_transportation_material_moving",
+   "statesWithOwnData": 51
+  }
+ ],
+ "educationStateCoverage": [
+  {
+   "id": "hs_or_less",
+   "stateAgeCombosWithOwnData": 255,
+   "of": 255
+  },
+  {
+   "id": "some_college",
+   "stateAgeCombosWithOwnData": 255,
+   "of": 255
+  },
+  {
+   "id": "bachelors",
+   "stateAgeCombosWithOwnData": 255,
+   "of": 255
+  },
+  {
+   "id": "masters",
+   "stateAgeCombosWithOwnData": 255,
+   "of": 255
+  },
+  {
+   "id": "professional",
+   "stateAgeCombosWithOwnData": 228,
+   "of": 255
+  },
+  {
+   "id": "doctorate",
+   "stateAgeCombosWithOwnData": 219,
+   "of": 255
+  }
+ ],
+ "experienceFallbacks": [],
+ "educationMajorFallbacks": []
+}

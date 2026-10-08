@@ -25,6 +25,10 @@ type ShieldShareCardProps = {
   location?: string;
   noDataMessage?: string;
   renderScale?: number;
+  // "netWorth" swaps only the wording (eyebrow, shield label) — same shield,
+  // colors, layout and "Where do you rank?" close as the income card. Never
+  // carries a dollar amount, just like the income card.
+  metric?: "income" | "netWorth";
 };
 
 function unit(value: number, renderScale: number): string | number {
@@ -40,9 +44,9 @@ function formatRankLabel(label: string): string {
   return label.toLowerCase();
 }
 
-function ShieldIcon({ grade, size, renderScale }: { grade: string; size: string | number; renderScale: number }) {
+function ShieldIcon({ grade, size, renderScale, metricWord }: { grade: string; size: string | number; renderScale: number; metricWord: string }) {
   return (
-    <div aria-label={`${grade} income grade`} role="img" style={{ position: "relative", display: "flex", width: size, height: size, flexShrink: 0 }}>
+    <div aria-label={`${grade} ${metricWord} grade`} role="img" style={{ position: "relative", display: "flex", width: size, height: size, flexShrink: 0 }}>
       <svg width="100%" height="100%" viewBox="0 0 160 190" style={{ position: "absolute", inset: 0, display: "flex", width: "100%", height: "100%" }}>
         <path
           d="M80 4 153 31v58c0 43-28 75-73 97C35 164 7 132 7 89V31L80 4Z"
@@ -86,7 +90,9 @@ export default function ShieldShareCard({
   location,
   noDataMessage,
   renderScale = 1,
+  metric = "income",
 }: ShieldShareCardProps) {
+  const isNetWorth = metric === "netWorth";
   const isStory = variant === "story";
   const height = isStory ? STORY_HEIGHT : WIDE_HEIGHT;
   const tier = percent == null ? null : getTier(percent);
@@ -210,7 +216,7 @@ export default function ShieldShareCard({
               gap: unit(isStory ? 4 : 2, renderScale),
             }}
           >
-            <ShieldIcon grade={grade} size={unit(isStory ? 116 : 124, renderScale)} renderScale={renderScale} />
+            <ShieldIcon grade={grade} size={unit(isStory ? 116 : 124, renderScale)} renderScale={renderScale} metricWord={isNetWorth ? "net worth" : "income"} />
             <span
               style={{
                 display: "flex",
@@ -221,7 +227,7 @@ export default function ShieldShareCard({
                 lineHeight: 1,
               }}
             >
-              TOP
+              {isNetWorth ? "NET WORTH · TOP" : "TOP"}
             </span>
             <span
               style={{

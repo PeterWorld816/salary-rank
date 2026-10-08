@@ -2,6 +2,11 @@ import type { MetadataRoute } from "next";
 import { absoluteUrl } from "@/lib/site-url";
 import { getAllInsights } from "@/lib/insights";
 import { US_STATES } from "@/data/us/stateMeta";
+import { OCCUPATION_PAGES } from "@/lib/seo-pages/occupations";
+import { NET_WORTH_BRACKETS } from "@/lib/seo-pages/netWorth";
+import { isWithheldFromSearch } from "@/lib/seo-pages/gate";
+import occupationDetails from "@/data/us/occupationDetails.json";
+import scf from "@/data/us/netWorthByAgeScf.json";
 
 // Only /us is listed. /kr is the same app/us/** route tree served in Korean
 // (see middleware.ts) but it's noindex,follow (lib/seo.ts) and disallowed in
@@ -49,7 +54,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // the state map (and still get their own `noindex, follow` — see
     // app/[locale]/[state]/[county]/page.tsx and .../[place]/page.tsx) —
     // just not individually submitted for indexing.
+    // Data-driven pages (lib/seo-pages/*) — only those the quality gate
+    // passed (scripts/seoQualityGate.ts; a failed page is noindex and left
+    // out here). lastmod = when their underlying data file was generated.
+    const occupationData = new Date(occupationDetails.meta.generatedAt);
+    const netWorthData = new Date(scf.meta.transcribedAt); // when the SCF table was added here
+    const seoPages = [
+      { path: `${base}/occupations`, lastModified: occupationData, priority: 0.7 },
+      ...OCCUPATION_PAGES.map((p) => ({ path: `${base}/occupations/${p.slug}`, lastModified: occupationData, priority: 0.6 })),
+      { path: `${base}/net-worth`, lastModified: netWorthData, priority: 0.7 },
+      ...NET_WORTH_BRACKETS.map((b) => ({ path: `${base}/net-worth/${b.id}`, lastModified: netWorthData, priority: 0.6 })),
+    ];
+    for (const p of seoPages) {
+      if (isWithheldFromSearch(p.path)) continue;
+      entries.push({ url: absoluteUrl(p.path), lastModified: p.lastModified, changeFrequency: "monthly", priority: p.priority });
+    }
+
     for (const state of US_STATES) {
+      if (isWithheldFromSearch(`${base}/${state.abbr}`)) continue;
       entries.push({
         url: absoluteUrl(`${base}/${state.abbr}`),
         lastModified: now,

@@ -9,12 +9,14 @@ export default function UsShareCardStory({
   cardRef,
   location,
   noDataMessage,
+  metric,
 }: {
   percent: number | null;
   rows: ShieldRankRow[];
   cardRef?: RefObject<HTMLDivElement>;
   location?: string;
   noDataMessage?: string;
+  metric?: "income" | "netWorth";
 }) {
   return (
     <ShieldShareCard
@@ -24,6 +26,7 @@ export default function UsShareCardStory({
       rows={rows}
       location={location}
       noDataMessage={noDataMessage}
+      metric={metric}
     />
   );
 }
