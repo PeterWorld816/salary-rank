@@ -75,7 +75,10 @@ body {
   color: var(--color-text);
   font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  /* clip, not hidden: hidden would make body its own scroll container,
+     which breaks position: sticky (MapNavBar) for everything inside it.
+     html above still hides horizontal overflow where clip is unsupported. */
+  overflow-x: clip;
   word-break: keep-all;
 }
 

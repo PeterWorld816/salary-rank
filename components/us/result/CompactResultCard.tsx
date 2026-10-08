@@ -16,7 +16,7 @@ import { NoDataCard } from "@/components/us/result/ResultBits";
 import Spinner from "@/components/Spinner";
 import ShareButtons from "@/components/ShareButtons";
 import type { StateMeta } from "@/data/us/stateMeta";
-import type { UsCountyIncome } from "@/lib/usIncomeCalc";
+import { acs5YearRange, type UsCountyIncome } from "@/lib/usIncomeCalc";
 import { useCompactResult } from "@/components/us/result/useCompactResult";
 import { stripStateSuffix } from "@/lib/usFormat";
 import { buildUsShareHref, US_AGE_BANDS } from "@/lib/usInput";
@@ -121,7 +121,7 @@ function CompactResultCardInner({
       <div className="mx-auto max-w-2xl px-6 pt-8">
         {result.ready ? (
           <>
-            <div className="mx-auto mb-8 w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+            <div className="mx-auto mb-4 w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.03] p-5">
               <p className="text-center text-[13px] font-semibold text-white/55">
                 {formatTemplate(t.topPercentTemplate, { percent: result.incomePercent })}
               </p>
@@ -150,7 +150,7 @@ function CompactResultCardInner({
                 />
               </div>
               <p className="mt-2 text-center text-[11px] text-white/35">
-                {formatTemplate(t.usAcs5YearLabel, { range: "2019–2023" })}
+                {formatTemplate(t.usAcs5YearLabel, { range: acs5YearRange })}
               </p>
             </div>
 

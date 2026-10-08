@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { localeFromParams, localeBase } from "@/lib/serverLocale";
 import { pageMetadata } from "@/lib/seo";
 import { LegalPage, LegalSection } from "@/components/us/LegalPage";
+import { acs1Vintage, acs5YearRange } from "@/lib/usIncomeCalc";
 
 const COPY = {
   us: {
@@ -16,8 +17,8 @@ const COPY = {
     sourcesIntro: "Every figure shown comes from one of the following public sources — nothing is estimated or made up:",
     sources: [
       {
-        name: "US Census Bureau — American Community Survey (ACS) 5-Year Estimates",
-        detail: "Median household income by state and county (tables B19013, B19001), plus the latest 1-Year estimate for states.",
+        name: `US Census Bureau — American Community Survey (ACS) ${acs5YearRange} 5-Year Estimates`,
+        detail: `Median household income by state, county, and town (tables B19013, B19001), median earnings by sex (B20017), and the latest ${acs1Vintage} 1-Year estimate for states. Occupation figures come from the same ${acs5YearRange} ACS Public Use Microdata Sample (PUMS).`,
       },
       {
         name: "Federal Reserve — 2022 Survey of Consumer Finances (SCF)",
@@ -47,8 +48,8 @@ const COPY = {
     sourcesIntro: "이 사이트에 표시되는 모든 수치는 아래 공개 통계 출처에서 가져온 것이며, 임의로 추정하거나 만들어낸 값이 아닙니다:",
     sources: [
       {
-        name: "미국 인구조사국(US Census Bureau) — ACS 5년 추정치(American Community Survey 5-Year Estimates)",
-        detail: "주·카운티별 가구 중위소득(B19013, B19001 테이블), 주 단위 최신 1년 추정치.",
+        name: `미국 인구조사국(US Census Bureau) — ACS ${acs5YearRange} 5년 추정치(American Community Survey 5-Year Estimates)`,
+        detail: `주·카운티·타운별 가구 중위소득(B19013, B19001 테이블), 성별 근로소득 중앙값(B20017), 주 단위 ${acs1Vintage} 1년 추정치. 직업별 수치는 같은 ${acs5YearRange} ACS 표본 마이크로데이터(PUMS)에서 계산합니다.`,
       },
       {
         name: "미국 연방준비제도(Federal Reserve) — 2022 소비자금융조사(Survey of Consumer Finances, SCF)",

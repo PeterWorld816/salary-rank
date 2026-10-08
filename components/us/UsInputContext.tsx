@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { decodeUsInput, DEFAULT_US_INPUT, isDefaultUsInputSelection, type UsInput } from "@/lib/usInput";
-import type { UsMapBasisLens } from "@/components/us/mapBasisLens";
+import { isMapBasisLens, type UsMapBasisLens } from "@/components/us/mapBasisLens";
 
 type UsInputContextValue = {
   input: UsInput;
@@ -25,8 +25,12 @@ export function UsInputProvider({ children, pathname }: { children: ReactNode; p
     const params = new URLSearchParams(window.location.search);
     const encodedInput = params.get("d");
     const sharedInput = encodedInput ? decodeUsInput(encodedInput) : null;
-    const sharedLens = params.get("lens");
-    const isKnownLens = sharedLens === "household" || sharedLens === "marital" || sharedLens === "gender" || sharedLens === "occupation" || sharedLens === "personalized";
+    const rawLens = params.get("lens");
+    // Links shared before the gender tab split into Men/Women still carry
+    // "?lens=gender" — that meant "my own gender", so map it the same way.
+    const sharedLens =
+      rawLens === "gender" ? ((sharedInput?.gender ?? DEFAULT_US_INPUT.gender) === "female" ? "women" : "men") : rawLens;
+    const isKnownLens = isMapBasisLens(sharedLens);
 
     if (sharedInput) {
       setInput(sharedInput);

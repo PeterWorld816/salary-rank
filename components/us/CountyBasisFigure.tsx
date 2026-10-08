@@ -25,7 +25,7 @@ import { basisForLens, basisLabel, UNIT_EXPLAINER_HREF } from "@/components/us/m
 function CountyBasisFigureContent({ county }: { county: UsIncomeBreakdownSource }) {
   const { t, tr } = useLanguage();
   const { input, mapLens } = useUsInput();
-  const basis = basisForLens(mapLens, input.gender, input.maritalStatus);
+  const basis = basisForLens(mapLens, input.maritalStatus);
   if (basis.axis === "household") return null;
 
   const reference = resolveBasisIncome(county, basis);

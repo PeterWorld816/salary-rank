@@ -84,11 +84,8 @@ export interface Translations {
   usFieldAssetsToggleHide: string;
   usSeeNationalResultButtonTemplate: string; // template: {income}
   usApply: string;
-  usMapTitle: string;
-  usMapHint: string;
   usLegendNoData: string;
   usStateMapTitleTemplate: string; // template: {state}
-  usStateMapHint: string;
   usSearchStatePlaceholder: string;
   usSearchPlacePlaceholder: string;
   usListNoResults: string;
@@ -97,7 +94,8 @@ export interface Translations {
   usMapBasisHeading: string;
   usMapBasisOptionHousehold: string;
   usMapBasisOptionMaritalTemplate: string; // template: {status}
-  usMapBasisOptionGenderTemplate: string; // template: {gender}
+  usMapBasisOptionMen: string;
+  usMapBasisOptionWomen: string;
   usMapBasisMetricHousehold: string;
   usMapBasisMetricIndividual: string;
   usMapBasisIndividualNote: string;
@@ -112,6 +110,10 @@ export interface Translations {
   usMapBasisPersonalizedNote: string;
   usMapBasisPersonalizedCountyNotice: string;
   usBackToUsMap: string;
+  // ── Map card top row (components/us/MapNavBar.tsx)
+  usMapNavRoot: string;
+  usMapNavLabel: string;
+  usMapNavBackTemplate: string; // template: {place}
   usBackToStateMap: string;
   usCountyNoDataTitle: string;
   usCountyNoDataDesc: string;
@@ -156,8 +158,6 @@ export interface Translations {
   usStateThresholdsHeadingTemplate: string; // template: {state}
   usStateRankTemplate: string; // template: {state}, {rank}, {total}
   usStateNearbyRankedHeading: string;
-  usStateCountyListHeadingTemplate: string; // template: {state}
-  usStateCountyListHint: string;
   usSearchCountyPlaceholder: string;
 
   // ── County SEO landing page (app/us/[state]/[county]/page.tsx)
@@ -167,8 +167,6 @@ export interface Translations {
   usCountyVsNationalTemplate: string; // template: {percent}
   usCountyThresholdsHeading: string;
   usCountyNearbyHeading: string;
-  usCountyPlaceListHeadingTemplate: string; // template: {county}
-  usCountyPlaceListHint: string;
   usCountyMapPickHint: string;
   usCountyNoPlaceDataTitle: string;
   usCountyNoPlaceDataDesc: string;
@@ -251,7 +249,7 @@ export const translations: Record<LangCode, Translations> = {
     privacyNotice: "개인정보를 수집하지 않습니다. 모든 계산은 이 브라우저 안에서만 이뤄집니다.",
 
     distributionYouAreHere: "너 여기!",
-    distributionAverageTick: "평균",
+    distributionAverageTick: "중앙값",
     distributionLowLabel: "소득 낮음",
     distributionHighLabel: "소득 높음",
     topPercentTemplate: "상위 {percent}%",
@@ -305,11 +303,8 @@ export const translations: Record<LangCode, Translations> = {
     usFieldAssetsToggleHide: "순자산 / 401k 접기",
     usSeeNationalResultButtonTemplate: "{income}가 전국에서 상위 몇 %인지 보기",
     usApply: "적용하고 지도 보기",
-    usMapTitle: "주(State)를 선택하세요",
-    usMapHint: "지도나 목록에서 주를 선택하면 카운티별 지도로 이동해요",
     usLegendNoData: "데이터 없음",
     usStateMapTitleTemplate: "{state} 카운티를 선택하세요",
-    usStateMapHint: "카운티를 클릭하면 그 카운티 기준 결과를 볼 수 있어요",
     usSearchStatePlaceholder: "주 이름 검색...",
     usSearchPlacePlaceholder: "도시 이름 검색...",
     usListNoResults: "검색 결과가 없어요",
@@ -317,7 +312,8 @@ export const translations: Record<LangCode, Translations> = {
     usMapBasisHeading: "지도 기준",
     usMapBasisOptionHousehold: "전체 가구",
     usMapBasisOptionMaritalTemplate: "{status} 가구",
-    usMapBasisOptionGenderTemplate: "{gender} (개인)",
+    usMapBasisOptionMen: "남성 (개인)",
+    usMapBasisOptionWomen: "여성 (개인)",
     usMapBasisMetricHousehold: "가구 중위소득",
     usMapBasisMetricIndividual: "개인 근로소득 중앙값",
     usMapBasisIndividualNote: "성별 수치는 가구소득이 아니라 개인 근로소득이에요.",
@@ -332,6 +328,9 @@ export const translations: Record<LangCode, Translations> = {
     usMapBasisPersonalizedNote: "직업을 선택하면 개인 근로소득(주 단위, 표본 부족 시 전국 평균) 기준으로, 직업 없이는 결혼여부·성별에 나이대별 전국 비율을 반영한 가구소득 기준으로 표시돼요. YOUR INFO를 바꿀 때마다 실시간으로 다시 계산돼요.",
     usMapBasisPersonalizedCountyNotice: "카운티 단위는 맞춤 조합 데이터가 충분하지 않아 전체 가구 기준으로 표시돼요.",
     usBackToUsMap: "미국 지도로",
+    usMapNavRoot: "미국 지도",
+    usMapNavLabel: "지도 위치",
+    usMapNavBackTemplate: "{place}(으)로 돌아가기",
     usBackToStateMap: "주 지도로",
     usCountyNoDataTitle: "이 지역 데이터는 아직 준비 중이에요",
     usCountyNoDataDesc: "scripts/fetchCensusData.ts를 Census API 키와 함께 실행하면 실제 수치로 채워집니다.",
@@ -344,7 +343,7 @@ export const translations: Record<LangCode, Translations> = {
     usStateMedianLabel: "이 주 가구 중위소득",
     usNationalMedianLabel: "전국 가구 중위소득",
     usAcs1YearLabel: "최신 연간 추정치 (1-Year, {year})",
-    usAcs5YearLabel: "5개년 평균 (5-Year, {range})",
+    usAcs5YearLabel: "ACS 5개년 추정치 ({range})",
     usCountyPercentileHeroLabel: "이 카운티 기준 소득 상위",
     usHeadlineCountyLabelTemplate: "{county} 기준 소득 상위",
     usNationalPercentileHeroLabel: "미국 전체 기준 소득 상위",
@@ -375,8 +374,6 @@ export const translations: Record<LangCode, Translations> = {
     usStateThresholdsHeadingTemplate: "{state} 소득 상위 기준선",
     usStateRankTemplate: "{state}는 미국 51개 주(+D.C.) 중 가구 중위소득 기준 {rank}위예요 (총 {total}개 중).",
     usStateNearbyRankedHeading: "소득 수준이 비슷한 주",
-    usStateCountyListHeadingTemplate: "{state}의 카운티",
-    usStateCountyListHint: "카운티별 가구 중위소득이에요. 카운티를 누르면 자세한 내용을 볼 수 있어요.",
     usSearchCountyPlaceholder: "카운티 이름 검색...",
 
     usCountyPageHeadingTemplate: "{county} 소득은 상위 몇 %?",
@@ -385,8 +382,6 @@ export const translations: Record<LangCode, Translations> = {
     usCountyVsNationalTemplate: "전국 기준으로는 상위 {percent}%예요.",
     usCountyThresholdsHeading: "이 카운티의 소득 기준선",
     usCountyNearbyHeading: "인접 카운티",
-    usCountyPlaceListHeadingTemplate: "{county}에서 타운을 선택하세요",
-    usCountyPlaceListHint: "지도나 목록에서 타운을 선택하면 그 타운 기준 결과를 바로 볼 수 있어요.",
     usCountyMapPickHint: "지도의 마커를 누르면 그 타운으로 이동해요.",
     usCountyNoPlaceDataTitle: "이 카운티는 타운 단위 데이터가 없어요",
     usCountyNoPlaceDataDesc: "위의 카운티 전체 결과만 확인할 수 있어요.",
@@ -463,7 +458,7 @@ export const translations: Record<LangCode, Translations> = {
     privacyNotice: "We don't collect personal data. Every calculation runs right in your browser.",
 
     distributionYouAreHere: "You're here!",
-    distributionAverageTick: "avg",
+    distributionAverageTick: "median",
     distributionLowLabel: "Lower income",
     distributionHighLabel: "Higher income",
     topPercentTemplate: "Top {percent}%",
@@ -517,11 +512,8 @@ export const translations: Record<LangCode, Translations> = {
     usFieldAssetsToggleHide: "Hide net worth / 401k",
     usSeeNationalResultButtonTemplate: "See where {income} ranks nationwide",
     usApply: "Apply & view map",
-    usMapTitle: "Select a state",
-    usMapHint: "Pick a state on the map or list to see its county-level map",
     usLegendNoData: "No data",
     usStateMapTitleTemplate: "Select a county in {state}",
-    usStateMapHint: "Click a county to see your result for that county",
     usSearchStatePlaceholder: "Search states...",
     usSearchPlacePlaceholder: "Search cities...",
     usListNoResults: "No results found",
@@ -529,7 +521,8 @@ export const translations: Record<LangCode, Translations> = {
     usMapBasisHeading: "Shading",
     usMapBasisOptionHousehold: "All households",
     usMapBasisOptionMaritalTemplate: "{status} households",
-    usMapBasisOptionGenderTemplate: "{gender} (individual)",
+    usMapBasisOptionMen: "Men (individual)",
+    usMapBasisOptionWomen: "Women (individual)",
     usMapBasisMetricHousehold: "Median income",
     usMapBasisMetricIndividual: "Median earnings",
     usMapBasisIndividualNote: "Gender figures are individual earnings, not household income.",
@@ -544,6 +537,9 @@ export const translations: Record<LangCode, Translations> = {
     usMapBasisPersonalizedNote: "With an occupation picked, this shows personal earnings by state (falling back to the national figure where a state's sample is too small). Without one, it shows household income for your marital status/gender, adjusted by the national age-band pattern. Recalculates live whenever you change YOUR INFO.",
     usMapBasisPersonalizedCountyNotice: "County-level personalized data isn't reliable enough — showing all-households instead.",
     usBackToUsMap: "US map",
+    usMapNavRoot: "US Map",
+    usMapNavLabel: "Map location",
+    usMapNavBackTemplate: "Back to {place}",
     usBackToStateMap: "State map",
     usCountyNoDataTitle: "Data for this area isn't loaded yet",
     usCountyNoDataDesc: "Run scripts/fetchCensusData.ts with a Census API key to populate real figures.",
@@ -556,7 +552,7 @@ export const translations: Record<LangCode, Translations> = {
     usStateMedianLabel: "This state's median household income",
     usNationalMedianLabel: "Nationwide median household income",
     usAcs1YearLabel: "Latest annual estimate (1-Year, {year})",
-    usAcs5YearLabel: "5-Year average (5-Year, {range})",
+    usAcs5YearLabel: "ACS 5-Year estimate ({range})",
     usCountyPercentileHeroLabel: "Top in this county",
     usHeadlineCountyLabelTemplate: "Top in {county}",
     usNationalPercentileHeroLabel: "Top nationwide",
@@ -587,8 +583,6 @@ export const translations: Record<LangCode, Translations> = {
     usStateThresholdsHeadingTemplate: "Top income thresholds in {state}",
     usStateRankTemplate: "{state} ranks #{rank} of {total} states (and D.C.) by median household income.",
     usStateNearbyRankedHeading: "States with a similar income level",
-    usStateCountyListHeadingTemplate: "Counties in {state}",
-    usStateCountyListHint: "Median household income by county. Tap a county to see the full breakdown.",
     usSearchCountyPlaceholder: "Search counties...",
 
     usCountyPageHeadingTemplate: "What's your income percentile in {county}?",
@@ -597,8 +591,6 @@ export const translations: Record<LangCode, Translations> = {
     usCountyVsNationalTemplate: "Nationally, it ranks in the top {percent}%.",
     usCountyThresholdsHeading: "Income thresholds in this county",
     usCountyNearbyHeading: "Nearby counties",
-    usCountyPlaceListHeadingTemplate: "Select a town in {county}",
-    usCountyPlaceListHint: "Pick a town on the map or list to see your result for that town.",
     usCountyMapPickHint: "Tap a marker to go to that town.",
     usCountyNoPlaceDataTitle: "No town-level data for this county",
     usCountyNoPlaceDataDesc: "Only the county-level result above is available.",

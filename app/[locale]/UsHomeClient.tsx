@@ -7,9 +7,10 @@ import { useLocaleBase } from "@/lib/useLocaleBase";
 import { formatTemplate } from "@/lib/i18n";
 import UsShell from "@/components/us/UsShell";
 import UsMap, { type UsMapFeatureProps } from "@/components/us/UsMap";
-import UsGeoList from "@/components/us/UsGeoList";
+import MapNavBar from "@/components/us/MapNavBar";
+import GeoCombobox from "@/components/us/GeoCombobox";
 import IncomeLegend from "@/components/us/IncomeLegend";
-import MapBasisControl from "@/components/us/MapBasisControl";
+import MapBasisControl, { MapBasisCaption } from "@/components/us/MapBasisControl";
 import {
   basisForLens,
   basisLabel,
@@ -68,8 +69,8 @@ function UsHomeContent({
   const showingPersonalized = basisLens === "personalized";
 
   const basis = useMemo(
-    () => basisForLens(basisLens, input.gender, input.maritalStatus),
-    [basisLens, input.gender, input.maritalStatus]
+    () => basisForLens(basisLens, input.maritalStatus),
+    [basisLens, input.maritalStatus]
   );
 
   // The household half of "Personalized" when no occupation is selected:
@@ -182,7 +183,7 @@ function UsHomeContent({
     setMapLens(next);
   }
 
-  // Same basis as the map beside it — a sidebar quoting household medians next
+  // Same basis as the map above it — a search list quoting household medians next
   // to a map shaded by individual earnings would read as two contradictory
   // numbers for the same state.
   const stateItems = geo.features
@@ -214,78 +215,75 @@ function UsHomeContent({
         group: `${basisLabel(personalizedHouseholdBasis, t, tr).group} · ${ageBandLabel}`,
       };
 
+  const occupationOption = occupationCategory
+    ? { label: formatTemplate(t.usMapBasisOptionOccupationTemplate, { occupation: tr(occupationCategory.label) }) }
+    : null;
+
   return (
     <UsShell>
       <CompactResultCard presetState={null} presetCounty={null} shareAfterMapId="us-map-share-actions" />
 
-      <div className="mx-auto max-w-5xl px-4 pb-16 pt-8 sm:px-6">
-        <h1 className="mb-2 text-[28px] font-extrabold tracking-tight text-balance">{t.usAppTitle}</h1>
-        <p className="mb-8 max-w-xl text-[15px] text-white/55">{t.usTagline}</p>
-
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-[15px] font-bold text-white/90">{t.usMapTitle}</h2>
-          <span className="text-[12px] text-white/40">{t.usMapHint}</span>
-        </div>
+      <div className="mx-auto max-w-5xl px-4 pb-16 pt-6 sm:px-6">
+        {/* The header bar already names the site, so on phones the page title
+            stays for screen readers and search engines only — that, and the
+            tagline, are what keep the map inside the first screen there. */}
+        <h1 className="sr-only mb-1 text-[22px] font-extrabold tracking-tight text-balance sm:not-sr-only">{t.usAppTitle}</h1>
+        <p className="mb-4 hidden max-w-xl text-[13px] leading-relaxed text-white/55 sm:block">{t.usTagline}</p>
 
         <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
+          <MapNavBar crumbs={[{ label: t.usMapNavRoot }]}>
+            <GeoCombobox
+              items={stateItems}
+              onSelect={handleSelect}
+              placeholder={t.usSearchStatePlaceholder}
+              emptyText={t.usListNoResults}
+            />
+          </MapNavBar>
           <MapBasisControl
             lens={basisLens}
             onLensChange={handleLensChange}
-            basis={basis}
-            gender={input.gender}
             maritalStatus={input.maritalStatus}
-            occupationOption={
-              occupationCategory
-                ? { label: formatTemplate(t.usMapBasisOptionOccupationTemplate, { occupation: tr(occupationCategory.label) }) }
-                : null
-            }
+            occupationOption={occupationOption}
             personalizedOption={personalizedOption}
           />
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-            <div className="min-w-0 flex-1">
-              <div className="relative">
-                <UsMap
-                  geo={geo}
-                  onSelect={handleSelect}
-                  getFill={getFill}
-                  getLabel={getLabel}
-                  getFallback={getFallback}
-                  height={480}
-                  zoomable
-                />
-                {/* Occupation/Personalized fetch every state's occupation
-                    file the first time either is activated (see
-                    useOccupationMapData.ts) — a visible overlay here, not
-                    just a small text line above the map, is what keeps that
-                    stretch from reading as a hung page instead of a loading
-                    one. */}
-                {usingOccupationFill && occupationMapData.loading && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-[#050607]/60 backdrop-blur-[1px]">
-                    <div className="flex items-center gap-2 rounded-full border border-white/10 bg-[#050607]/90 px-4 py-2">
-                      <Spinner className="h-4 w-4 border-2 border-white/20 border-t-[#34D399]" />
-                      <span className="text-[12px] font-semibold text-white/80">{t.usMapBasisOccupationLoading}</span>
-                    </div>
-                  </div>
-                )}
+          <div className="relative">
+            <UsMap
+              geo={geo}
+              onSelect={handleSelect}
+              getFill={getFill}
+              getLabel={getLabel}
+              getFallback={getFallback}
+              height={480}
+              zoomable
+            />
+            {/* Occupation/Personalized fetch every state's occupation
+                file the first time either is activated (see
+                useOccupationMapData.ts) — a visible overlay here, not
+                just a small text line above the map, is what keeps that
+                stretch from reading as a hung page instead of a loading
+                one. */}
+            {usingOccupationFill && occupationMapData.loading && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-[#050607]/60 backdrop-blur-[1px]">
+                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-[#050607]/90 px-4 py-2">
+                  <Spinner className="h-4 w-4 border-2 border-white/20 border-t-[#34D399]" />
+                  <span className="text-[12px] font-semibold text-white/80">{t.usMapBasisOccupationLoading}</span>
+                </div>
               </div>
-              <p className="mt-2 text-center text-[11px] text-white/35 sm:hidden">{t.usZoomHint}</p>
-            </div>
-
-            <div className="w-full shrink-0 sm:w-64">
-              <UsGeoList
-                items={stateItems}
-                onSelect={handleSelect}
-                searchPlaceholder={t.usSearchStatePlaceholder}
-                emptyText={t.usListNoResults}
-                maxHeight={480}
-              />
-            </div>
+            )}
           </div>
-          <IncomeLegend
-            min={activeMin}
-            max={activeMax}
-            fallbackLabel={usingOccupationFill ? t.usMapBasisOccupationFallbackTooltip : null}
-          />
+          <p className="mt-2 text-center text-[11px] text-white/35 sm:hidden">{t.usZoomHint}</p>
+          <MapBasisCaption
+            lens={basisLens}
+            basis={basis}
+            occupationOption={occupationOption}
+            personalizedOption={personalizedOption}
+          >
+            <IncomeLegend
+              min={activeMin}
+              max={activeMax}
+              fallbackLabel={usingOccupationFill ? t.usMapBasisOccupationFallbackTooltip : null}
+            />
+          </MapBasisCaption>
           <div id="us-map-share-actions" className="mt-4 border-t border-white/[0.06] pt-4" />
         </div>
 

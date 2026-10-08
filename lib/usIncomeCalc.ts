@@ -60,7 +60,9 @@ export type UsStateIncome = {
 
 // All 50 states + DC clear the ACS 1-year population threshold, so this
 // vintage/range pair describes every state entry uniformly.
-export const acs5YearRange = stateIncomeData.meta.acs5YearRange as string;
+// Stored as "2020-2024"; shown with an en dash so every label on the site
+// spells the range the same way the insight articles do ("2020–2024").
+export const acs5YearRange = (stateIncomeData.meta.acs5YearRange as string).replace("-", "–");
 export const acs1Vintage = stateIncomeData.meta.acs1Vintage as number;
 
 // County/place types and their fips -> object lookups live in

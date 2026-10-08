@@ -1,9 +1,9 @@
 "use client";
 // County page's town-picker — the selected county's polygon (fit to just
-// that one feature) alongside an always-visible, searchable list of every
-// town in it. Picking a town, either from the list or by tapping its pin
-// directly on the map, shares one handler: it drops a single marker at that
-// town's spot and navigates to its own SEO+result page
+// that one feature) under the shared MapNavBar row, whose search box lists
+// every town in it on demand. Picking a town, either from the search list or
+// by tapping its pin directly on the map, shares one handler: it drops a
+// single marker at that town's spot and navigates to its own SEO+result page
 // (/us/[state]/[county]/[place]). No markers show until one is picked —
 // that's what keeps the default map clean instead of showing every town in
 // the county at once.
@@ -13,7 +13,8 @@ import type { FeatureCollection, Geometry } from "geojson";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { formatUsd, stripStateSuffix } from "@/lib/usFormat";
 import UsMap, { type UsMapFeatureProps, type UsMapMarker } from "@/components/us/UsMap";
-import UsGeoList from "@/components/us/UsGeoList";
+import MapNavBar, { type MapNavCrumb } from "@/components/us/MapNavBar";
+import GeoCombobox from "@/components/us/GeoCombobox";
 
 export type CountyMapPlace = {
   fips: string;
@@ -34,6 +35,8 @@ function TownPickerMapContent({
   countyGeo,
   places,
   placeHrefBase,
+  crumbs,
+  back,
 }: {
   stateName: string;
   countyName: string;
@@ -42,10 +45,12 @@ function TownPickerMapContent({
   // The county's own page path (e.g. "/us/CA/06037") — a picked place's
   // fips is appended as a path segment to reach its own page.
   placeHrefBase: string;
+  crumbs: MapNavCrumb[];
+  back: { label: string; href: string };
 }) {
   const { t } = useLanguage();
   const router = useRouter();
-  // Selecting a town (via the map's markers or the list below) shares this
+  // Selecting a town (via the map's markers or the search list) shares this
   // single handler, so the two stay in sync by construction. No marker is
   // shown until one is picked — see `markers` below.
   const [selectedFips, setSelectedFips] = useState<string | null>(null);
@@ -72,35 +77,29 @@ function TownPickerMapContent({
 
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <div className="min-w-0 flex-1">
-          <UsMap
-            geo={countyGeo}
-            fit
-            height={420}
-            zoomable
-            minZoom={1}
-            maxZoom={6}
-            onSelect={() => {}}
-            onMarkerSelect={handleSelect}
-            getFill={() => COUNTY_FILL}
-            getLabel={() => countyName}
-            markers={markers}
-          />
-          <p className="mt-2 text-center text-[11px] text-white/35">{t.usCountyMapPickHint}</p>
-        </div>
-
-        <div className="w-full shrink-0 sm:w-64">
-          <UsGeoList
-            items={placeItems}
-            onSelect={handleSelect}
-            searchPlaceholder={t.usSearchPlacePlaceholder}
-            emptyText={t.usListNoResults}
-            selectedId={selectedFips ?? undefined}
-            maxHeight={420}
-          />
-        </div>
-      </div>
+      <MapNavBar crumbs={crumbs} back={back}>
+        <GeoCombobox
+          items={placeItems}
+          onSelect={handleSelect}
+          placeholder={t.usSearchPlacePlaceholder}
+          emptyText={t.usListNoResults}
+          selectedId={selectedFips ?? undefined}
+        />
+      </MapNavBar>
+      <UsMap
+        geo={countyGeo}
+        fit
+        height={420}
+        zoomable
+        minZoom={1}
+        maxZoom={6}
+        onSelect={() => {}}
+        onMarkerSelect={handleSelect}
+        getFill={() => COUNTY_FILL}
+        getLabel={() => countyName}
+        markers={markers}
+      />
+      <p className="mt-2 text-center text-[11px] text-white/35">{t.usCountyMapPickHint}</p>
     </div>
   );
 }
@@ -111,6 +110,8 @@ export default function TownPickerMap(props: {
   countyGeo: FeatureCollection<Geometry, UsMapFeatureProps>;
   places: CountyMapPlace[];
   placeHrefBase: string;
+  crumbs: MapNavCrumb[];
+  back: { label: string; href: string };
 }) {
   return (
     <Suspense fallback={null}>

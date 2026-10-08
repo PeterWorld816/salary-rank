@@ -3,7 +3,6 @@
 import { resolveIncomeBasis, type UsIncomeBasis } from "@/lib/usIncomeCalc";
 import { formatTemplate, type Localized, type Translations } from "@/lib/i18n";
 import {
-  US_GENDERS,
   US_MARITAL_STATUSES,
   type UsGenderId,
   type UsMaritalStatusId,
@@ -34,9 +33,18 @@ import {
 // selected by UsInputPanel.tsx's apply() the moment any of those four
 // answers stops matching lib/usInput.ts's DEFAULT_US_INPUT, and dropped back
 // to "household" the moment they all match it again.
-export type UsMapBasisLens = "household" | "marital" | "gender" | "occupation" | "personalized";
+//
+// "men" / "women" are two fixed lenses rather than one "my gender" lens, so
+// the map always offers both halves of the B20017 split (both are published
+// for every state and nearly every county) instead of only whichever gender
+// the visitor happened to enter.
+export type UsMapBasisLens = "household" | "marital" | "men" | "women" | "occupation" | "personalized";
 
-const LENS_IDS: UsMapBasisLens[] = ["household", "marital", "gender", "occupation", "personalized"];
+const LENS_IDS: UsMapBasisLens[] = ["household", "marital", "men", "women", "occupation", "personalized"];
+
+export function isMapBasisLens(value: string | null): value is UsMapBasisLens {
+  return value != null && (LENS_IDS as string[]).includes(value);
+}
 
 // Marital status is the default because the input panel has no "unanswered"
 // state for either axis (see lib/usInput.ts — gender and maritalStatus are
@@ -52,8 +60,9 @@ const LENS_IDS: UsMapBasisLens[] = ["household", "marital", "gender", "occupatio
 // checks below and resolves to the same plain household basis "household"
 // itself would, which is exactly the fallback callers want while an
 // occupation fetch is in flight or unavailable.
-export function basisForLens(lens: UsMapBasisLens, gender: UsGenderId, maritalStatus: UsMaritalStatusId): UsIncomeBasis {
-  return resolveIncomeBasis(lens === "gender" ? gender : null, lens === "marital" ? maritalStatus : null);
+export function basisForLens(lens: UsMapBasisLens, maritalStatus: UsMaritalStatusId): UsIncomeBasis {
+  const gender: UsGenderId | null = lens === "men" ? "male" : lens === "women" ? "female" : null;
+  return resolveIncomeBasis(gender, lens === "marital" ? maritalStatus : null);
 }
 
 export type BasisLabel = {
@@ -77,8 +86,7 @@ export function basisLabel(
 
   let group: string;
   if (basis.axis === "gender") {
-    const label = tr(US_GENDERS.find((g) => g.id === basis.gender)?.label ?? { ko: "", en: "" });
-    group = formatTemplate(t.usMapBasisOptionGenderTemplate, { gender: label });
+    group = basis.gender === "female" ? t.usMapBasisOptionWomen : t.usMapBasisOptionMen;
   } else if (basis.axis === "maritalStatus") {
     const label = tr(US_MARITAL_STATUSES.find((m) => m.id === basis.maritalStatus)?.label ?? { ko: "", en: "" });
     group = formatTemplate(t.usMapBasisOptionMaritalTemplate, { status: label });

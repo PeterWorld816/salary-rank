@@ -5,10 +5,10 @@ import { ChevronLeft } from "lucide-react";
 import { translations } from "@/lib/i18n";
 import { localeFromParams, localeBase, getLangForLocale } from "@/lib/serverLocale";
 import { pageMetadata } from "@/lib/seo";
-import { getInsightBySlug } from "@/lib/insights";
+import { getInsightBySlug, splitForArticleAds } from "@/lib/insights";
 import UsShell from "@/components/us/UsShell";
 import Footer from "@/components/us/Footer";
-import AdSlot from "@/components/ads/AdSlot";
+import ArticleAdSlot from "@/components/ads/ArticleAdSlot";
 
 const PROSE_CLASSES =
   "text-[14px] text-white/70 " +
@@ -22,17 +22,6 @@ const PROSE_CLASSES =
   "[&_blockquote]:border-l-2 [&_blockquote]:border-white/20 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-white/55 " +
   "[&_code]:rounded [&_code]:bg-white/[0.08] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[13px] " +
   "[&_hr]:my-8 [&_hr]:border-white/10";
-
-// Splits the article's rendered HTML at the <h2> nearest its midpoint so an
-// ad can sit between two sections instead of interrupting a paragraph. Needs
-// at least 2 <h2>s to have a sane midpoint — shorter articles just skip the
-// mid-article slot rather than splitting somewhere arbitrary.
-function splitAtMidHeading(html: string): [string, string] | null {
-  const headingStarts = [...html.matchAll(/<h2[\s>]/g)].map((m) => m.index!);
-  if (headingStarts.length < 2) return null;
-  const mid = headingStarts[Math.floor(headingStarts.length / 2)];
-  return [html.slice(0, mid), html.slice(mid)];
-}
 
 type Params = { locale: string; slug: string };
 
@@ -76,14 +65,18 @@ export default function InsightArticlePage({ params }: { params: Params }) {
         <h1 className="mb-8 text-[26px] font-extrabold tracking-tight text-balance">{article.title}</h1>
 
         {(() => {
-          const split = splitAtMidHeading(article.html);
-          if (!split) return <div className={PROSE_CLASSES} dangerouslySetInnerHTML={{ __html: article.html }} />;
-          const [before, after] = split;
+          const { start, middle, end, midAd } = splitForArticleAds(article.html);
           return (
             <>
-              <div className={PROSE_CLASSES} dangerouslySetInnerHTML={{ __html: before }} />
-              <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_INSIGHTS_MID!} className="my-8" />
-              <div className={PROSE_CLASSES} dangerouslySetInnerHTML={{ __html: after }} />
+              <div className={PROSE_CLASSES} dangerouslySetInnerHTML={{ __html: start }} />
+              {midAd && (
+                <>
+                  <ArticleAdSlot className="my-8" />
+                  <div className={PROSE_CLASSES} dangerouslySetInnerHTML={{ __html: middle }} />
+                </>
+              )}
+              <ArticleAdSlot className="my-10" />
+              {end && <div className={PROSE_CLASSES} dangerouslySetInnerHTML={{ __html: end }} />}
             </>
           );
         })()}
@@ -99,8 +92,6 @@ export default function InsightArticlePage({ params }: { params: Params }) {
             {t.usInsightsCtaButton}
           </Link>
         </div>
-
-        <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_INSIGHTS_BOTTOM!} className="mt-10" />
 
         <Footer />
       </div>

@@ -2,7 +2,6 @@
 import { Suspense, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
 import type { FeatureCollection, Geometry } from "geojson";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { useLocaleBase } from "@/lib/useLocaleBase";
@@ -11,9 +10,10 @@ import UsShell from "@/components/us/UsShell";
 import CompactResultCard from "@/components/us/result/CompactResultCard";
 import CompactInsightSection from "@/components/us/result/CompactInsightSection";
 import UsMap, { type UsMapFeatureProps } from "@/components/us/UsMap";
-import UsGeoList from "@/components/us/UsGeoList";
+import MapNavBar from "@/components/us/MapNavBar";
+import GeoCombobox from "@/components/us/GeoCombobox";
 import IncomeLegend from "@/components/us/IncomeLegend";
-import MapBasisControl from "@/components/us/MapBasisControl";
+import MapBasisControl, { MapBasisCaption } from "@/components/us/MapBasisControl";
 import {
   basisForLens,
   type UsMapBasisLens,
@@ -78,8 +78,8 @@ function UsStateContent({
   // nothing remounts, so the choropleth transitions its fills (see UsMap's
   // `transition: fill 150ms`). Flipping the lens below uses the URL.
   const basis = useMemo(
-    () => basisForLens(basisLens, input.gender, input.maritalStatus),
-    [basisLens, input.gender, input.maritalStatus]
+    () => basisForLens(basisLens, input.maritalStatus),
+    [basisLens, input.maritalStatus]
   );
 
   // Every county's figure under the current basis, resolved once per basis
@@ -183,19 +183,10 @@ function UsStateContent({
     <UsShell>
       <CompactResultCard presetState={state} presetCounty={null} shareAfterMapId="state-map-share-actions" />
 
-      <div className="mx-auto flex max-w-5xl flex-col px-4 pb-16 pt-8 sm:px-6">
-        <Link
-          href={base}
-          className="mb-6 inline-flex min-h-11 items-center gap-1 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-[13px] text-white/60 transition-colors hover:border-[#34D399]/40 hover:bg-[#34D399]/10 hover:text-white"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          {t.usBackToUsMap}
-        </Link>
-
-        <h1 className="mb-2 text-[26px] font-extrabold tracking-tight text-balance">
+      <div className="mx-auto flex max-w-5xl flex-col px-4 pb-16 pt-6 sm:px-6">
+        <h1 className="mb-4 text-[22px] font-extrabold tracking-tight text-balance">
           {formatTemplate(t.usStateMapTitleTemplate, { state: state.name })}
         </h1>
-        <p className="mb-6 max-w-xl text-[15px] text-white/55">{t.usStateMapHint}</p>
 
         {/* This SEO copy doesn't touch searchParams itself — confirmed via
             `next build` + curl that it's present in the prerendered HTML for
@@ -288,50 +279,45 @@ function UsStateContent({
           </div>
         )}
 
-        {geo.features.length === 0 ? (
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-10 text-center text-white/50">
-            {t.usCountyNoDataDesc}
-          </div>
-        ) : (
-          <div className="order-1 rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
-            <MapBasisControl
-              lens={basisLens}
-              onLensChange={handleLensChange}
-              basis={basis}
-              gender={input.gender}
-              maritalStatus={input.maritalStatus}
-              forcedOffNotice={
-                occupationForcedOff
-                  ? t.usMapBasisOccupationCountyNotice
-                  : personalizedForcedOff
-                    ? t.usMapBasisPersonalizedCountyNotice
-                    : null
-              }
-            />
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-              <div className="min-w-0 flex-1">
-                <UsMap geo={geo} fit onSelect={handleSelect} getFill={getFill} getLabel={getLabel} height={520} zoomable />
-                <p className="mt-2 text-center text-[11px] text-white/35 sm:hidden">{t.usZoomHint}</p>
-              </div>
-
-              <div className="w-full shrink-0 sm:w-64">
-                <p className="mb-0.5 text-[13px] font-bold text-white/90">
-                  {formatTemplate(t.usStateCountyListHeadingTemplate, { state: state.name })}
-                </p>
-                <p className="mb-2 text-[11px] text-white/40">{t.usStateCountyListHint}</p>
-                <UsGeoList
-                  items={countyItems}
-                  onSelect={handleSelect}
-                  searchPlaceholder={t.usSearchCountyPlaceholder}
-                  emptyText={t.usListNoResults}
-                  maxHeight={460}
-                />
-              </div>
-            </div>
-            <IncomeLegend min={min} max={max} />
-            <div id="state-map-share-actions" className="mt-4 border-t border-white/[0.06] pt-4" />
-          </div>
-        )}
+        <div className="order-1 rounded-2xl border border-white/10 bg-white/[0.02] p-3 sm:p-4">
+          <MapNavBar
+            crumbs={[{ label: t.usMapNavRoot, href: base }, { label: state.name }]}
+            back={{ label: t.usMapNavRoot, href: base }}
+          >
+            {geo.features.length > 0 && (
+              <GeoCombobox
+                items={countyItems}
+                onSelect={handleSelect}
+                placeholder={t.usSearchCountyPlaceholder}
+                emptyText={t.usListNoResults}
+              />
+            )}
+          </MapNavBar>
+          {geo.features.length === 0 ? (
+            <div className="p-10 text-center text-white/50">{t.usCountyNoDataDesc}</div>
+          ) : (
+            <>
+              <MapBasisControl
+                lens={basisLens}
+                onLensChange={handleLensChange}
+                maritalStatus={input.maritalStatus}
+                forcedOffNotice={
+                  occupationForcedOff
+                    ? t.usMapBasisOccupationCountyNotice
+                    : personalizedForcedOff
+                      ? t.usMapBasisPersonalizedCountyNotice
+                      : null
+                }
+              />
+              <UsMap geo={geo} fit onSelect={handleSelect} getFill={getFill} getLabel={getLabel} height={520} zoomable />
+              <p className="mt-2 text-center text-[11px] text-white/35 sm:hidden">{t.usZoomHint}</p>
+              <MapBasisCaption lens={basisLens} basis={basis}>
+                <IncomeLegend min={min} max={max} />
+              </MapBasisCaption>
+              <div id="state-map-share-actions" className="mt-4 border-t border-white/[0.06] pt-4" />
+            </>
+          )}
+        </div>
 
         <div className="order-3 mt-8">{countyListAdSlot}</div>
 

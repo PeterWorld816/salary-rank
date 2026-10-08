@@ -123,20 +123,26 @@ export default function UsCountyPage({ params }: { params: Params }) {
   // which case a "no map data" message below is shown instead of the map.
   const countyFeature = getUsCountiesGeoForState(state.fips).features.find((f) => String(f.id) === county.fips);
   const countyGeo = countyFeature ? { type: "FeatureCollection" as const, features: [countyFeature] } : null;
+  const showTownMap = places.length > 0 && countyGeo != null;
+  const stateHref = `${base}/${state.abbr}`;
+  const countyShortName = stripStateSuffix(county.name, state.name);
 
   return (
     <UsShell>
       <CompactResultCard presetState={state} presetCounty={county} shareAfterMapId="county-map-share-actions" />
-      <div className="mx-auto flex max-w-2xl flex-col px-4 pb-16 pt-8 sm:px-6">
-        <Link
-          href={`${base}/${state.abbr}`}
-          className="mb-6 inline-flex min-h-11 items-center gap-1 rounded-lg border border-white/10 bg-white/[0.04] px-3 text-[13px] text-white/60 transition-colors hover:border-[#34D399]/40 hover:bg-[#34D399]/10 hover:text-white"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          {t.usBackToStateMap}
-        </Link>
+      <div className="mx-auto flex max-w-2xl flex-col px-4 pb-16 pt-6 sm:px-6">
+        {/* With a town map, its MapNavBar row carries the way back up. */}
+        {!showTownMap && (
+          <Link
+            href={stateHref}
+            className="mb-6 inline-flex min-h-11 items-center gap-1 self-start rounded-lg border border-white/10 bg-white/[0.04] px-3 text-[13px] text-white/60 transition-colors hover:border-[#34D399]/40 hover:bg-[#34D399]/10 hover:text-white"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            {t.usBackToStateMap}
+          </Link>
+        )}
 
-        <h1 className="mb-6 text-[24px] font-extrabold tracking-tight text-balance">
+        <h1 className="mb-4 text-[22px] font-extrabold tracking-tight text-balance">
           {formatTemplate(t.usCountyPageHeadingTemplate, { county: county.name })}
         </h1>
 
@@ -182,32 +188,25 @@ export default function UsCountyPage({ params }: { params: Params }) {
         <AdSlot slot={process.env.NEXT_PUBLIC_ADSENSE_SLOT_GEO!} className="order-3 mb-8" />
 
         <div className="order-1 mb-8">
-          {places.length === 0 ? (
+          {showTownMap ? (
+            <TownPickerMap
+              stateName={state.name}
+              countyName={countyShortName}
+              countyGeo={countyGeo}
+              places={places}
+              placeHrefBase={placeHrefBase}
+              crumbs={[
+                { label: t.usMapNavRoot, href: base },
+                { label: state.name, href: stateHref },
+                { label: countyShortName },
+              ]}
+              back={{ label: state.name, href: stateHref }}
+            />
+          ) : (
             <div className="rounded-xl border border-white/10 bg-white/[0.02] px-5 py-8 text-center">
               <p className="mb-1 text-[14px] font-semibold text-white/70">{t.usCountyNoPlaceDataTitle}</p>
               <p className="text-[12px] text-white/40">{t.usCountyNoPlaceDataDesc}</p>
             </div>
-          ) : (
-            <>
-              <h2 className="mb-1 text-[16px] font-bold text-white/90">
-                {formatTemplate(t.usCountyPlaceListHeadingTemplate, { county: stripStateSuffix(county.name, state.name) })}
-              </h2>
-              <p className="mb-4 text-[13px] text-white/45">{t.usCountyPlaceListHint}</p>
-              {countyGeo ? (
-                <TownPickerMap
-                  stateName={state.name}
-                  countyName={stripStateSuffix(county.name, state.name)}
-                  countyGeo={countyGeo}
-                  places={places}
-                  placeHrefBase={placeHrefBase}
-                />
-              ) : (
-                <div className="rounded-xl border border-white/10 bg-white/[0.02] px-5 py-8 text-center">
-                  <p className="mb-1 text-[14px] font-semibold text-white/70">{t.usCountyNoPlaceDataTitle}</p>
-                  <p className="text-[12px] text-white/40">{t.usCountyNoPlaceDataDesc}</p>
-                </div>
-              )}
-            </>
           )}
           <div id="county-map-share-actions" className="mt-4 border-t border-white/[0.06] pt-4" />
         </div>
