@@ -32,6 +32,8 @@ export default function GeoCombobox({
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const blurTimer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => () => clearTimeout(blurTimer.current), []);
   const listId = useId();
 
   const sorted = useMemo(() => [...items].sort((a, b) => a.name.localeCompare(b.name)), [items]);
@@ -60,8 +62,20 @@ export default function GeoCombobox({
   }, [open, activeIndex]);
 
   function close() {
+    clearTimeout(blurTimer.current);
     setOpen(false);
     setActiveIndex(0);
+  }
+
+  // iOS Safari ignores the list's pointerdown preventDefault and blurs the
+  // input as soon as a tap ends, before the option's click fires. Closing
+  // right away there unmounts the list, so the click falls through to
+  // whatever is behind it (a map state, or nothing). So a blur only closes
+  // after a short grace period that a click (choose) cancels.
+  function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
+    if (rootRef.current?.contains(e.relatedTarget as Node)) return;
+    clearTimeout(blurTimer.current);
+    blurTimer.current = setTimeout(close, 250);
   }
 
   function choose(id: string) {
@@ -110,12 +124,15 @@ export default function GeoCombobox({
           aria-activedescendant={activeOptionId}
           aria-label={placeholder}
           value={query}
-          onFocus={() => setOpen(true)}
+          onFocus={() => {
+            clearTimeout(blurTimer.current);
+            setOpen(true);
+          }}
           // Already-focused input (e.g. after Esc closed the list): a click
           // fires no new focus event, so reopen on click too.
           onClick={() => setOpen(true)}
           // Tabbing away closes it too (outside presses are handled above).
-          onBlur={close}
+          onBlur={handleBlur}
           onChange={(e) => {
             setQuery(e.target.value);
             setActiveIndex(0);
