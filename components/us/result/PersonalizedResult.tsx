@@ -74,6 +74,10 @@ import {
 import { buildPercentileGapNote } from "@/lib/percentileGap";
 import { useRevealAfterCountUp } from "@/lib/useCountUp";
 import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
+import { useSettledValue } from "@/lib/useSettledValue";
+import { useUsInput } from "@/components/us/UsInputContext";
+import CountUpTemplate from "@/components/us/result/CountUpTemplate";
+import { CelebrationChip, CelebrationLayer, useResultCelebration } from "@/components/us/result/ResultCelebration";
 import { US_TOTAL_HOUSEHOLDS_2024 } from "@/lib/usPopulation";
 import nationalIncomeData from "@/data/us/nationalIncome.json";
 import netWorthPercentilesUS from "@/data/us/netWorthPercentilesUS.json";
@@ -407,6 +411,18 @@ function PersonalizedResultContent({
   const headlineTier = headlineTierPercent != null ? getTier(headlineTierPercent) : null;
   const revealReady = useRevealAfterCountUp(headlineTierPercent);
   const reducedMotion = usePrefersReducedMotion();
+  // The headline card animates toward the last *settled* result (400ms
+  // without a change) — see CompactResultCard.tsx. The chart's "ahead of"
+  // label uses the income baseline its marker is plotted against; the chip
+  // and burst follow the headline percent.
+  const { inputUrlCleaned } = useUsInput();
+  const settled = useSettledValue(
+    headlineTierPercent != null
+      ? { income: input.annualIncome, percent: headlineTierPercent, incomePercent: incomeBaseline?.percent ?? headlineTierPercent }
+      : null,
+    { ready: inputUrlCleaned }
+  );
+  const celebration = useResultCelebration(settled?.percent ?? null);
   const shouldPlayReveal = revealReady && !reducedMotion;
   const revealGroup = headlineTier ? getTierAnimationGroup(headlineTier) : null;
 
@@ -678,20 +694,25 @@ function PersonalizedResultContent({
           </div>
         ) : (
           <>
-            <div className="mx-auto flex max-w-md flex-col items-center rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+            <div className="relative mx-auto flex max-w-md flex-col items-center rounded-2xl border border-white/10 bg-white/[0.03] p-5">
               <p className="text-[13px] font-semibold text-white/55">
-                {formatTemplate(t.topPercentTemplate, { percent: headlineTierPercent })}
+                <CountUpTemplate template={t.topPercentTemplate} value={settled?.percent ?? headlineTierPercent} />
               </p>
               <p className="mt-1 text-center text-[20px] font-extrabold leading-tight text-white">{headline}</p>
-              <div className="mt-4">
+              <CelebrationChip celebration={celebration} />
+              <div className="mt-2">
                 <DistributionChart
-                  monthlySalary={input.annualIncome}
+                  monthlySalary={settled?.income ?? input.annualIncome}
                   width={280}
                   lang={lang}
                   dark
                   min={15000}
                   max={500000}
                   averageValue={county?.medianHouseholdIncome ?? nationalMedianHouseholdIncome ?? 75000}
+                  animate
+                  hold={settled == null}
+                  aheadPercent={100 - (settled?.incomePercent ?? incomeBaseline?.percent ?? headlineTierPercent)}
+                  glowAhead={celebration.band === 0}
                 />
               </div>
             {similarIncomePopulation != null && (
@@ -699,6 +720,7 @@ function PersonalizedResultContent({
                 {formatTemplate(t.usSimilarIncomePopulationTemplate, { count: formatPeopleCount(similarIncomePopulation, lang) })}
               </p>
             )}
+            <CelebrationLayer celebration={celebration} />
             </div>
             {best && incomeBaseline && (
               <ResultGuideTabs

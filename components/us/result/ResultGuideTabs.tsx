@@ -35,6 +35,8 @@ import occupationPages from "@/data/seo/occupationPages.json";
 // Detailed occupations that have a public /us/occupations/<slug> page.
 const OCCUPATION_PAGE_SLUG = new Map(occupationPages.pages.map((p) => [p.id, { slug: p.slug, name: p.name }]));
 import { useDetailedEarnings } from "@/components/us/result/useDetailedEarnings";
+import { useSettledValue } from "@/lib/useSettledValue";
+import { CelebrationLayer, useResultCelebration } from "@/components/us/result/ResultCelebration";
 import {
   GUIDE_MILESTONES,
   ageBandLabel,
@@ -520,6 +522,11 @@ function WhatIfPanel({ ctx, scopes, incomeScope }: { ctx: GuideContext; scopes: 
   const crossed = crossedMilestone(currentPercent, newPercent);
   const raisePct = Math.round((shown / base - 1) * 100);
   const hidden = guessMode && guess == null;
+  // Same band celebration as the result card, from the slider once it rests
+  // (400ms after the last move) and only when it climbs into a higher band —
+  // the starting rank itself is the card's to celebrate, not this panel's.
+  const settledSimPercent = useSettledValue(hidden ? null : newPercent);
+  const celebration = useResultCelebration(settledSimPercent, { playOnFirst: false });
 
   function onSlide(pos: number) {
     const v = posToIncome(pos);
@@ -576,13 +583,15 @@ function WhatIfPanel({ ctx, scopes, incomeScope }: { ctx: GuideContext; scopes: 
         </span>
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+      <div className="relative mt-3 grid grid-cols-3 gap-2 text-center">
+        {/* Burst stays inside the result boxes, clear of the input and slider. */}
+        <CelebrationLayer celebration={celebration} originSelector="[data-celebrate-origin]" goldRing={false} />
         <div className="rounded-lg bg-white/[0.04] px-2 py-2">
           <p className="text-[10.5px] text-white/40">{L(lang, "가정 소득", "New income")}</p>
           <p className="text-[14px] font-bold text-white">{formatUsd(shown)}</p>
           <p className="text-[10.5px] text-white/40">{raisePct >= 0 ? `+${raisePct}%` : `${raisePct}%`}</p>
         </div>
-        <div className="rounded-lg bg-white/[0.04] px-2 py-2">
+        <div data-celebrate-origin className="rounded-lg bg-white/[0.04] px-2 py-2">
           <p className="text-[10.5px] text-white/40">{L(lang, "새 순위", "New rank")}</p>
           <p className="text-[14px] font-bold text-white" aria-live="polite">
             {hidden ? "?" : L(lang, `상위 ${newPercent}%`, `Top ${newPercent}%`)}

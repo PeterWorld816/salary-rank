@@ -28,6 +28,14 @@ export interface Translations {
   distributionAverageTick: string;
   distributionLowLabel: string;
   distributionHighLabel: string;
+  distributionAheadTemplate: string; // template: {percent}
+  // ── Result-card band chips (components/us/result/ResultCelebration.tsx)
+  celebrateBelowMedian: string;
+  celebrateMedian: string;
+  celebrateTop25: string;
+  celebrateTop10: string;
+  celebrateTop5: string;
+  celebrateTop1: string;
   topPercentTemplate: string; // template: {percent}
 
   // ── Nav / actions
@@ -272,6 +280,13 @@ export const translations: Record<LangCode, Translations> = {
     distributionAverageTick: "중앙값",
     distributionLowLabel: "소득 낮음",
     distributionHighLabel: "소득 높음",
+    distributionAheadTemplate: "{percent}%보다 앞서요",
+    celebrateBelowMedian: "여기서부터 올라가는 거예요. 앞길이 이만큼 열려 있어요.",
+    celebrateMedian: "중앙값을 넘었어요",
+    celebrateTop25: "상위 25% — 잘하고 있어요",
+    celebrateTop10: "상위 10% 구간이에요",
+    celebrateTop5: "상위 5% — 흔치 않은 위치예요",
+    celebrateTop1: "상위 1%. 박수 받을 만해요.",
     topPercentTemplate: "상위 {percent}%",
 
     home: "홈",
@@ -501,6 +516,13 @@ export const translations: Record<LangCode, Translations> = {
     distributionAverageTick: "median",
     distributionLowLabel: "Lower income",
     distributionHighLabel: "Higher income",
+    distributionAheadTemplate: "Ahead of {percent}%",
+    celebrateBelowMedian: "Every climb starts somewhere. Here's what's ahead of you.",
+    celebrateMedian: "You're above the median",
+    celebrateTop25: "Top 25% — nicely done",
+    celebrateTop10: "Top 10% territory",
+    celebrateTop5: "Top 5% — that's rare air",
+    celebrateTop1: "Top 1%. Take a bow.",
     topPercentTemplate: "Top {percent}%",
 
     home: "Home",

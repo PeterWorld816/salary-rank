@@ -30,7 +30,8 @@ export function getTier(topPercent: number): Tier {
 }
 
 // Which of the three result-card reveal animations a tier gets (see
-// components/us/result/TierRevealAnimation.tsx) — grouped by label rather
+// the badge pulse / gap-note bounce in TierBadge.tsx and
+// CoachingInsightCard.tsx) — grouped by label rather
 // than re-deriving from topPercent so this stays correct even if
 // TIER_LEVELS' thresholds ever shift.
 export type TierAnimationGroup = "celebration" | "standard" | "encourage";

@@ -198,13 +198,10 @@ body {
   animation: shimmer 1.4s infinite;
 }
 
-/* ── Tier-branched result-card reveal (see lib/tier.ts's
-   getTierAnimationGroup and components/us/result/TierRevealAnimation.tsx):
-   - "celebration" (gold, top 15%): light sweep bar twice + confetti pieces.
-   - "standard" (mint, 15-85%): light sweep bar once.
-   - "encourage" (bottom 15%): no sweep — badge pulse + gap-note bounce
-     instead, applied directly to those elements (TierBadge.tsx,
-     CoachingInsightCard.tsx). ── */
+/* ── Result-card motion. LightSweep (components/us/result/LightSweep.tsx)
+   is the Top 1% gold shimmer in ResultCelebration.tsx; the badge pulse +
+   gap-note bounce are the "encourage" tier group's flourish (lib/tier.ts's
+   getTierAnimationGroup, TierBadge.tsx, CoachingInsightCard.tsx). ── */
 @keyframes tierLightSweep {
   0% { transform: translateX(-130%) skewX(-12deg); opacity: 0; }
   15% { opacity: 1; }
@@ -220,14 +217,9 @@ body {
   animation: tierLightSweep 700ms ease-out both;
   will-change: transform, opacity;
 }
-
-@keyframes tierConfettiFall {
-  0% { transform: translateY(-10px) rotate(0deg); opacity: 0; }
-  15% { opacity: 1; }
-  100% { transform: translateY(70px) rotate(140deg); opacity: 0; }
-}
-.tier-confetti-piece {
-  animation: tierConfettiFall 900ms ease-in both;
+.tier-light-sweep-bar--gold {
+  background: linear-gradient(105deg, rgba(251, 191, 36, 0) 0%, rgba(253, 230, 138, 0.38) 50%, rgba(251, 191, 36, 0) 100%);
+  animation-duration: 1100ms;
 }
 
 @keyframes tierBadgePulse {
@@ -248,11 +240,83 @@ body {
   animation: tierGapBounce 400ms ease-in-out both;
 }
 
+/* ── Distribution chart (components/DistributionChart.tsx): one-time
+   left→right draw-in, and the below-median "road ahead" glow. ── */
+@keyframes chartDrawIn {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+.chart-draw-in {
+  animation: chartDrawIn 700ms cubic-bezier(0.33, 1, 0.68, 1) both;
+}
+@keyframes chartAheadGlow {
+  0%, 100% { opacity: 0.04; }
+  50% { opacity: 0.14; }
+}
+.chart-ahead-glow {
+  opacity: 0.08;
+  animation: chartAheadGlow 2400ms ease-in-out 900ms 3 both;
+}
+
+/* ── Band celebration (components/us/result/ResultCelebration.tsx) ── */
+@keyframes celebrateGlow {
+  0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+  30% { opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+}
+.celebrate-glow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(253, 230, 138, 0.55) 0%, rgba(251, 191, 36, 0.18) 45%, rgba(251, 191, 36, 0) 70%);
+  animation: celebrateGlow 900ms ease-out both;
+  will-change: transform, opacity;
+}
+@keyframes celebrateSpark {
+  0% { transform: translate(-50%, -50%) translate(0, 0) scale(0); opacity: 0; }
+  35% { opacity: 1; transform: translate(-50%, -50%) translate(calc(var(--dx) * 0.7), calc(var(--dy) * 0.7)) scale(1); }
+  100% { transform: translate(-50%, -50%) translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+}
+.celebrate-spark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  transform: translate(-50%, -50%) scale(0);
+  animation: celebrateSpark 850ms ease-out both;
+}
+@keyframes celebrateChipPop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.celebrate-chip-pop {
+  animation: celebrateChipPop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) 650ms both;
+}
+@keyframes celebrateRingIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.celebrate-gold-ring {
+  box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.55), inset 0 0 22px rgba(251, 191, 36, 0.14);
+  animation: celebrateRingIn 900ms ease-out 650ms both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .tier-light-sweep-bar,
-  .tier-confetti-piece,
   .tier-badge-pulse,
-  .tier-gap-bounce {
+  .tier-gap-bounce,
+  .chart-draw-in,
+  .chart-ahead-glow,
+  .celebrate-glow,
+  .celebrate-spark,
+  .celebrate-chip-pop,
+  .celebrate-gold-ring {
     animation: none !important;
   }
 }

@@ -24,6 +24,10 @@ import { shieldShareImagePath, shieldShareText } from "@/lib/shieldShare";
 import { formatTemplate } from "@/lib/i18n";
 import ResultGuideTabs from "@/components/us/result/ResultGuideTabs";
 import { buildNetWorthShareAlternate } from "@/components/us/result/netWorthShare";
+import { useUsInput } from "@/components/us/UsInputContext";
+import { useSettledValue } from "@/lib/useSettledValue";
+import CountUpTemplate from "@/components/us/result/CountUpTemplate";
+import { CelebrationChip, CelebrationLayer, useResultCelebration } from "@/components/us/result/ResultCelebration";
 
 function CompactResultCardInner({
   presetState,
@@ -37,6 +41,14 @@ function CompactResultCardInner({
   const { t, lang } = useLanguage();
   const base = useLocaleBase();
   const result = useCompactResult(presetState, presetCounty);
+  // The card animates toward the last *settled* result (400ms without a
+  // change) — waits for a shared link's input to load before the first one.
+  const { inputUrlCleaned } = useUsInput();
+  const settled = useSettledValue(
+    result.ready ? { income: result.input.annualIncome, percent: result.incomePercent } : null,
+    { ready: inputUrlCleaned }
+  );
+  const celebration = useResultCelebration(settled?.percent ?? null);
   const cardRef = useRef<HTMLDivElement>(null);
   const storyCardRef = useRef<HTMLDivElement>(null);
   const [shareTarget, setShareTarget] = useState<HTMLElement | null>(null);
@@ -136,9 +148,9 @@ function CompactResultCardInner({
       <div className="mx-auto max-w-2xl px-6 pt-8">
         {result.ready ? (
           <>
-            <div className="mx-auto mb-4 w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+            <div className="relative mx-auto mb-4 w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.03] p-5">
               <p className="text-center text-[13px] font-semibold text-white/55">
-                {formatTemplate(t.topPercentTemplate, { percent: result.incomePercent })}
+                <CountUpTemplate template={t.topPercentTemplate} value={settled?.percent ?? result.incomePercent} />
               </p>
               <h2 className="mt-1 text-center text-[22px] font-extrabold leading-tight text-white">
                 {formatTemplate(t.usDashboardHeadlineSingleTemplate, {
@@ -153,20 +165,26 @@ function CompactResultCardInner({
                         : t.usRankScopeNational,
                 })}
               </h2>
-              <div className="mt-4 flex justify-center">
+              <CelebrationChip celebration={celebration} />
+              <div className="mt-2 flex justify-center">
                 <DistributionChart
-                  monthlySalary={result.input.annualIncome}
+                  monthlySalary={settled?.income ?? result.input.annualIncome}
                   width={280}
                   lang={lang}
                   dark
                   min={15000}
                   max={500000}
                   averageValue={result.medianForChart}
+                  animate
+                  hold={settled == null}
+                  aheadPercent={100 - (settled?.percent ?? result.incomePercent)}
+                  glowAhead={celebration.band === 0}
                 />
               </div>
               <p className="mt-2 text-center text-[11px] text-white/35">
                 {formatTemplate(t.usAcs5YearLabel, { range: acs5YearRange })}
               </p>
+              <CelebrationLayer celebration={celebration} />
             </div>
 
             <ResultGuideTabs

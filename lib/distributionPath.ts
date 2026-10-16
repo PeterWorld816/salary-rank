@@ -60,7 +60,7 @@ export function buildDistributionPaths(): { linePath: string; areaPath: string }
 export const CHART_MIN_SALARY = 150;
 export const CHART_MAX_SALARY = 2200;
 
-function valueToT(value: number, min: number, max: number): number {
+export function valueToT(value: number, min: number, max: number): number {
   const clamped = Math.min(max, Math.max(min, value));
   return (Math.log(clamped) - Math.log(min)) / (Math.log(max) - Math.log(min));
 }
@@ -80,4 +80,11 @@ export function averageTickX(
   max: number = CHART_MAX_SALARY
 ): number {
   return curveX(valueToT(overallAverageValue, min, max));
+}
+
+// A point on the curve for a raw t in [0, 1] — lets the chart tween the
+// marker in t-space so it slides along the curve instead of cutting across.
+export function pointAtT(t: number): ChartPoint {
+  const clamped = Math.min(1, Math.max(0, t));
+  return { x: curveX(clamped), y: curveY(clamped) };
 }
