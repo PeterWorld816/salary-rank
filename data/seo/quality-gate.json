@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-08T19:55:32.166Z",
+ "generatedAt": "2026-10-30T20:02:12.097Z",
  "rules": {
   "minWords": 400,
   "minWordsHub": 200,
@@ -8,8 +8,8 @@
   "comparedAgainstInsights": 8
  },
  "summary": {
-  "pages": 109,
-  "passed": 109,
+  "pages": 110,
+  "passed": 110,
   "failed": 0,
   "minWords": 229,
   "minWordsPage": "/us/net-worth",
@@ -44,6 +44,11 @@
     "pages": 51,
     "failed": 0,
     "minWords": 410
+   },
+   "livability": {
+    "pages": 1,
+    "failed": 0,
+    "minWords": 788
    }
   }
  },
@@ -857,6 +862,20 @@
     "with": "/us/net-worth/35-44",
     "raw": 0.013293943870014771,
     "masked": 0.008955223880597015
+   },
+   "pass": true,
+   "reasons": []
+  },
+  {
+   "path": "/us/where-to-live",
+   "kind": "livability",
+   "words": 788,
+   "minWords": 400,
+   "missingData": [],
+   "maxSimilarity": {
+    "with": "/us/insights/state-median-income-rankings",
+    "raw": 0,
+    "masked": 0.0020161290322580645
    },
    "pass": true,
    "reasons": []

@@ -1,7 +1,10 @@
 "use client";
-// The three tabs under the result card — "Your result" (what the number
-// means, against which groups), "What moves you" (reference cutoffs and
-// medians, no advice), and "What if?" (an income slider). Mounted by both
+// A short Summary card under the result card (the same Top % as the card,
+// then median multiple, same-age rank and the next marker), the share slot,
+// and a "Details" disclosure — closed by default — holding the three tabs:
+// "Your result" (what the number means, against which groups), "What moves
+// you" (reference cutoffs and medians, no advice), and "What if?" (an income
+// slider). Mounted by both
 // CompactResultCard.tsx (home/state/county) and PersonalizedResult.tsx
 // (place + standalone), which pass in the same percent their card shows so
 // the line-up sentence can't disagree with it. All math lives in
@@ -132,6 +135,7 @@ export default function ResultGuideTabs({
   place = null,
   countyName = null,
   placeName = null,
+  afterSummary,
 }: {
   input: UsInput;
   // The scope + percent the result card above is showing, verbatim.
@@ -145,8 +149,12 @@ export default function ResultGuideTabs({
   place?: UsPlaceIncome | null;
   countyName?: string | null;
   placeName?: string | null;
+  // Rendered between the Summary card and the Details toggle (the share
+  // buttons), so it sits right under the summary while Details is closed.
+  afterSummary?: React.ReactNode;
 }) {
   const { lang } = useLanguage();
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [tab, setTab] = useState<TabId | null>("result");
   const { occupation: majorOccupation, selected: occupationSelected, unavailable: occupationUnavailable } = useGuideOccupation(input, state, lang);
   const { rows: extraRows, detailMedianByAge } = useDetailedEarnings(input, state);
@@ -188,48 +196,125 @@ export default function ResultGuideTabs({
   ];
 
   return (
-    <div className="mx-auto mt-4 w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.02]">
-      <div role="tablist" aria-label={L(lang, "결과 해설", "Result guide")} className="flex gap-1 p-1.5">
-        {tabs.map((t) => {
-          const active = tab === t.id;
-          return (
-            <button
-              key={t.id}
-              type="button"
-              role="tab"
-              id={`guide-tab-${t.id}`}
-              aria-selected={active}
-              aria-expanded={active}
-              aria-controls={`guide-panel-${t.id}`}
-              onClick={() => setTab(active ? null : t.id)}
-              className={`flex flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-xl px-1.5 py-2 text-[12px] font-semibold transition-colors sm:text-[12.5px] ${
-                active ? "bg-white/[0.08] text-white" : "text-white/50 hover:text-white/80"
-              }`}
-            >
-              {t.label}
-              <ChevronDown className={`hidden h-3.5 w-3.5 shrink-0 transition-transform sm:inline ${active ? "rotate-180" : ""}`} />
-            </button>
-          );
-        })}
+    <>
+      <SummaryCard ctx={ctx} scopes={scopes} incomeScope={incomeScope} headlineKey={headlineKey} headlinePercent={headlinePercent} />
+      {afterSummary}
+      <div className="mx-auto mt-4 w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.02]">
+        <button
+          type="button"
+          aria-expanded={detailsOpen}
+          aria-controls="result-guide-details"
+          onClick={() => setDetailsOpen((v) => !v)}
+          className="flex min-h-11 w-full items-center justify-between gap-2 px-4 py-2.5 text-[13px] font-semibold text-white/70 transition-colors hover:text-white"
+        >
+          {L(lang, "자세히 보기", "Details")}
+          <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${detailsOpen ? "rotate-180" : ""}`} />
+        </button>
+        {/* Only the panel mounts/unmounts here — every number comes from the
+            memoized scopes above, so toggling never recomputes the result. */}
+        {detailsOpen && (
+          <div id="result-guide-details" className="border-t border-white/[0.06]">
+            <div role="tablist" aria-label={L(lang, "결과 해설", "Result guide")} className="flex gap-1 p-1.5">
+              {tabs.map((t) => {
+                const active = tab === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    role="tab"
+                    id={`guide-tab-${t.id}`}
+                    aria-selected={active}
+                    aria-expanded={active}
+                    aria-controls={`guide-panel-${t.id}`}
+                    onClick={() => setTab(active ? null : t.id)}
+                    className={`flex flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-xl px-1.5 py-2 text-[12px] font-semibold transition-colors sm:text-[12.5px] ${
+                      active ? "bg-white/[0.08] text-white" : "text-white/50 hover:text-white/80"
+                    }`}
+                  >
+                    {t.label}
+                    <ChevronDown className={`hidden h-3.5 w-3.5 shrink-0 transition-transform sm:inline ${active ? "rotate-180" : ""}`} />
+                  </button>
+                );
+              })}
+            </div>
+            {tab && (
+              <div role="tabpanel" id={`guide-panel-${tab}`} aria-labelledby={`guide-tab-${tab}`} className="border-t border-white/[0.06] px-4 pb-4 pt-3">
+                {tab === "result" && (
+                  <YourResultPanel ctx={ctx} scopes={scopes} incomeScope={incomeScope} headlineKey={headlineKey} headlinePercent={headlinePercent} />
+                )}
+                {tab === "moves" && (
+                  <WhatMovesPanel
+                    ctx={ctx}
+                    scopes={scopes}
+                    incomeScope={incomeScope}
+                    occupationSelected={occupationSelected}
+                    occupationUnavailable={occupationUnavailable}
+                  />
+                )}
+                {tab === "whatif" && <WhatIfPanel ctx={ctx} scopes={scopes} incomeScope={incomeScope} />}
+              </div>
+            )}
+          </div>
+        )}
       </div>
-      {tab && (
-        <div role="tabpanel" id={`guide-panel-${tab}`} aria-labelledby={`guide-tab-${tab}`} className="border-t border-white/[0.06] px-4 pb-4 pt-3">
-          {tab === "result" && (
-            <YourResultPanel ctx={ctx} scopes={scopes} incomeScope={incomeScope} headlineKey={headlineKey} headlinePercent={headlinePercent} />
-          )}
-          {tab === "moves" && (
-            <WhatMovesPanel
-              ctx={ctx}
-              scopes={scopes}
-              incomeScope={incomeScope}
-              occupationSelected={occupationSelected}
-              occupationUnavailable={occupationUnavailable}
-            />
-          )}
-          {tab === "whatif" && <WhatIfPanel ctx={ctx} scopes={scopes} incomeScope={incomeScope} />}
-        </div>
-      )}
-    </div>
+    </>
+  );
+}
+
+// ── Summary ───────────────────────────────────────────────────────────────
+// Headline is the card's own Top % (headlinePercent, verbatim); the three
+// rows reuse the "Your result" / "What moves you" numbers — the comparison
+// rows' median ratio and same-age rank, and the first milestone step.
+
+function SummaryCard({
+  ctx,
+  scopes,
+  incomeScope,
+  headlineKey,
+  headlinePercent,
+}: {
+  ctx: GuideContext;
+  scopes: GuideScopes;
+  incomeScope: RankScope;
+  headlineKey: HeadlineKey;
+  headlinePercent: number;
+}) {
+  const { lang, input } = ctx;
+  const income = input.annualIncome;
+  const rows = useMemo(() => buildComparisonRows(scopes, income), [scopes, income]);
+  const steps = useMemo(() => buildMilestoneSteps(incomeScope, income, 1), [incomeScope, income]);
+  const medianRow = rows.find((r) => r.key === incomeScope.key);
+  const ageRow = rows.find((r) => r.key === "ageIncome");
+  const next = steps[0];
+  const where = headlineWhere(headlineKey, scopes, ctx);
+  const headline = L(lang, `${where} 상위 ${headlinePercent}%`, `Top ${headlinePercent}% ${where}`);
+
+  const items: { label: string; value: string }[] = [
+    medianRow?.ratio != null && medianRow.median != null
+      ? { label: L(lang, `중위 ${formatUsd(medianRow.median)} 대비`, `vs. median ${formatUsd(medianRow.median)}`), value: `${medianRow.ratio.toFixed(2)}×` }
+      : null,
+    ageRow ? { label: ageRow.label, value: L(lang, `상위 ${ageRow.percent}%`, `Top ${ageRow.percent}%`) } : null,
+    next
+      ? { label: L(lang, `상위 ${next.milestone}%까지`, `To reach Top ${next.milestone}%`), value: `+${formatUsd(next.gap)}` }
+      : { label: L(lang, "상위 1%", "Top 1%"), value: L(lang, "이미 도달", "already there") },
+  ].filter((i): i is { label: string; value: string } => i != null);
+
+  return (
+    <section aria-label={L(lang, "요약", "Summary")} className="mx-auto mt-4 w-full max-w-md rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3">
+      <h3 className="line-clamp-2 text-[15px] font-bold leading-snug text-white" title={headline}>
+        {headline}
+      </h3>
+      <ul className="mt-1.5 flex flex-col gap-1">
+        {items.map((i) => (
+          <li key={i.label} className="flex items-baseline justify-between gap-3 text-[13px] leading-snug">
+            <span className="min-w-0 truncate text-white/60" title={i.label}>
+              {i.label}
+            </span>
+            <span className="shrink-0 font-semibold tabular-nums text-white">{i.value}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -439,6 +524,10 @@ function WhatMovesPanel({
       <p className="mt-1.5 text-[10.5px] text-white/30">
         {L(lang, "생활비·세금 차이는 반영되지 않은 순수 소득 분포 비교입니다.", "Income distributions only — cost of living and taxes are not reflected.")}
       </p>
+      {/* Same income, read against rent, home prices and price levels instead. */}
+      <Link href="/us/where-to-live" className="mt-2 block text-[12px] font-semibold text-[#34D399] underline-offset-2 hover:underline">
+        {L(lang, "이 소득으로 어디서 여유 있게 살 수 있을까? →", "Where could this income live best? →")}
+      </Link>
 
       <SectionTitle>{L(lang, "직업 기준", "By occupation")}</SectionTitle>
       {occ && occ.median != null ? (

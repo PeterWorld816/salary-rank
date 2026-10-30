@@ -8,7 +8,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { ChevronDown, Home, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, Home, MapPin, SlidersHorizontal } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
 import LanguageSelector from "@/components/LanguageSelector";
 import { formatUsdCompact } from "@/lib/usFormat";
@@ -261,6 +261,16 @@ export default function UsInputPanel() {
             </Link>
           </div>
 
+          {/* Below md there's no room beside the brand and the answers chip
+              (checked at 480/640px: it overlaps the title); there the page is
+              linked from the footer and the result's "What moves you" tab. */}
+          <Link
+            href="/us/where-to-live"
+            className="ml-auto hidden min-h-11 shrink-0 items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 text-[12.5px] font-semibold text-white/75 transition-colors hover:border-[#34D399]/50 hover:text-white md:flex"
+          >
+            <MapPin className="h-4 w-4 text-[#34D399]" aria-hidden />
+            {t.whereToLiveNav}
+          </Link>
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}

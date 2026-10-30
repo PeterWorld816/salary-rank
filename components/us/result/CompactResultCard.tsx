@@ -1,11 +1,12 @@
 "use client";
 // The result-card step shared by the home page (nationwide), /us/[state]
 // (state), and /us/[state]/[county] (county). The ordinary result stays a
-// percentile headline and distribution chart; the shield card only appears
-// after a share/save action opens the modal. See useCompactResult.ts for the
+// percentile headline and distribution chart, then ResultGuideTabs' Summary
+// card with the share buttons right under it (once per page, never inside the
+// map card); the shield card only appears after a share/save action opens the
+// modal. See useCompactResult.ts for the
 // shared calculation and CompactInsightSection.tsx for the coaching insight.
-import { Suspense, useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { Suspense, useRef } from "react";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { useLocaleBase } from "@/lib/useLocaleBase";
 import ShieldShareCard, { STORY_WIDTH, STORY_HEIGHT, WIDE_WIDTH, WIDE_HEIGHT } from "@/components/us/ShieldShareCard";
@@ -32,11 +33,9 @@ import { CelebrationChip, CelebrationLayer, useResultCelebration } from "@/compo
 function CompactResultCardInner({
   presetState,
   presetCounty,
-  shareAfterMapId,
 }: {
   presetState: StateMeta | null;
   presetCounty: UsCountyIncome | null;
-  shareAfterMapId?: string;
 }) {
   const { t, lang } = useLanguage();
   const base = useLocaleBase();
@@ -51,12 +50,6 @@ function CompactResultCardInner({
   const celebration = useResultCelebration(settled?.percent ?? null);
   const cardRef = useRef<HTMLDivElement>(null);
   const storyCardRef = useRef<HTMLDivElement>(null);
-  const [shareTarget, setShareTarget] = useState<HTMLElement | null>(null);
-
-  useEffect(() => {
-    if (!shareAfterMapId) return;
-    setShareTarget(document.getElementById(shareAfterMapId));
-  }, [shareAfterMapId]);
 
   // Most-specific geography name available — same fallback order
   // useCompactResult.ts uses internally for its own (unexported)
@@ -195,54 +188,29 @@ function CompactResultCardInner({
               state={presetState}
               county={presetCounty}
               countyName={presetCounty ? locationName : null}
+              afterSummary={
+                <div className="mx-auto mt-4 w-full" style={{ maxWidth: 440 }}>
+                  <ShareButtons
+                    cardRef={cardRef}
+                    storyCardRef={storyCardRef}
+                    width={WIDE_WIDTH}
+                    height={WIDE_HEIGHT}
+                    storyWidth={STORY_WIDTH}
+                    storyHeight={STORY_HEIGHT}
+                    shareTitle={shareTitle}
+                    shareText={shareText}
+                    getShareUrl={getShareUrl}
+                    downloadName={downloadName}
+                    storyDownloadName={`story-${downloadName}`}
+                    cardPreview={cardPreview}
+                    storyPreview={storyPreview}
+                    downloadImageUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary) : undefined}
+                    downloadStoryUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary, "story") : undefined}
+                    alternate={netWorthAlternate}
+                  />
+                </div>
+              }
             />
-
-            {shareTarget
-              ? createPortal(
-                  <div className="mx-auto w-full" style={{ maxWidth: 440 }}>
-                    <ShareButtons
-                      cardRef={cardRef}
-                      storyCardRef={storyCardRef}
-                      width={WIDE_WIDTH}
-                      height={WIDE_HEIGHT}
-                      storyWidth={STORY_WIDTH}
-                      storyHeight={STORY_HEIGHT}
-                      shareTitle={shareTitle}
-                      shareText={shareText}
-                      getShareUrl={getShareUrl}
-                      downloadName={downloadName}
-                      storyDownloadName={`story-${downloadName}`}
-                      cardPreview={cardPreview}
-                      storyPreview={storyPreview}
-                      downloadImageUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary) : undefined}
-                      downloadStoryUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary, "story") : undefined}
-                      alternate={netWorthAlternate}
-                    />
-                  </div>,
-                  shareTarget
-                )
-              : !shareAfterMapId && (
-                  <div className="mx-auto mt-4 w-full" style={{ maxWidth: 440 }}>
-                    <ShareButtons
-                      cardRef={cardRef}
-                      storyCardRef={storyCardRef}
-                      width={WIDE_WIDTH}
-                      height={WIDE_HEIGHT}
-                      storyWidth={STORY_WIDTH}
-                      storyHeight={STORY_HEIGHT}
-                      shareTitle={shareTitle}
-                      shareText={shareText}
-                      getShareUrl={getShareUrl}
-                      downloadName={downloadName}
-                      storyDownloadName={`story-${downloadName}`}
-                      cardPreview={cardPreview}
-                      storyPreview={storyPreview}
-                      downloadImageUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary) : undefined}
-                      downloadStoryUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary, "story") : undefined}
-                      alternate={netWorthAlternate}
-                    />
-                  </div>
-                )}
           </>
         ) : (
           <NoDataCard title={t.usCountyNoDataTitle} desc={t.usCountyNoDataDesc} />
@@ -252,11 +220,7 @@ function CompactResultCardInner({
   );
 }
 
-export default function CompactResultCard(props: {
-  presetState: StateMeta | null;
-  presetCounty: UsCountyIncome | null;
-  shareAfterMapId?: string;
-}) {
+export default function CompactResultCard(props: { presetState: StateMeta | null; presetCounty: UsCountyIncome | null }) {
   return (
     <Suspense
       fallback={

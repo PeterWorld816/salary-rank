@@ -72,6 +72,7 @@ function TownPickerMapContent({
   const placeItems = places.map((p) => ({
     id: p.fips,
     name: stripStateSuffix(p.name, stateName),
+    context: `${countyName}, ${stateName}`,
     sub: p.medianHouseholdIncome != null ? formatUsd(p.medianHouseholdIncome) : undefined,
   }));
 

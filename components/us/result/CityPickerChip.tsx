@@ -48,7 +48,9 @@ export default function CityPickerChip({
         aria-label={ariaLabel}
         className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.06] px-3 py-1.5 text-[12px] font-semibold text-white/80 transition-colors hover:border-[#34D399] hover:text-white"
       >
-        <span className="max-w-[200px] truncate">📍 {label}</span>
+        <span className="line-clamp-2 max-w-[240px] break-words text-left" title={label}>
+          📍 {label}
+        </span>
         <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 

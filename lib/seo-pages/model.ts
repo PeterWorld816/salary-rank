@@ -23,7 +23,7 @@ export type SeoLink = { href: string; label: string; note?: string };
 
 export type SeoPage = {
   path: string; // "/us/occupations/registered-nurses"
-  kind: "occupation" | "netWorth" | "occupationHub" | "netWorthHub" | "state";
+  kind: "occupation" | "netWorth" | "occupationHub" | "netWorthHub" | "state" | "livability";
   title: string;
   description: string;
   h1: string;

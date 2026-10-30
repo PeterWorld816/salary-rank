@@ -22,6 +22,7 @@ import { US_STATES } from "../data/us/stateMeta";
 import { OCCUPATION_PAGES, buildOccupationHub, buildOccupationPage } from "../lib/seo-pages/occupations";
 import { NET_WORTH_BRACKETS, buildNetWorthHub, buildNetWorthPage } from "../lib/seo-pages/netWorth";
 import { buildStateDeepDive } from "../lib/seo-pages/stateDeepDive";
+import { buildWhereToLivePage } from "../lib/seo-pages/whereToLive";
 import { commentaryText, wordCount, type SeoPage } from "../lib/seo-pages/model";
 import { getAllInsights, getInsightBySlug } from "../lib/insights";
 
@@ -73,6 +74,7 @@ function main() {
   pages.push(buildOccupationHub());
   for (const b of NET_WORTH_BRACKETS) pages.push(buildNetWorthPage(b));
   pages.push(buildNetWorthHub());
+  pages.push(buildWhereToLivePage());
   const countiesByState = new Map<string, { fips: string; name: string; medianHouseholdIncome: number | null }[]>();
   for (const c of countyIncome.counties as { fips: string; stateFips: string; name: string; medianHouseholdIncome: number | null }[])
     countiesByState.set(c.stateFips, [...(countiesByState.get(c.stateFips) ?? []), c]);
@@ -134,7 +136,7 @@ function main() {
       minWordsPage: results.reduce((a, b) => (b.words < a.words ? b : a)).path,
       mostSimilarPair: { a: worst.a, b: worst.b, raw: +worst.raw.toFixed(3), masked: +worst.masked.toFixed(3) },
       kinds: Object.fromEntries(
-        (["occupation", "occupationHub", "netWorth", "netWorthHub", "state"] as const).map((k) => [k, { pages: byKind(k).length, failed: byKind(k).filter((r) => !r.pass).length, minWords: Math.min(...byKind(k).map((r) => r.words)) }])
+        (["occupation", "occupationHub", "netWorth", "netWorthHub", "state", "livability"] as const).map((k) => [k, { pages: byKind(k).length, failed: byKind(k).filter((r) => !r.pass).length, minWords: Math.min(...byKind(k).map((r) => r.words)) }])
       ),
     },
     failed: failed.map((r) => r.path),

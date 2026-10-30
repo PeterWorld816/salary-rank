@@ -12,6 +12,7 @@ export default function Footer({ className }: { className?: string }) {
     // English-only data pages (the /kr paths redirect to them).
     { href: "/us/occupations", label: t.footerOccupations },
     { href: "/us/net-worth", label: t.footerNetWorth },
+    { href: "/us/where-to-live", label: t.footerWhereToLive },
     { href: `${base}/about`, label: t.footerAbout },
     { href: `${base}/privacy`, label: t.footerPrivacy },
     { href: `${base}/contact`, label: t.footerContact },

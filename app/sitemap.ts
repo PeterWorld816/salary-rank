@@ -7,6 +7,7 @@ import { NET_WORTH_BRACKETS } from "@/lib/seo-pages/netWorth";
 import { isWithheldFromSearch } from "@/lib/seo-pages/gate";
 import occupationDetails from "@/data/us/occupationDetails.json";
 import scf from "@/data/us/netWorthByAgeScf.json";
+import livability from "@/public/data/livability.json";
 
 // Only /us is listed. /kr is the same app/us/** route tree served in Korean
 // (see middleware.ts) but it's noindex,follow (lib/seo.ts) and disallowed in
@@ -64,6 +65,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       ...OCCUPATION_PAGES.map((p) => ({ path: `${base}/occupations/${p.slug}`, lastModified: occupationData, priority: 0.6 })),
       { path: `${base}/net-worth`, lastModified: netWorthData, priority: 0.7 },
       ...NET_WORTH_BRACKETS.map((b) => ({ path: `${base}/net-worth/${b.id}`, lastModified: netWorthData, priority: 0.6 })),
+      // lastmod = when scripts/build-livability.ts downloaded its sources.
+      { path: `${base}/where-to-live`, lastModified: new Date(livability.meta.generatedAt), priority: 0.8 },
     ];
     for (const p of seoPages) {
       if (isWithheldFromSearch(p.path)) continue;

@@ -31,12 +31,13 @@ export default function MapNavBar({
   return (
     <nav
       aria-label={t.usMapNavLabel}
-      className="sticky top-16 z-20 -mx-3 -mt-3 mb-3 flex items-center gap-2 rounded-t-2xl border-b border-white/[0.06] bg-[#0d0f11]/95 px-3 py-2 backdrop-blur sm:-mx-4 sm:-mt-4 sm:px-4"
+      className="sticky top-16 z-20 -mx-3 -mt-3 mb-3 flex flex-wrap items-center gap-2 rounded-t-2xl border-b border-white/[0.06] bg-[#0d0f11]/95 px-3 py-2 backdrop-blur sm:-mx-4 sm:-mt-4 sm:px-4"
     >
       {back && (
         <Link
           href={back.href}
           aria-label={formatTemplate(t.usMapNavBackTemplate, { place: back.label })}
+          title={back.label}
           className="flex h-9 max-w-[7.5rem] shrink-0 items-center gap-0.5 rounded-lg border border-white/10 bg-white/[0.04] pl-1.5 pr-2.5 text-[13px] font-semibold text-white/70 transition-colors hover:border-[#34D399]/40 hover:bg-[#34D399]/10 hover:text-white sm:max-w-none"
         >
           <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden />
@@ -45,8 +46,10 @@ export default function MapNavBar({
       )}
 
       {/* Phones get the current level only; the back button already names
-          the level above it. */}
-      <p className="min-w-0 shrink truncate text-[13px] font-bold text-white/90 sm:hidden">{current?.label}</p>
+          the level above it. Up to two lines, then an ellipsis + title. */}
+      <p className="line-clamp-2 min-w-0 flex-1 break-words text-[13px] font-bold leading-snug text-white/90 sm:hidden" title={current?.label}>
+        {current?.label}
+      </p>
       <ol className="hidden min-w-0 shrink items-center gap-1.5 text-[13px] sm:flex">
         {crumbs.map((crumb, i) => {
           const last = i === crumbs.length - 1;
@@ -58,7 +61,11 @@ export default function MapNavBar({
                   {crumb.label}
                 </Link>
               ) : (
-                <span className={`truncate ${last ? "font-bold text-white/90" : "text-white/55"}`} aria-current={last ? "location" : undefined}>
+                <span
+                  className={`truncate ${last ? "font-bold text-white/90" : "text-white/55"}`}
+                  aria-current={last ? "location" : undefined}
+                  title={crumb.label}
+                >
                   {crumb.label}
                 </span>
               )}
@@ -67,7 +74,9 @@ export default function MapNavBar({
         })}
       </ol>
 
-      <div className="ml-auto flex min-w-[8.5rem] flex-1 justify-end">{children}</div>
+      {/* Phones: the search box takes its own full-width row so a typed
+          name isn't squeezed next to the place label. */}
+      {children && <div className="flex min-w-0 basis-full justify-end sm:ml-auto sm:min-w-[8.5rem] sm:flex-1 sm:basis-auto">{children}</div>}
     </nav>
   );
 }

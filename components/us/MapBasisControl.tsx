@@ -16,8 +16,8 @@
 // rule, and the label wording all live in components/us/mapBasisLens.ts,
 // shared with the county page.
 import Link from "next/link";
-import { useEffect, useRef } from "react";
-import { ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageProvider";
 import { formatTemplate } from "@/lib/i18n";
 import { US_MARITAL_STATUSES, type UsMaritalStatusId } from "@/lib/usInput";
@@ -58,6 +58,7 @@ export default function MapBasisControl({
 }) {
   const { t, tr } = useLanguage();
   const tabsRef = useRef<HTMLDivElement>(null);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   useEffect(() => {
     const tabs = tabsRef.current;
@@ -82,20 +83,24 @@ export default function MapBasisControl({
     const resizeObserver = new ResizeObserver(() => revealActiveTab("auto"));
     resizeObserver.observe(tabs);
     return () => resizeObserver.disconnect();
-  }, [lens, occupationOption?.label, personalizedOption?.tabLabel]);
+  }, [lens, occupationOption?.label, personalizedOption?.tabLabel, moreOpen]);
 
   const maritalLabel = tr(US_MARITAL_STATUSES.find((m) => m.id === maritalStatus)?.label ?? { ko: "", en: "" });
 
   // The marital button names the visitor's own answer, so it reads the same
   // whichever tab is currently active.
-  const options: { id: UsMapBasisLens; label: string }[] = [
+  // Men/Women/occupation are the less-used extras: folded behind "More"
+  // (never removed), and always shown while one of them is the active lens.
+  const allOptions: { id: UsMapBasisLens; label: string; extra?: boolean }[] = [
     { id: "household", label: t.usMapBasisOptionHousehold },
     { id: "marital", label: formatTemplate(t.usMapBasisOptionMaritalTemplate, { status: maritalLabel }) },
-    { id: "men", label: t.usMapBasisOptionMen },
-    { id: "women", label: t.usMapBasisOptionWomen },
-    ...(occupationOption ? [{ id: "occupation" as const, label: occupationOption.label }] : []),
+    { id: "men", label: t.usMapBasisOptionMen, extra: true },
+    { id: "women", label: t.usMapBasisOptionWomen, extra: true },
+    ...(occupationOption ? [{ id: "occupation" as const, label: occupationOption.label, extra: true }] : []),
     ...(personalizedOption ? [{ id: "personalized" as const, label: personalizedOption.tabLabel }] : []),
   ];
+  const showExtras = moreOpen || allOptions.some((o) => o.extra && o.id === lens);
+  const options = showExtras ? allOptions : allOptions.filter((o) => !o.extra);
 
   return (
     <div className="mb-2 flex flex-col gap-2 px-1">
@@ -131,6 +136,18 @@ export default function MapBasisControl({
                 </button>
               );
             })}
+            {!allOptions.some((o) => o.extra && o.id === lens) && (
+              <button
+                type="button"
+                onClick={() => setMoreOpen((v) => !v)}
+                aria-expanded={moreOpen}
+                style={{ minHeight: 40 }}
+                className="flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full px-3 py-2 text-[13px] font-semibold text-white/55 transition-colors hover:text-white sm:min-h-0 sm:px-2 sm:py-1 sm:text-[12px]"
+              >
+                {moreOpen ? t.usMapBasisLess : t.usMapBasisMore}
+                <ChevronDown className={`h-3.5 w-3.5 transition-transform ${moreOpen ? "rotate-180" : ""}`} aria-hidden />
+              </button>
+            )}
           </div>
           <div
             className="pointer-events-none absolute inset-y-0 right-0 flex w-9 items-center justify-end bg-gradient-to-l from-[#0d0f11] via-[#0d0f11]/90 to-transparent pr-1 text-white/50 sm:hidden"

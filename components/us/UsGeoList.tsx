@@ -8,6 +8,8 @@ export type UsGeoListItem = {
   id: string;
   name: string;
   sub?: string;
+  // Second line under the name — where it is ("Richmond County, Georgia").
+  context?: string;
 };
 
 export default function UsGeoList({
@@ -46,7 +48,8 @@ export default function UsGeoList({
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={searchPlaceholder}
-        className="mb-2 w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2.5 text-[14px] text-white outline-none transition-colors focus:border-[#34D399] focus:bg-white/[0.09]"
+        // 16px on phones so iOS Safari doesn't zoom in on focus.
+        className="mb-2 w-full rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2.5 text-[16px] text-white sm:text-[14px] outline-none transition-colors focus:border-[#34D399] focus:bg-white/[0.09]"
       />
       <div
         className="us-geo-list-scroll overflow-y-auto rounded-lg border border-white/10 bg-white/[0.02]"
@@ -64,7 +67,10 @@ export default function UsGeoList({
                 item.id === selectedId ? "bg-[#34D399]/[0.10] text-white" : "text-white/80"
               }`}
             >
-              <span className="truncate">{item.name}</span>
+              <span className="min-w-0 flex-1 leading-snug" title={item.context ? `${item.name}, ${item.context}` : item.name}>
+                <span className="line-clamp-2 break-words">{item.name}</span>
+                {item.context && <span className="block truncate text-[11.5px] text-white/40">{item.context}</span>}
+              </span>
               {item.sub && <span className="flex-shrink-0 tabular-nums text-white/40">{item.sub}</span>}
             </button>
           ))

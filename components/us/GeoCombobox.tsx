@@ -167,12 +167,25 @@ export default function GeoCombobox({
                 aria-selected={i === activeIndex}
                 onClick={() => choose(item.id)}
                 onMouseMove={() => setActiveIndex(i)}
-                className={`flex min-h-11 cursor-pointer items-center justify-between gap-3 px-3 py-2 text-[14px] ${
+                className={`flex min-h-11 cursor-pointer items-center justify-between gap-3 px-3 py-2 text-[14px] leading-snug ${
                   i === activeIndex ? "bg-white/[0.08] text-white" : item.id === selectedId ? "text-white" : "text-white/80"
                 }`}
               >
-                <span className="truncate">{item.name}</span>
-                {item.sub && <span className="shrink-0 tabular-nums text-[13px] text-white/45">{item.sub}</span>}
+                {/* Long names (e.g. "Augusta-Richmond County consolidated
+                    government (balance)") get the full row width and wrap to
+                    two lines; the second line carries the county/state and
+                    the figure. Rows without a context keep the figure on the
+                    right. */}
+                <span className="min-w-0 flex-1" title={item.context ? `${item.name}, ${item.context}` : item.name}>
+                  <span className="line-clamp-2 break-words">{item.name}</span>
+                  {item.context && (
+                    <span className="flex gap-2 text-[12px] text-white/45">
+                      <span className="min-w-0 truncate">{item.context}</span>
+                      {item.sub && <span className="shrink-0 tabular-nums">{item.sub}</span>}
+                    </span>
+                  )}
+                </span>
+                {item.sub && !item.context && <span className="shrink-0 tabular-nums text-[13px] text-white/45">{item.sub}</span>}
               </li>
             ))
           )}

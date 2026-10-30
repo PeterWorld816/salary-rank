@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "fetch:census": "tsx scripts/fetchCensusData.ts",
-    "seo:gate": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/seoQualityGate.ts"
+    "seo:gate": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/seoQualityGate.ts",
+    "build:livability": "tsx scripts/build-livability.ts"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

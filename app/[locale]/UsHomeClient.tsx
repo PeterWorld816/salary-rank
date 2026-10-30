@@ -222,7 +222,7 @@ function UsHomeContent({
 
   return (
     <UsShell>
-      <CompactResultCard presetState={null} presetCounty={null} shareAfterMapId="us-map-share-actions" />
+      <CompactResultCard presetState={null} presetCounty={null} />
 
       <div className="mx-auto max-w-5xl px-4 pb-16 pt-6 sm:px-6">
         {/* The header bar already names the site, so on phones the page title
@@ -286,7 +286,6 @@ function UsHomeContent({
               fallbackLabel={usingOccupationFill ? t.usMapBasisOccupationFallbackTooltip : null}
             />
           </MapBasisCaption>
-          <div id="us-map-share-actions" className="mt-4 border-t border-white/[0.06] pt-4" />
         </div>
 
         <div className="mt-8">

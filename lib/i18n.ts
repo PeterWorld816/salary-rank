@@ -100,6 +100,8 @@ export interface Translations {
   usZoomHint: string;
   // ── County-map shading basis (components/us/MapBasisControl.tsx)
   usMapBasisHeading: string;
+  usMapBasisMore: string;
+  usMapBasisLess: string;
   usMapBasisOptionHousehold: string;
   usMapBasisOptionMaritalTemplate: string; // template: {status}
   usMapBasisOptionMen: string;
@@ -159,6 +161,8 @@ export interface Translations {
   usShareCardIncomeOption: string;
   footerOccupations: string;
   footerNetWorth: string;
+  footerWhereToLive: string;
+  whereToLiveNav: string;
   usShareCardNetWorthOption: string;
   usEducationMapNote: string;
   usOccupationDetailMapNoteTemplate: string; // template: {group}
@@ -345,6 +349,8 @@ export const translations: Record<LangCode, Translations> = {
     usListNoResults: "검색 결과가 없어요",
     usZoomHint: "손가락으로 확대·이동하거나 더블탭으로 확대/축소하세요",
     usMapBasisHeading: "지도 기준",
+    usMapBasisMore: "더보기",
+    usMapBasisLess: "접기",
     usMapBasisOptionHousehold: "전체 가구",
     usMapBasisOptionMaritalTemplate: "{status} 가구",
     usMapBasisOptionMen: "남성 (개인)",
@@ -407,6 +413,8 @@ export const translations: Record<LangCode, Translations> = {
     usShareCardIncomeOption: "소득 카드",
     footerOccupations: "직업별 연봉 (영문)",
     footerNetWorth: "나이별 순자산 (영문)",
+    footerWhereToLive: "내 소득으로 어디서 살까",
+    whereToLiveNav: "어디서 살까",
     usShareCardNetWorthOption: "순자산 카드",
     usEducationMapNote: "학력 필터는 지도 색칠에는 적용되지 않습니다.",
     usOccupationDetailMapNoteTemplate: "지도는 세부 직업이 아닌 대분류({group}) 기준으로 표시됩니다.",
@@ -581,6 +589,8 @@ export const translations: Record<LangCode, Translations> = {
     usListNoResults: "No results found",
     usZoomHint: "Pinch or drag to pan/zoom, double-tap to toggle zoom",
     usMapBasisHeading: "Shading",
+    usMapBasisMore: "More",
+    usMapBasisLess: "Less",
     usMapBasisOptionHousehold: "All households",
     usMapBasisOptionMaritalTemplate: "{status} households",
     usMapBasisOptionMen: "Men (individual)",
@@ -643,6 +653,8 @@ export const translations: Record<LangCode, Translations> = {
     usShareCardIncomeOption: "Income card",
     footerOccupations: "Salary by occupation",
     footerNetWorth: "Net worth by age",
+    footerWhereToLive: "Where to live on your income",
+    whereToLiveNav: "Where to live",
     usShareCardNetWorthOption: "Net worth card",
     usEducationMapNote: "The education filter isn't applied to map shading.",
     usOccupationDetailMapNoteTemplate: "The map shows the major group ({group}), not the detailed occupation.",

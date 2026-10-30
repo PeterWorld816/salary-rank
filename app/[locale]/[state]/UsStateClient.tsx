@@ -115,6 +115,7 @@ function UsStateContent({
           return {
             id: c.fips,
             name: stripStateSuffix(c.name, state.name),
+            context: state.name,
             sub: value != null ? formatUsd(value) : undefined,
           };
         }),
@@ -184,7 +185,7 @@ function UsStateContent({
 
   return (
     <UsShell>
-      <CompactResultCard presetState={state} presetCounty={null} shareAfterMapId="state-map-share-actions" />
+      <CompactResultCard presetState={state} presetCounty={null} />
 
       <div className="mx-auto flex max-w-5xl flex-col px-4 pb-16 pt-6 sm:px-6">
         <h1 className="mb-4 text-[22px] font-extrabold tracking-tight text-balance">
@@ -318,7 +319,6 @@ function UsStateContent({
               <MapBasisCaption lens={basisLens} basis={basis}>
                 <IncomeLegend min={min} max={max} />
               </MapBasisCaption>
-              <div id="state-map-share-actions" className="mt-4 border-t border-white/[0.06] pt-4" />
             </>
           )}
         </div>

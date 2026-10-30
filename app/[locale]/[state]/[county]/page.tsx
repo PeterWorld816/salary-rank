@@ -129,7 +129,7 @@ export default function UsCountyPage({ params }: { params: Params }) {
 
   return (
     <UsShell>
-      <CompactResultCard presetState={state} presetCounty={county} shareAfterMapId="county-map-share-actions" />
+      <CompactResultCard presetState={state} presetCounty={county} />
       <div className="mx-auto flex max-w-2xl flex-col px-4 pb-16 pt-6 sm:px-6">
         {/* With a town map, its MapNavBar row carries the way back up. */}
         {!showTownMap && (
@@ -208,7 +208,6 @@ export default function UsCountyPage({ params }: { params: Params }) {
               <p className="text-[12px] text-white/40">{t.usCountyNoPlaceDataDesc}</p>
             </div>
           )}
-          <div id="county-map-share-actions" className="mt-4 border-t border-white/[0.06] pt-4" />
         </div>
 
         <div className="order-4 mb-8">

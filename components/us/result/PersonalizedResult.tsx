@@ -152,9 +152,10 @@ function PersonalizedResultContent({
       .map((p) => ({
         id: p.fips,
         name: stripStateSuffix(p.name, state.name),
+        context: county ? `${stripStateSuffix(county.name, state.name)}, ${state.name}` : state.name,
         sub: p.medianHouseholdIncome != null ? formatUsd(p.medianHouseholdIncome) : undefined,
       }));
-  }, [countyFips, state, presetPlacesForCounty]);
+  }, [countyFips, state, county, presetPlacesForCounty]);
 
   function handleSelectPlace(placeFips: string) {
     if (!state || !countyFips) return;
@@ -638,6 +639,84 @@ function PersonalizedResultContent({
 
   const hasNetWorthOrK401 = input.netWorth != null || input.k401 != null;
 
+  const guideShown = headline != null && headlineTierPercent != null && headlineTier != null && best != null && incomeBaseline != null;
+  const shareSpacing = guideShown ? "mx-auto mt-4 w-full max-w-md" : "mb-10";
+  const shareSection = (
+    ready && state && county ? (
+      <div className={shareSpacing}>
+        <div className="mb-3">
+          <ShareButtons
+            cardRef={cardRef}
+            width={WIDE_WIDTH}
+            height={WIDE_HEIGHT}
+            shareTitle={shareTitle}
+            shareText={shareText}
+            getShareUrl={getShareUrl}
+            downloadName={`us-income-${state.abbr}-${countyFips}.png`}
+            cardPreview={
+              <ShieldShareCard
+                variant="wide"
+                cardRef={cardRef}
+                percent={nationalPercentile}
+                rows={shareRows}
+                location={`${locationName ?? state.name}, ${state.abbr.toUpperCase()}`}
+              />
+            }
+            storyCardRef={storyCardRef}
+            storyWidth={STORY_WIDTH}
+            storyHeight={STORY_HEIGHT}
+            storyDownloadName={`us-income-story-${state.abbr}-${countyFips}.png`}
+            storyPreview={
+              <UsShareCardStory
+                cardRef={storyCardRef}
+                percent={nationalPercentile}
+                rows={shareRows}
+                location={`${locationName ?? state.name}, ${state.abbr.toUpperCase()}`}
+              />
+            }
+            downloadImageUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary) : undefined}
+            downloadStoryUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary, "story") : undefined}
+            alternate={netWorthAlternate}
+          />
+        </div>
+
+        <div className="relative">
+          {compareToast && (
+            <div className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-md bg-white px-5 py-3 text-[14px] font-semibold text-[#0D0D0D] shadow-lg">
+              {compareToast}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={handleCompare}
+            disabled={heroPercent == null}
+            className="flex w-full items-center justify-center gap-2 rounded-md border border-white/15 py-3 text-[14px] font-semibold text-white/80 transition-colors hover:border-[#34D399] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Link2 className="h-4 w-4" />
+            {compareCopied ? t.usCompareCopiedShort : t.usCompareButton}
+          </button>
+          {compareFallbackUrl && (
+            <div className="mt-2 rounded-md border border-white/15 bg-white/[0.04] p-3">
+              <p className="mb-2 text-[12px] text-white/60">{t.usCompareCopyFailedHelper}</p>
+              <input
+                type="text"
+                readOnly
+                value={compareFallbackUrl}
+                autoFocus
+                onFocus={(e) => e.currentTarget.select()}
+                className="w-full rounded-md border border-white/10 bg-white/[0.06] px-3 py-2 text-[12px] text-white outline-none focus:border-[#34D399]"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    ) : (
+      <div className={shareSpacing}>
+        <NoDataCard title={t.usDashboardSharePromptTitle} desc={t.usDashboardSharePromptDesc} />
+      </div>
+    )
+  );
+
   const content = (
     <div className={embedded ? "mx-auto max-w-2xl px-6 pb-6 pt-10" : "mx-auto max-w-2xl px-6 pb-16 pt-10"}>
       {friendChallenge && friendPlaceName && friendOutEarnsPercent != null && !bannerDismissed && (
@@ -733,86 +812,16 @@ function PersonalizedResultContent({
                 place={place}
                 countyName={county && state ? stripStateSuffix(county.name, state.name) : null}
                 placeName={place && state ? stripStateSuffix(place.name, state.name) : null}
+                afterSummary={shareSection}
               />
             )}
           </>
         )}
       </div>
 
-      {/* ── Share/Save buttons + compare-with-a-friend ── */}
-      {ready && state && county ? (
-        <div className="mb-10">
-          <div className="mb-3">
-            <ShareButtons
-              cardRef={cardRef}
-              width={WIDE_WIDTH}
-              height={WIDE_HEIGHT}
-              shareTitle={shareTitle}
-              shareText={shareText}
-              getShareUrl={getShareUrl}
-              downloadName={`us-income-${state.abbr}-${countyFips}.png`}
-              cardPreview={
-                <ShieldShareCard
-                  variant="wide"
-                  cardRef={cardRef}
-                  percent={nationalPercentile}
-                  rows={shareRows}
-                  location={`${locationName ?? state.name}, ${state.abbr.toUpperCase()}`}
-                />
-              }
-              storyCardRef={storyCardRef}
-              storyWidth={STORY_WIDTH}
-              storyHeight={STORY_HEIGHT}
-              storyDownloadName={`us-income-story-${state.abbr}-${countyFips}.png`}
-              storyPreview={
-                <UsShareCardStory
-                  cardRef={storyCardRef}
-                  percent={nationalPercentile}
-                  rows={shareRows}
-                  location={`${locationName ?? state.name}, ${state.abbr.toUpperCase()}`}
-                />
-              }
-              downloadImageUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary) : undefined}
-              downloadStoryUrl={shareImageSummary ? shieldShareImagePath(shareImageSummary, "story") : undefined}
-              alternate={netWorthAlternate}
-            />
-          </div>
-
-          <div className="relative">
-            {compareToast && (
-              <div className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-md bg-white px-5 py-3 text-[14px] font-semibold text-[#0D0D0D] shadow-lg">
-                {compareToast}
-              </div>
-            )}
-            <button
-              type="button"
-              onClick={handleCompare}
-              disabled={heroPercent == null}
-              className="flex w-full items-center justify-center gap-2 rounded-md border border-white/15 py-3 text-[14px] font-semibold text-white/80 transition-colors hover:border-[#34D399] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <Link2 className="h-4 w-4" />
-              {compareCopied ? t.usCompareCopiedShort : t.usCompareButton}
-            </button>
-            {compareFallbackUrl && (
-              <div className="mt-2 rounded-md border border-white/15 bg-white/[0.04] p-3">
-                <p className="mb-2 text-[12px] text-white/60">{t.usCompareCopyFailedHelper}</p>
-                <input
-                  type="text"
-                  readOnly
-                  value={compareFallbackUrl}
-                  autoFocus
-                  onFocus={(e) => e.currentTarget.select()}
-                  className="w-full rounded-md border border-white/10 bg-white/[0.06] px-3 py-2 text-[12px] text-white outline-none focus:border-[#34D399]"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="mb-10">
-          <NoDataCard title={t.usDashboardSharePromptTitle} desc={t.usDashboardSharePromptDesc} />
-        </div>
-      )}
+      {/* ── Share/Save + compare-with-a-friend: under the Summary card when the
+          result guide renders (see ResultGuideTabs' afterSummary), else here. ── */}
+      {!guideShown && shareSection}
 
       {/* ── Coaching insight — always shown (national income percentile is
           effectively always available), placed right after the bell curve
